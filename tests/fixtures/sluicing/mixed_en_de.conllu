@@ -1,0 +1,18 @@
+# sent_id = 1
+# text = He didn't say why.
+# lang = en
+1	He	he	PRON	PRP	_	3	nsubj	_	t_start=0|t_end=2
+2	did	do	AUX	VBD	_	3	aux	_	t_start=3|t_end=6
+3	say	say	VERB	VB	_	0	root	_	t_start=11|t_end=14
+4	why	why	ADV	WRB	_	3	ccomp	_	t_start=15|t_end=18
+5	.	.	PUNCT	.	_	3	punct	_	t_start=18|t_end=19
+
+# sent_id = 2
+# text = Er sagte nicht warum.
+# lang = de
+1	Er	er	PRON	PPER	_	2	nsubj	_	t_start=20|t_end=22
+2	sagte	sagen	VERB	VVFIN	_	0	root	_	t_start=23|t_end=28
+3	nicht	nicht	PART	PTKNEG	_	2	advmod	_	t_start=29|t_end=34
+4	warum	warum	ADV	PWAV	_	2	ccomp	_	t_start=35|t_end=40
+5	.	.	PUNCT	$.	_	2	punct	_	t_start=40|t_end=41
+

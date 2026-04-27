@@ -1,0 +1,8 @@
+# sent_id = 1
+# text = He is running.
+# lang = en
+1	He	he	PRON	PRP	_	3	nsubj	_	t_start=0|t_end=2
+2	is	be	AUX	AUX	_	3	aux	_	t_start=3|t_end=5
+3	running	run	VERB	VBG	_	0	root	_	t_start=6|t_end=13
+4	.	.	PUNCT	.	_	3	punct	_	t_start=13|t_end=14
+
