@@ -13,6 +13,8 @@ preprocessor = Stanza_Preprocessor(language='en')
 text = "Dogs love playing. Cats are independent."
 cas = preprocessor.run(text)
 
+cas.to_xmi("stanz_demo.xmi")
+
 print(f"Input text: {text}")
 print(f"Cleaned text: {cas.sofa_string}")
 print()
