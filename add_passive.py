@@ -1,29 +1,27 @@
 #!/usr/bin/env python3
-"""Add verbal ellipsis annotations to existing CAS XMI files.
+"""Add passive-construction annotations to existing CAS XMI files.
 
-Detects verbal ellipsis by finding tokens with POS=AUX whose dependency
-relation to their head is NOT ``aux``/``aux:pass``/``cop`` — i.e. cases
-where an auxiliary stands in for a missing main verb.
+For each token with ``deprel == aux:pass`` (the passive auxiliary), this
+script annotates:
+  - the auxiliary itself (LexicalPhrase, text="Passive_aux"),
+  - its head (the lexical verb) (LexicalPhrase, text="Passive_verb"),
+  - the passive subject if present (a child of the head with deprel
+    ``nsubj:pass`` or ``csubj:pass``)
+    (LexicalPhrase, text="Passive_subject").
 
-Detection logic lives in :mod:`preprocessing.detection.verbal_ellipsis`
-and operates on udapi trees, so it can be tested independently with
+Detection logic lives in :mod:`preprocessing.detection.passive` and
+operates on udapi trees, so it can be tested independently with
 ``.conllu`` fixtures. This script is a thin CAS/CLI wrapper.
-
-Annotation added:
-  - GrammarAnomaly: description="Ellipsis", category="auxiliary"
 
 Usage:
     # Single file, default view (_InitialView):
-    python add_verbal_ellipsis.py input.xmi
+    python add_passive.py input.xmi
 
-    # Directory of XMI files, specific view:
-    python add_verbal_ellipsis.py ./xmi_dir/ --view spelling_corrected
-
-    # Multiple views:
-    python add_verbal_ellipsis.py ./xmi_dir/ --view view1 view2
+    # Directory of XMI files, specific views:
+    python add_passive.py ./xmi_dir/ --view _InitialView spelling_corrected
 
     # Custom output directory (default: overwrite in place):
-    python add_verbal_ellipsis.py ./xmi_dir/ --output ./annotated/
+    python add_passive.py ./xmi_dir/ --output ./annotated/
 """
 
 import argparse
@@ -35,8 +33,8 @@ import cassis
 from py_lift.util import get_lift_typesystem
 
 from preprocessing.detection.cas_adapter import (
-    T_GRAMMAR_ANOMALY,
-    find_and_annotate_verbal_ellipsis,
+    T_LEXICAL_PHRASE,
+    find_and_annotate_passive,
 )
 from preprocessing.detection.cli import add_language_args
 
@@ -54,7 +52,7 @@ def process_file(
     lang: str | None,
     mixed: bool,
 ) -> None:
-    """Load an XMI file, detect verbal ellipsis on specified views, and save."""
+    """Load an XMI file, detect passives on specified views, and save."""
     with open(xmi_path, "rb") as f:
         cas = cassis.load_cas_from_xmi(f, typesystem=ts)
 
@@ -66,26 +64,27 @@ def process_file(
             continue
 
         existing = [
-            a
-            for a in view.select(T_GRAMMAR_ANOMALY)
-            if getattr(a, "category", None) == "auxiliary"
+            a for a in view.select(T_LEXICAL_PHRASE)
+            if getattr(a, "text", None) == "Passive_verb"
         ]
         if existing:
             logger.info(
                 f"{xmi_path.name}: view '{view_name}' already has "
-                f"{len(existing)} verbal-ellipsis annotations, skipping."
+                f"{len(existing)} passive annotations, skipping."
             )
             continue
 
-        count = find_and_annotate_verbal_ellipsis(view, ts, lang=lang, mixed=mixed)
-        logger.info(f"{xmi_path.name}: view '{view_name}' — {count} ellipses found")
+        count = find_and_annotate_passive(view, ts, lang=lang, mixed=mixed)
+        logger.info(
+            f"{xmi_path.name}: view '{view_name}' — {count} passive cases found"
+        )
 
     cas.to_xmi(str(output_path), pretty_print=True)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Add verbal ellipsis annotations to existing CAS XMI files."
+        description="Add passive-construction annotations to existing CAS XMI files."
     )
     parser.add_argument(
         "input",
@@ -141,12 +140,8 @@ def main():
         out_path = (output_dir / xmi_file.name) if output_dir else xmi_file
         try:
             process_file(
-                xmi_file,
-                ts,
-                args.view,
-                out_path,
-                lang=args.lang,
-                mixed=args.mixed,
+                xmi_file, ts, args.view, out_path,
+                lang=args.lang, mixed=args.mixed,
             )
             success += 1
         except Exception as e:

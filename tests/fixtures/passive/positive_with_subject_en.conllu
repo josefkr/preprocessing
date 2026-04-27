@@ -1,0 +1,9 @@
+# sent_id = 1
+# text = The cake was eaten.
+# lang = en
+1	The	the	DET	DT	_	2	det	_	t_start=0|t_end=3
+2	cake	cake	NOUN	NN	_	4	nsubj:pass	_	t_start=4|t_end=8
+3	was	be	AUX	VBD	_	4	aux:pass	_	t_start=9|t_end=12
+4	eaten	eat	VERB	VBN	_	0	root	_	t_start=13|t_end=18
+5	.	.	PUNCT	.	_	4	punct	_	t_start=18|t_end=19
+
