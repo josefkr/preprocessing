@@ -28,6 +28,10 @@ from preprocessing.detection.language import (
     SUPPORTED_LANGS,
     detect_language,
 )
+from preprocessing.detection.nominal_ellipsis import (
+    NominalEllipsisFinding,
+    detect_nominal_ellipsis,
+)
 from preprocessing.detection.passive import PassiveFinding, detect_passive
 from preprocessing.detection.sluicing import SluicingFinding, detect_sluicing
 from preprocessing.detection.subject_sharing import (
@@ -173,6 +177,20 @@ def find_and_annotate_passive(
     return len(findings)
 
 
+def find_and_annotate_nominal_ellipsis(
+    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
+) -> int:
+    """Detect nominal-head ellipsis on ``view`` and add CAS annotations."""
+    doc, restrict = _build_doc(
+        view, phenomenon="nominal-ellipsis", lang=lang, mixed=mixed
+    )
+    if doc is None:
+        return 0
+    findings = detect_nominal_ellipsis(doc, restrict_to_lang=restrict)
+    _write_nominal_ellipsis(view, ts, findings)
+    return len(findings)
+
+
 def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
     GA = ts.get_type(T_GRAMMAR_ANOMALY)
     LP = ts.get_type(T_LEXICAL_PHRASE)
@@ -206,6 +224,18 @@ def _write_verbal_ellipsis(
         view.add(GA(
             begin=f.begin, end=f.end,
             description="Ellipsis", category="auxiliary",
+        ))
+
+
+def _write_nominal_ellipsis(
+    view, ts, findings: list[NominalEllipsisFinding]
+) -> None:
+    GA = ts.get_type(T_GRAMMAR_ANOMALY)
+    for f in findings:
+        view.add(GA(
+            begin=f.begin, end=f.end,
+            description="Ellipsis",
+            category=f"nominal_head_{f.subtype}",
         ))
 
 

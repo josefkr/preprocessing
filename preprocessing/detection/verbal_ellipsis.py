@@ -58,7 +58,10 @@ def detect_verbal_ellipsis(
             begin, end = token_offsets(node)
             findings.append(
                 VerbalEllipsisFinding(
-                    begin=begin, end=end, text=node.form, deprel=node.deprel,
+                    begin=begin,
+                    end=end,
+                    text=node.form,
+                    deprel=node.deprel,
                     lang=lang,
                 )
             )

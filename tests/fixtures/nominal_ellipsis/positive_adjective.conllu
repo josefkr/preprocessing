@@ -1,0 +1,8 @@
+# sent_id = 1
+# text = I prefer small.
+# lang = en
+1	I	I	PRON	PRP	_	2	nsubj	_	t_start=0|t_end=1
+2	prefer	prefer	VERB	VBP	_	0	root	_	t_start=2|t_end=8
+3	small	small	ADJ	JJ	_	2	obj	_	t_start=9|t_end=14
+4	.	.	PUNCT	.	_	2	punct	_	t_start=14|t_end=15
+

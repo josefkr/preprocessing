@@ -1,0 +1,8 @@
+# sent_id = 1
+# text = Several looked promising.
+# lang = en
+1	Several	several	ADJ	JJ	_	2	nsubj	_	t_start=0|t_end=7
+2	looked	look	VERB	VBD	_	0	root	_	t_start=8|t_end=14
+3	promising	promising	ADJ	JJ	_	2	xcomp	_	t_start=15|t_end=24
+4	.	.	PUNCT	.	_	2	punct	_	t_start=24|t_end=25
+
