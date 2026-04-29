@@ -1,0 +1,11 @@
+# sent_id = 1
+# text = What he wanted was to leave.
+# lang = en
+1	What	what	PRON	WP	_	6	nsubj	_	t_start=0|t_end=4
+2	he	he	PRON	PRP	_	3	nsubj	_	t_start=5|t_end=7
+3	wanted	want	VERB	VBD	_	1	acl:relcl	_	t_start=8|t_end=14
+4	was	be	AUX	VBD	_	6	cop	_	t_start=15|t_end=18
+5	to	to	PART	TO	_	6	mark	_	t_start=19|t_end=21
+6	leave	leave	VERB	VB	_	0	root	_	t_start=22|t_end=27
+7	.	.	PUNCT	.	_	6	punct	_	t_start=27|t_end=28
+

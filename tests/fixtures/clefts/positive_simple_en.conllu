@@ -1,0 +1,12 @@
+# sent_id = 1
+# text = It was John who broke the vase.
+# lang = en
+1	It	it	PRON	PRP	_	3	expl	_	t_start=0|t_end=2
+2	was	be	AUX	VBD	_	3	cop	_	t_start=3|t_end=6
+3	John	John	PROPN	NNP	_	0	root	_	t_start=7|t_end=11
+4	who	who	PRON	WP	_	5	nsubj	_	t_start=12|t_end=15
+5	broke	break	VERB	VBD	_	3	acl:relcl	_	t_start=16|t_end=21
+6	the	the	DET	DT	_	7	det	_	t_start=22|t_end=25
+7	vase	vase	NOUN	NN	_	5	obj	_	t_start=26|t_end=30
+8	.	.	PUNCT	.	_	3	punct	_	t_start=30|t_end=31
+

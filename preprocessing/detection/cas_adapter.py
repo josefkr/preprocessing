@@ -28,6 +28,7 @@ from preprocessing.detection.language import (
     SUPPORTED_LANGS,
     detect_language,
 )
+from preprocessing.detection.clefts import CleftFinding, detect_clefts
 from preprocessing.detection.nominal_ellipsis import (
     NominalEllipsisFinding,
     detect_nominal_ellipsis,
@@ -191,6 +192,20 @@ def find_and_annotate_nominal_ellipsis(
     return len(findings)
 
 
+def find_and_annotate_clefts(
+    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
+) -> int:
+    """Detect cleft constructions on ``view`` and add CAS annotations."""
+    doc, restrict = _build_doc(
+        view, phenomenon="clefts", lang=lang, mixed=mixed
+    )
+    if doc is None:
+        return 0
+    findings = detect_clefts(doc, restrict_to_lang=restrict)
+    _write_clefts(view, ts, findings)
+    return len(findings)
+
+
 def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
     GA = ts.get_type(T_GRAMMAR_ANOMALY)
     LP = ts.get_type(T_LEXICAL_PHRASE)
@@ -224,6 +239,28 @@ def _write_verbal_ellipsis(
         view.add(GA(
             begin=f.begin, end=f.end,
             description="Ellipsis", category="auxiliary",
+        ))
+
+
+_CLEFT_TOKEN_TEXT = {
+    "it_cleft": "Cleft_it",
+    "wh_cleft": "Cleft_wh",
+}
+
+
+def _write_clefts(view, ts, findings: list[CleftFinding]) -> None:
+    LP = ts.get_type(T_LEXICAL_PHRASE)
+    for f in findings:
+        view.add(LP(
+            begin=f.focus.begin, end=f.focus.end, text="Cleft_focus",
+        ))
+        view.add(LP(
+            begin=f.presupposition.begin, end=f.presupposition.end,
+            text="Cleft_presupposition",
+        ))
+        view.add(LP(
+            begin=f.cleft_token.begin, end=f.cleft_token.end,
+            text=_CLEFT_TOKEN_TEXT.get(f.kind, "Cleft_it"),
         ))
 
 
