@@ -33,6 +33,7 @@ from py_lift.util import get_lift_typesystem
 
 from preprocessing.detection.cas_adapter import (
     T_GRAMMAR_ANOMALY,
+    T_LEXICAL_PHRASE,
     find_and_annotate_sluicing,
 )
 from preprocessing.detection.cli import add_language_args
@@ -40,6 +41,19 @@ from preprocessing.detection.cli import add_language_args
 logger = logging.getLogger(__name__)
 
 DEFAULT_VIEW = "_InitialView"
+
+
+def _existing_sluicing_annotations(view) -> list:
+    """All annotations this detector would have created on ``view``."""
+    out = [
+        a for a in view.select(T_GRAMMAR_ANOMALY)
+        if getattr(a, "category", None) == "sluicing"
+    ]
+    out.extend(
+        lp for lp in view.select(T_LEXICAL_PHRASE)
+        if getattr(lp, "text", None) == "QEmbedder"
+    )
+    return out
 
 
 def process_file(
@@ -50,6 +64,7 @@ def process_file(
     *,
     lang: str | None,
     mixed: bool,
+    replace: bool = False,
 ) -> None:
     """Load an XMI file, detect sluicing on specified views, and save."""
     with open(xmi_path, "rb") as f:
@@ -62,17 +77,21 @@ def process_file(
             logger.warning(f"{xmi_path.name}: view '{view_name}' not found, skipping.")
             continue
 
-        existing = [
-            a
-            for a in view.select(T_GRAMMAR_ANOMALY)
-            if getattr(a, "category", None) == "sluicing"
-        ]
+        existing = _existing_sluicing_annotations(view)
         if existing:
+            if not replace:
+                logger.info(
+                    f"{xmi_path.name}: view '{view_name}' already has "
+                    f"{len(existing)} sluicing annotations, skipping "
+                    "(use --replace to overwrite)."
+                )
+                continue
+            for a in existing:
+                view.remove(a)
             logger.info(
-                f"{xmi_path.name}: view '{view_name}' already has "
-                f"{len(existing)} sluicing annotations, skipping."
+                f"{xmi_path.name}: view '{view_name}' — removed "
+                f"{len(existing)} existing sluicing annotations."
             )
-            continue
 
         count = find_and_annotate_sluicing(view, ts, lang=lang, mixed=mixed)
         logger.info(
@@ -106,6 +125,13 @@ def main():
         default=None,
         help="Output directory for annotated XMI files. "
         "If omitted, files are overwritten in place.",
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Remove existing sluicing annotations on each processed "
+        "view before re-running the detector. Default: skip views "
+        "that already have sluicing annotations.",
     )
     add_language_args(parser)
     args = parser.parse_args()
@@ -142,6 +168,7 @@ def main():
             process_file(
                 xmi_file, ts, args.view, out_path,
                 lang=args.lang, mixed=args.mixed,
+                replace=args.replace,
             )
             success += 1
         except Exception as e:

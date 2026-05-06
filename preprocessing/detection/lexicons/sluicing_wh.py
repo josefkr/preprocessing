@@ -9,21 +9,61 @@ from __future__ import annotations
 from preprocessing.detection.language import UnsupportedLanguage
 
 WH_WORDS_BY_LANG: dict[str, frozenset[str]] = {
-    "en": frozenset({"who", "what", "why", "when", "how", "whose"}),
-    "de": frozenset({
-        "wer", "wen", "wem", "wessen",
-        "was", "wann", "warum", "wieso", "weshalb", "wozu",
-        "wie", "wo", "woher", "wohin",
-        "welcher", "welche", "welches", "welchem", "welchen",
-    }),
-    "fr": frozenset({
-        "qui", "que", "quoi", "pourquoi", "quand", "comment",
-        "où", "quel", "quelle", "quels", "quelles",
-    }),
-    "es": frozenset({
-        "quién", "quiénes", "qué", "cuándo", "cómo", "dónde",
-        "cuál", "cuáles", "cuyo", "cuya", "cuyos", "cuyas",
-    }),
+    "en": frozenset({"who", "what", "why", "when", "how", "whose", "where"}),
+    "de": frozenset(
+        {
+            "wer",
+            "wen",
+            "wem",
+            "wessen",
+            "was",
+            "wann",
+            "warum",
+            "wieso",
+            "weshalb",
+            "wozu",
+            "wie",
+            "wo",
+            "woher",
+            "wohin",
+            "welcher",
+            "welche",
+            "welches",
+            "welchem",
+            "welchen",
+        }
+    ),
+    "fr": frozenset(
+        {
+            "qui",
+            "que",
+            "quoi",
+            "pourquoi",
+            "quand",
+            "comment",
+            "où",
+            "quel",
+            "quelle",
+            "quels",
+            "quelles",
+        }
+    ),
+    "es": frozenset(
+        {
+            "quién",
+            "quiénes",
+            "qué",
+            "cuándo",
+            "cómo",
+            "dónde",
+            "cuál",
+            "cuáles",
+            "cuyo",
+            "cuya",
+            "cuyos",
+            "cuyas",
+        }
+    ),
 }
 
 

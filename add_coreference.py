@@ -203,12 +203,22 @@ def annotate_coreference(view, ts, endpoint: str) -> int:
     return count
 
 
+def _existing_coref_annotations(view) -> list:
+    """Coref LPs (text == integer cluster id), ignoring other LP uses."""
+    return [
+        lp for lp in view.select(T_LEXICAL_PHRASE)
+        if _is_cluster_id(getattr(lp, "text", None))
+    ]
+
+
 def process_file(
     xmi_path: Path,
     ts: cassis.TypeSystem,
     views: list[str],
     endpoint: str,
     output_path: Path,
+    *,
+    replace: bool = False,
 ) -> None:
     """Load an XMI file, add coreference annotations to specified views, and save."""
     with open(xmi_path, "rb") as f:
@@ -225,16 +235,21 @@ def process_file(
         # Coreference uses integer cluster IDs as the text value,
         # while other uses of LexicalPhrase (e.g. subject sharing)
         # use word strings — those should not block annotation.
-        existing_coref = [
-            lp for lp in view.select(T_LEXICAL_PHRASE)
-            if _is_cluster_id(getattr(lp, "text", None))
-        ]
+        existing_coref = _existing_coref_annotations(view)
         if existing_coref:
+            if not replace:
+                logger.info(
+                    f"{xmi_path.name}: view '{view_name}' already has "
+                    f"{len(existing_coref)} coreference annotations, skipping "
+                    "(use --replace to overwrite)."
+                )
+                continue
+            for a in existing_coref:
+                view.remove(a)
             logger.info(
-                f"{xmi_path.name}: view '{view_name}' already has "
-                f"{len(existing_coref)} coreference annotations, skipping."
+                f"{xmi_path.name}: view '{view_name}' — removed "
+                f"{len(existing_coref)} existing coreference annotations."
             )
-            continue
 
         count = annotate_coreference(view, ts, endpoint)
         logger.info(f"{xmi_path.name}: view '{view_name}' — {count} mentions annotated")
@@ -280,6 +295,13 @@ def main():
         help="Output directory for annotated XMI files. "
         "If omitted, files are overwritten in place.",
     )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Remove existing coreference annotations on each "
+        "processed view before re-running the detector. Default: skip "
+        "views that already have coreference annotations.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -322,7 +344,10 @@ def main():
     for i, xmi_file in enumerate(xmi_files, 1):
         out_path = (output_dir / xmi_file.name) if output_dir else xmi_file
         try:
-            process_file(xmi_file, ts, args.view, endpoint, out_path)
+            process_file(
+                xmi_file, ts, args.view, endpoint, out_path,
+                replace=args.replace,
+            )
             success += 1
         except Exception as e:
             errors += 1

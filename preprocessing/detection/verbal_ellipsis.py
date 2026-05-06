@@ -6,11 +6,10 @@ Detection rule:
   - Token has POS=AUX (in either UPOS or XPOS column; see note below).
   - Its dependency relation to its head is NOT one of {aux, aux:pass, cop}.
 
-Note on POS columns: when the document comes from
-:mod:`preprocessing.detection.cas_conllu`, ``upos`` is hardcoded by
-py_lift's ``cas_to_str`` and the real PosValue lives in ``xpos``.
-The detector therefore matches AUX in either column, which also lets
-hand-written UD-convention fixtures (AUX in UPOS) work as expected.
+Note on POS columns: the detector matches AUX in either UPOS or XPOS so
+both DKPro CAS input (UD ``coarseValue`` -> UPOS, Penn-Treebank
+``PosValue`` -> XPOS, where AUX appears in UPOS) and hand-written
+fixtures (AUX in either column) work.
 
 This detector has no per-language lexicon, but still respects the
 language tagging on each tree so multilingual documents can be

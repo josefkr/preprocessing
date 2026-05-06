@@ -43,6 +43,20 @@ logger = logging.getLogger(__name__)
 DEFAULT_VIEW = "_InitialView"
 
 
+_PASSIVE_LP_TEXTS = frozenset({
+    "Passive_verb", "Passive_aux", "Passive_subject",
+    "Passive_agent", "Passive_agent_marker",
+})
+
+
+def _existing_passive_annotations(view) -> list:
+    """All annotations this detector would have created on ``view``."""
+    return [
+        lp for lp in view.select(T_LEXICAL_PHRASE)
+        if getattr(lp, "text", None) in _PASSIVE_LP_TEXTS
+    ]
+
+
 def process_file(
     xmi_path: Path,
     ts: cassis.TypeSystem,
@@ -51,6 +65,7 @@ def process_file(
     *,
     lang: str | None,
     mixed: bool,
+    replace: bool = False,
 ) -> None:
     """Load an XMI file, detect passives on specified views, and save."""
     with open(xmi_path, "rb") as f:
@@ -63,16 +78,21 @@ def process_file(
             logger.warning(f"{xmi_path.name}: view '{view_name}' not found, skipping.")
             continue
 
-        existing = [
-            a for a in view.select(T_LEXICAL_PHRASE)
-            if getattr(a, "text", None) == "Passive_verb"
-        ]
+        existing = _existing_passive_annotations(view)
         if existing:
+            if not replace:
+                logger.info(
+                    f"{xmi_path.name}: view '{view_name}' already has "
+                    f"{len(existing)} passive annotations, skipping "
+                    "(use --replace to overwrite)."
+                )
+                continue
+            for a in existing:
+                view.remove(a)
             logger.info(
-                f"{xmi_path.name}: view '{view_name}' already has "
-                f"{len(existing)} passive annotations, skipping."
+                f"{xmi_path.name}: view '{view_name}' — removed "
+                f"{len(existing)} existing passive annotations."
             )
-            continue
 
         count = find_and_annotate_passive(view, ts, lang=lang, mixed=mixed)
         logger.info(
@@ -106,6 +126,13 @@ def main():
         default=None,
         help="Output directory for annotated XMI files. "
         "If omitted, files are overwritten in place.",
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Remove existing passive annotations on each processed "
+        "view before re-running the detector. Default: skip views "
+        "that already have passive annotations.",
     )
     add_language_args(parser)
     args = parser.parse_args()
@@ -142,6 +169,7 @@ def main():
             process_file(
                 xmi_file, ts, args.view, out_path,
                 lang=args.lang, mixed=args.mixed,
+                replace=args.replace,
             )
             success += 1
         except Exception as e:

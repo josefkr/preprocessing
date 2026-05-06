@@ -86,7 +86,13 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
                 begin = word.start_char
                 end = word.end_char
 
-                cas_pos = P(begin=begin, end=end, PosValue=word.upos or "")
+                # DKPro convention: PosValue=xpos (fine), coarseValue=upos (UD).
+                cas_pos = P(
+                    begin=begin,
+                    end=end,
+                    PosValue=word.xpos or "",
+                    coarseValue=word.upos or "",
+                )
                 view.add(cas_pos)
 
                 cas_lemma = L(begin=begin, end=end, value=word.lemma or "")

@@ -25,6 +25,19 @@ def test_positive_aux_as_root():
     assert f.deprel == "root"
 
 
+def test_positive_do_as_root():
+    # "I do as well." — 'do' may be AUX or VERB and attached as root, not aux/aux:pass/cop.
+    # This is a tricky case: in theory this should be detected as AUX 
+    # but in practice parsers often go with VERB here.
+    findings = detect_verbal_ellipsis(_load("positive_do_as_root.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.text.lower() == "do"
+    assert (f.begin, f.end) == (2, 4)
+    assert f.deprel == "root"
+
+
+
 def test_negative_normal_aux():
     # "He is running." — 'is' is AUX and attached as 'aux'.
     findings = detect_verbal_ellipsis(_load("negative_normal_aux.conllu"))

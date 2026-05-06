@@ -42,6 +42,8 @@ def process_file(
     ts: cassis.TypeSystem,
     views: list[str],
     output_path: Path,
+    *,
+    replace: bool = False,
 ) -> None:
     """Load an XMI file, run spell checking on specified views, and save."""
     with open(xmi_path, "rb") as f:
@@ -57,11 +59,19 @@ def process_file(
 
         existing = list(view.select(T_ANOMALY))
         if existing:
+            if not replace:
+                logger.info(
+                    f"{xmi_path.name}: view '{view_name}' already has "
+                    f"{len(existing)} spelling anomalies, skipping "
+                    "(use --replace to overwrite)."
+                )
+                continue
+            for a in existing:
+                view.remove(a)
             logger.info(
-                f"{xmi_path.name}: view '{view_name}' already has "
-                f"{len(existing)} spelling anomalies, skipping."
+                f"{xmi_path.name}: view '{view_name}' — removed "
+                f"{len(existing)} existing spelling anomalies."
             )
-            continue
 
         logger.info(f"{xmi_path.name}: spell-checking view '{view_name}'")
         annotator.process(view)
@@ -100,6 +110,13 @@ def main():
         help="Output directory for annotated XMI files. "
         "If omitted, files are overwritten in place.",
     )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Remove existing spelling anomalies on each processed "
+        "view before re-running the spell checker. Default: skip "
+        "views that already have spelling anomalies.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -134,7 +151,10 @@ def main():
     for i, xmi_file in enumerate(xmi_files, 1):
         out_path = (output_dir / xmi_file.name) if output_dir else xmi_file
         try:
-            process_file(xmi_file, annotator, ts, args.view, out_path)
+            process_file(
+                xmi_file, annotator, ts, args.view, out_path,
+                replace=args.replace,
+            )
             success += 1
         except Exception as e:
             errors += 1

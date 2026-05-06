@@ -112,12 +112,14 @@ class Stanza_Preprocessor(BasePreprocessor):
                     begin = word.start_char
                     end = word.end_char
                     
-                    # Create POS annotation
-                    pos_value = word.upos or ""
+                    # Create POS annotation. DKPro convention:
+                    #   PosValue    = fine-grained (XPOS, e.g. Penn Treebank)
+                    #   coarseValue = coarse UD POS (UPOS)
                     cas_pos = P(
                         begin=begin,
                         end=end,
-                        PosValue=pos_value
+                        PosValue=word.xpos or "",
+                        coarseValue=word.upos or "",
                     )
                     self.cas.add(cas_pos)
                     

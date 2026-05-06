@@ -43,38 +43,46 @@ def test_stanza_preprocessing():
 
 
 def test_stanza_pos_and_lemmas():
-    """Test that POS tags and lemmas are correctly extracted."""
+    """Test that POS tags and lemmas are correctly extracted.
+
+    DKPro convention: ``PosValue`` holds the fine-grained / Penn-Treebank
+    XPOS, ``coarseValue`` holds the UD UPOS.
+    """
     text = 'The dogs are running.'
     stanza = Stanza_Preprocessor(language='en')
     cas = stanza.run(text)
-    
+
     # Get tokens and their POS tags
-    pos_dict = {}
+    upos_dict = {}
+    xpos_dict = {}
     lemma_dict = {}
-    
+
     for token in cas.select(T_TOKEN):
         token_text = token.get_covered_text()
         token_begin = token.begin
-        
-        # Find associated POS
+
         for pos in cas.select(T_POS):
             if pos.begin == token_begin:
-                pos_dict[token_text] = pos.PosValue
+                upos_dict[token_text] = pos.coarseValue
+                xpos_dict[token_text] = pos.PosValue
                 break
-        
-        # Find associated lemma
+
         for lemma in cas.select(T_LEMMA):
             if lemma.begin == token_begin:
                 lemma_dict[token_text] = lemma.value
                 break
-    
-    # Check POS tags
-    assert pos_dict.get('The') in ['DET', 'PRON'], f"Expected DET or PRON for 'The', got {pos_dict.get('The')}"
-    assert pos_dict.get('dogs') in ['NOUN', 'NOUN'], f"Expected NOUN for 'dogs', got {pos_dict.get('dogs')}"
-    assert pos_dict.get('are') in ['AUX', 'VERB'], f"Expected AUX or VERB for 'are', got {pos_dict.get('are')}"
-    assert pos_dict.get('running') in ['VERB'], f"Expected VERB for 'running', got {pos_dict.get('running')}"
-    
-    # Check lemmas
+
+    # UD POS (coarseValue)
+    assert upos_dict.get('The') in ['DET', 'PRON'], f"Expected DET or PRON for 'The', got {upos_dict.get('The')}"
+    assert upos_dict.get('dogs') == 'NOUN', f"Expected NOUN for 'dogs', got {upos_dict.get('dogs')}"
+    assert upos_dict.get('are') in ['AUX', 'VERB'], f"Expected AUX or VERB for 'are', got {upos_dict.get('are')}"
+    assert upos_dict.get('running') == 'VERB', f"Expected VERB for 'running', got {upos_dict.get('running')}"
+
+    # Penn-Treebank XPOS (PosValue)
+    assert xpos_dict.get('The') == 'DT', f"Expected DT for 'The', got {xpos_dict.get('The')}"
+    assert xpos_dict.get('dogs') in ['NNS', 'NN'], f"Expected NNS for 'dogs', got {xpos_dict.get('dogs')}"
+
+    # Lemmas
     assert lemma_dict.get('dogs') == 'dog', f"Expected 'dog' for lemma of 'dogs', got {lemma_dict.get('dogs')}"
     assert lemma_dict.get('running') == 'run', f"Expected 'run' for lemma of 'running', got {lemma_dict.get('running')}"
 
