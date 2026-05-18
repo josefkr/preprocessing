@@ -2,7 +2,7 @@ import logging
 import stanza
 from cassis import Cas
 
-from preprocessing.api import BasePreprocessor, T_TOKEN, T_SENT, T_POS, T_DEP, T_LEMMA, T_MORPH
+from preprocessing.api import BasePreprocessor, T_TOKEN, T_SENT, T_POS, T_DEP, T_LEMMA, T_MORPH, T_NER
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +39,15 @@ class Stanza_Preprocessor(BasePreprocessor):
         
         try:
             logger.info(f"Loading Stanza pipeline for language: {self.language}")
-            # Initialize pipeline with tokenization, POS tagging, lemmatization, dependency parsing
-            # The 'mwt' processor expands multi-word tokens
+            # Initialize pipeline with tokenization, POS tagging, lemmatization,
+            # dependency parsing and named entity recognition.
+            # The 'mwt' processor expands multi-word tokens.
+            # The 'ner' processor only needs 'tokenize'; its labelset is
+            # language-specific (English: OntoNotes 18-class; German:
+            # CoNLL-2003 4-class PER/LOC/ORG/MISC).
             self.pipeline = stanza.Pipeline(
                 lang=self.language,
-                processors="tokenize,mwt,pos,lemma,depparse",
+                processors="tokenize,mwt,pos,lemma,depparse,ner",
                 verbose=False,
                 logging_level=logging.WARNING,
             )
@@ -84,7 +88,8 @@ class Stanza_Preprocessor(BasePreprocessor):
         D = self.ts.get_type(T_DEP)
         L = self.ts.get_type(T_LEMMA)
         M = self.ts.get_type(T_MORPH)
-        
+        N = self.ts.get_type(T_NER)
+
         # First pass: add sentences
         for sentence in doc.sentences:
             # Get character offsets from first and last word
@@ -204,5 +209,16 @@ class Stanza_Preprocessor(BasePreprocessor):
                         flavor="basic"
                     )
                     self.cas.add(cas_dep)
-        
+
+        # Fourth pass: add named entities. Stanza exposes each entity as a
+        # span with character offsets; an entity may cover several tokens.
+        # The raw Stanza label is stored verbatim in the 'value' feature.
+        for ent in doc.ents:
+            cas_ner = N(
+                begin=ent.start_char,
+                end=ent.end_char,
+                value=ent.type,
+            )
+            self.cas.add(cas_ner)
+
         return self.cas

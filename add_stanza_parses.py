@@ -26,7 +26,7 @@ from pathlib import Path
 
 import cassis
 
-from preprocessing.api import T_DEP, T_LEMMA, T_MORPH, T_POS, T_SENT, T_TOKEN
+from preprocessing.api import T_DEP, T_LEMMA, T_MORPH, T_NER, T_POS, T_SENT, T_TOKEN
 from preprocessing.stanza import Stanza_Preprocessor
 from preprocessing.util import get_aslan_typesystem
 
@@ -41,8 +41,12 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
     This reuses the Stanza pipeline from the preprocessor but adds
     annotations directly to the given view instead of creating a new CAS.
 
-    Skips parsing if the view already contains token annotations to
-    avoid duplicates (e.g. if a normalizer already parsed the view).
+    The parse part (sentences, tokens, POS, lemma, morphology,
+    dependencies) is skipped if the view already contains token
+    annotations, to avoid duplicates (e.g. if a normalizer already
+    parsed the view). Named entities are checked independently, so NER
+    is back-filled even into views that were already parsed before NER
+    support existed.
 
     Args:
         preprocessor: An initialized Stanza_Preprocessor instance.
@@ -53,9 +57,10 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
         logger.warning("View has empty sofaString, skipping.")
         return
 
-    existing_tokens = list(view.select(T_TOKEN))
-    if existing_tokens:
-        logger.info("View already has token annotations, skipping parse.")
+    has_tokens = bool(list(view.select(T_TOKEN)))
+    has_ner = bool(list(view.select(T_NER)))
+    if has_tokens and has_ner:
+        logger.info("View already has token and NER annotations, skipping.")
         return
 
     ts = preprocessor.ts
@@ -69,6 +74,18 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
     D = ts.get_type(T_DEP)
     L = ts.get_type(T_LEMMA)
     M = ts.get_type(T_MORPH)
+    N = ts.get_type(T_NER)
+
+    # Named entities are independent of the parse layers, so they can be
+    # back-filled even when tokens already exist. The raw Stanza label is
+    # stored verbatim in the 'value' feature.
+    if not has_ner:
+        for ent in doc.ents:
+            view.add(N(begin=ent.start_char, end=ent.end_char, value=ent.type))
+
+    if has_tokens:
+        logger.info("View already has token annotations, skipping parse.")
+        return
 
     # First pass: sentences
     for sentence in doc.sentences:

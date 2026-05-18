@@ -11,6 +11,7 @@ T_LEMMA = "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Lemma"
 T_DEP = "de.tudarmstadt.ukp.dkpro.core.api.syntax.type.dependency.Dependency"
 T_MORPH = "de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.morph.Morpheme"
 T_POS = "de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS"
+T_NER = "de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity"
 
 
 class BasePreprocessor(ABC):
