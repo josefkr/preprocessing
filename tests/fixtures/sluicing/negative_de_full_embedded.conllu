@@ -1,0 +1,11 @@
+# sent_id = 1
+# text = Er sagte, was er wollte.
+# lang = de
+1	Er	er	PRON	PPER	_	2	nsubj	_	t_start=0|t_end=2
+2	sagte	sagen	VERB	VVFIN	_	0	root	_	t_start=3|t_end=8
+3	,	,	PUNCT	$,	_	6	punct	_	t_start=8|t_end=9
+4	was	was	PRON	PWS	_	6	obj	_	t_start=10|t_end=13
+5	er	er	PRON	PPER	_	6	nsubj	_	t_start=14|t_end=16
+6	wollte	wollen	VERB	VVFIN	_	2	ccomp	_	t_start=17|t_end=23
+7	.	.	PUNCT	$.	_	2	punct	_	t_start=23|t_end=24
+

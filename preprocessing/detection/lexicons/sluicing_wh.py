@@ -1,7 +1,17 @@
-"""Wh-word lexicons for sluicing detection, keyed by ISO 639-1 code.
+"""Lexicons for sluicing detection, keyed by ISO 639-1 code.
 
-Add a language by adding an entry to ``WH_WORDS_BY_LANG``. Words are
-matched case-insensitively against ``node.form``.
+Two lexicons:
+  * ``WH_WORDS_BY_LANG`` — the wh-words a sluice remnant can consist of.
+  * ``EMBEDDING_PREDICATES_BY_LANG`` — predicate lemmas that embed an
+    indirect question. The detector uses these to license a *broadened*
+    relation gate: an elliptical sluice often parse-degrades so the
+    remnant is no longer a clean ``ccomp`` of its governor (it lands on
+    ``obj``/``conj``/``mark``/...); accepting those relations is only
+    safe when the governor is a known question-embedding predicate.
+
+Add a language by adding entries to the two maps. Words are matched
+case-insensitively against ``node.form`` (wh-words) and against
+``node.lemma`` / ``node.form`` (embedding predicates).
 """
 
 from __future__ import annotations
@@ -21,7 +31,6 @@ WH_WORDS_BY_LANG: dict[str, frozenset[str]] = {
             "warum",
             "wieso",
             "weshalb",
-            "wozu",
             "wie",
             "wo",
             "woher",
@@ -31,6 +40,22 @@ WH_WORDS_BY_LANG: dict[str, frozenset[str]] = {
             "welches",
             "welchem",
             "welchen",
+            # productive "wo(r)+P" interrogative R-pronouns
+            "wozu",
+            "wodurch",
+            "womit",
+            "wofür",
+            "woran",
+            "worauf",
+            "worüber",
+            "wovon",
+            "wonach",
+            "worin",
+            "wobei",
+            "worum",
+            "wovor",
+            "wogegen",
+            "woraus",
         }
     ),
     "fr": frozenset(
@@ -75,3 +100,46 @@ def wh_words(lang: str) -> frozenset[str]:
         raise UnsupportedLanguage(
             f"sluicing: no wh-word lexicon for language {lang!r}"
         ) from e
+
+
+# Question-embedding predicate lemmas (matched case-insensitively against
+# both ``node.lemma`` and ``node.form``). Deliberately conservative: verbs
+# that genuinely take an indirect question. Verbs like ``wollen`` / ``meinen``
+# / ``sein`` are excluded so a full embedded clause whose wh-word happens to
+# land on a broadened relation is not mistaken for a sluice.
+EMBEDDING_PREDICATES_BY_LANG: dict[str, frozenset[str]] = {
+    "de": frozenset(
+        {
+            "wissen",
+            "weiss",  # non-standard spelling — covered via form match too
+            "fragen",
+            "sagen",
+            "erklären",
+            "verstehen",
+            "herausfinden",
+            "klären",
+            "verraten",
+            "mitteilen",
+            "erfahren",
+            "ahnen",
+            "vergessen",
+            "erinnern",
+            "bestimmen",
+            "festlegen",
+            "entscheiden",
+            "überlegen",
+            "nachvollziehen",
+            "raten",
+            "zeigen",
+        }
+    ),
+}
+
+
+def embedding_predicates(lang: str) -> frozenset[str]:
+    """Question-embedding predicate lemmas/forms for ``lang``.
+
+    Returns an empty set for languages without an entry — the broadened
+    relation gate then simply never fires for that language, leaving the
+    strict ``ccomp``/``advmod`` detection unchanged."""
+    return EMBEDDING_PREDICATES_BY_LANG.get(lang, frozenset())

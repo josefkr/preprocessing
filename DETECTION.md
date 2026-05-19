@@ -41,11 +41,18 @@ preprocessing/detection/
   subject_sharing.py   Pure subject-sharing detector.
   verbal_ellipsis.py   Pure verbal-ellipsis detector.
   passive.py           Pure passive detector (canonical + short).
-  nominal_ellipsis.py  Pure nominal-head ellipsis detector.
+  nominal_ellipsis.py  Pure nominal-head ellipsis detector. Dispatches on
+                       each sentence's language: German trees use the
+                       rules in nominal_ellipsis_de.py, other languages
+                       the lexicon-driven English-style checks.
+  nominal_ellipsis_de.py  German nominal-head ellipsis rules — German
+                       Stanza output (STTS XPOS, DET/PIS quantifiers)
+                       does not fit the English Penn-Treebank rules.
   lexicons/
-    sluicing_wh.py        Wh-words per language.
+    sluicing_wh.py        Wh-words and question-embedding predicates
+                          per language.
     passive.py            Agent prepositions + participle XPOS sets.
-    nominal_ellipsis.py   Quantifier forms, idiomatic patterns,
+    nominal_ellipsis.py   English quantifier forms, idiomatic patterns,
                           definite articles, comparative/JJ XPOS.
 
 add_sluicing.py            Thin CLIs (one per phenomenon).
@@ -96,14 +103,24 @@ the writer creates.
 | Subject sharing | `detection/subject_sharing.py` | `GrammarAnomaly(description="Ellipsis", category="right_conj_subject")` on the subjectless right conjunct, plus one `LexicalPhrase(text="Shared_subject")` per shared subject of the left conjunct. |
 | Verbal ellipsis | `detection/verbal_ellipsis.py` | `GrammarAnomaly(description="Ellipsis", category="auxiliary")` on the AUX token. |
 | Passive | `detection/passive.py` | Up to five `LexicalPhrase`s per finding: `Passive_verb`, `Passive_aux`, `Passive_subject`, `Passive_agent`, `Passive_agent_marker`. Aux+subject for canonical passives; agent+marker for short passives; verb is always emitted. |
-| Nominal-head ellipsis | `detection/nominal_ellipsis.py` | `GrammarAnomaly(description="Ellipsis", category="nominal_head_<subtype>")` where subtype is one of `quantifier`, `none`, `numeral`, `every_one`, `comparative`, `elder`, `adjective`. |
+| Nominal-head ellipsis | `detection/nominal_ellipsis.py` (+ `nominal_ellipsis_de.py` for German) | `GrammarAnomaly(description="Ellipsis", category="nominal_head_<subtype>")`. English subtypes: `quantifier`, `none`, `numeral`, `every_one`, `comparative`, `elder`, `adjective`. German subtypes: `quantifier`, `cardinal`, `ordinal`, `comparative`, `superlative`, `adjective`, `possessive_pronoun`, `demonstrative_pronoun`. |
 
 ### Detection rules (concise)
 
-- **Sluicing.** A wh-word X is the dependent of G via `ccomp`, or via
-  `advmod` only when X follows G linearly (so fronted "Why did you
-  ask?" is not flagged). X must have no subject child.
-  Wh-word lexicon is per-language.
+- **Sluicing.** The remnant X is a wh-word — or a phrase headed by a
+  non-wh word that has a wh-word child (`wie viele`: head `viele`,
+  wh-child `wie`). X has no subject child and no verbal child (a sluice
+  remnant is a bare wh-phrase, not a clause). X attaches to its
+  governor G by one of two paths:
+  - **strict, language-neutral** — `ccomp`, or `advmod` when X follows G
+    linearly (so fronted "Why did you ask?" is not flagged);
+  - **broadened** — `obj`/`iobj`/`obl`/`conj`/`advmod`/`mark`/`appos`,
+    accepted *only* when G is a known question-embedding predicate.
+    Elliptical sluices routinely parse-degrade off `ccomp`; the
+    embedding-predicate lexicon keeps the broadened path precise.
+
+  The wh-word list and the question-embedding-predicate list are both
+  per-language lexicons (`lexicons/sluicing_wh.py`).
 - **Subject sharing.** X is `conj` of Y; Y has at least one subject
   child (`nsubj`/`csubj`/`nsubj:pass`); X has none.
 - **Verbal ellipsis.** Token has POS `AUX` (matched in either UPOS or
@@ -117,8 +134,8 @@ the writer creates.
   deprel (rules out canonical passives and active perfects), and V has
   an `obl`/`obl:agent` child whose `case` form is in the language's
   agent-preposition set.
-- **Nominal-head ellipsis.** Subtypes are tried in this order, first
-  match wins (so e.g. "the elder" is `elder`, not `comparative` or
+- **Nominal-head ellipsis (English).** Subtypes are tried in this order,
+  first match wins (so e.g. "the elder" is `elder`, not `comparative` or
   `adjective`):
   1. `none` — form in `none_forms`, no dependents.
   2. `every_one` / `elder` — fixed `(det_form, head_form)` patterns
@@ -133,6 +150,19 @@ the writer creates.
      deprel ≠ `amod`, only optional `det` child, parent is a verb.
   All subtypes additionally require a core nominal relation
   (`nsubj`/`nsubj:pass`/`obj`/`iobj`/`nmod`).
+- **Nominal-head ellipsis (German).** German Stanza emits STTS XPOS
+  (which carries no degree) and tags quantifiers `DET`/`PIS`, so the
+  English XPOS-based rules do not transfer; German has its own rule
+  module, `nominal_ellipsis_de.py`. It keys on the STTS *substituting*
+  tags — `PIS` for `quantifier` ellipsis, `PPOSS` for
+  `possessive_pronoun` ellipsis; on `ADJA` acting as a nominal head for
+  `adjective` / `comparative` / `superlative` / `ordinal` ellipsis
+  (subtype refined via the `feats` `Degree`/`NumType`); on `NUM`
+  cardinals; and on a definite article (`ART`) immediately followed by a
+  preposition for `demonstrative_pronoun` ellipsis. "Acts as a head" is
+  a denylist of modifier relations, not the English core-relation
+  whitelist — elliptical structures routinely get parser-degraded
+  deprels (`appos`/`obl`/`conj`/`ccomp`).
 
 > **POS-column note.** When a CAS view is converted via
 > `view_to_conllu`, py_lift's `cas_to_str` hardcodes the UPOS column to
@@ -251,9 +281,9 @@ means adding a row to a per-phenomenon lexicon module:
 
 | Lexicon | Add an entry to |
 |---|---|
-| `lexicons/sluicing_wh.py` | `WH_WORDS_BY_LANG` (closed wh-word list). |
+| `lexicons/sluicing_wh.py` | `WH_WORDS_BY_LANG` (closed wh-word list) and `EMBEDDING_PREDICATES_BY_LANG` (question-embedding predicate lemmas — these license the broadened relation gate; absent ⇒ only the strict path runs). |
 | `lexicons/passive.py` | `PASSIVE_AGENT_PREPS_BY_LANG` and `PARTICIPLE_XPOS_BY_LANG` (or rely on the `VerbForm=Part` fallback). |
-| `lexicons/nominal_ellipsis.py` | `LEXICONS_BY_LANG` with a complete `NominalEllipsisLexicon` (quantifier forms, none-forms, fixed-pattern idioms, definite articles, comparative/adjective XPOS). |
+| `lexicons/nominal_ellipsis.py` | `LEXICONS_BY_LANG` with a complete `NominalEllipsisLexicon` — for languages whose Stanza output uses Penn-Treebank-like XPOS. German does **not** use this lexicon: its rules live in `detection/nominal_ellipsis_de.py` (see the German rule above). A language whose tagging resembles German's (STTS-style XPOS, no degree in the tag) likely needs a similar dedicated rule module rather than a lexicon row. |
 
 Also add the new ISO code to `SUPPORTED_LANGS` in
 `preprocessing/detection/language.py` so the CLI's `--lang` choices

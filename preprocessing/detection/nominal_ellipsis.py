@@ -71,14 +71,12 @@ def detect_nominal_ellipsis(
             continue
         if restrict_to_lang is not None and lang != restrict_to_lang:
             continue
-        try:
-            lex = nominal_ellipsis_lexicon(lang)
-        except UnsupportedLanguage as e:
-            logger.warning(str(e))
+        classify = _classifier_for_lang(lang)
+        if classify is None:
             continue
 
         for node in tree.descendants:
-            f = _classify(node, lex, lang)
+            f = classify(node)
             if f is not None:
                 findings.append(f)
                 logger.debug(
@@ -86,6 +84,28 @@ def detect_nominal_ellipsis(
                     f"{node.form!r} deprel={node.deprel}"
                 )
     return findings
+
+
+def _classifier_for_lang(lang: str):
+    """Return a ``node -> NominalEllipsisFinding | None`` classifier for
+    ``lang``, or ``None`` if the language is unsupported.
+
+    German has its own rule module (``nominal_ellipsis_de``) because German
+    Stanza output — STTS XPOS, quantifiers tagged DET/PIS, degree only in
+    ``feats`` — does not fit the lexicon-driven English-style checks. Other
+    languages use the lexicon-driven :func:`_classify`."""
+    if lang == "de":
+        # Imported lazily to avoid an import cycle: nominal_ellipsis_de
+        # imports NominalEllipsisFinding from this module.
+        from preprocessing.detection.nominal_ellipsis_de import classify_de
+
+        return lambda node: classify_de(node, lang)
+    try:
+        lex = nominal_ellipsis_lexicon(lang)
+    except UnsupportedLanguage as e:
+        logger.warning(str(e))
+        return None
+    return lambda node: _classify(node, lex, lang)
 
 
 def _classify(node, lex: NominalEllipsisLexicon, lang: str):

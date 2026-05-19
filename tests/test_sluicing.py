@@ -55,3 +55,40 @@ def test_mixed_doc_filtered_by_restrict_to_lang():
     findings = detect_sluicing(_load("mixed_en_de.conllu"), restrict_to_lang="de")
     assert [f.lang for f in findings] == ["de"]
     assert findings[0].x_text.lower() == "warum"
+
+
+def test_positive_de_wodurch_lexicon():
+    """`wodurch` — a productive German wo(r)+P interrogative — is in the
+    German wh-lexicon and is detected as a sluice remnant."""
+    findings = detect_sluicing(_load("positive_de_wodurch.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.x_text.lower() == "wodurch"
+    assert f.g_text.lower() == "sagte"
+    assert f.lang == "de"
+
+
+def test_positive_de_obj_remnant():
+    """A wh-remnant attached as `obj` (not `ccomp`) is recovered via the
+    broadened relation gate, licensed by a question-embedding governor."""
+    findings = detect_sluicing(_load("positive_de_obj_remnant.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.x_text.lower() == "was"
+    assert f.g_text.lower() == "weiß"
+
+
+def test_positive_de_multiword_remnant():
+    """A multi-word remnant ("wie viele") is detected via its wh-word child,
+    and the whole span is reported."""
+    findings = detect_sluicing(_load("positive_de_multiword.conllu"))
+    assert len(findings) == 1
+    assert findings[0].x_text.lower() == "wie viele"
+
+
+def test_negative_de_full_embedded_question():
+    """A full embedded question — wh-word on `obj`, governor an embedded
+    verb (deprel `ccomp`) with its own subject — is not a sluice. Guards
+    the precision of the broadened relation gate."""
+    findings = detect_sluicing(_load("negative_de_full_embedded.conllu"))
+    assert findings == []

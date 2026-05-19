@@ -1,0 +1,9 @@
+# sent_id = 1
+# text = Er weiß nicht was.
+# lang = de
+1	Er	er	PRON	PPER	_	2	nsubj	_	t_start=0|t_end=2
+2	weiß	wissen	VERB	VVFIN	_	0	root	_	t_start=3|t_end=7
+3	nicht	nicht	PART	PTKNEG	_	2	advmod	_	t_start=8|t_end=13
+4	was	was	PRON	PWS	_	2	obj	_	t_start=14|t_end=17
+5	.	.	PUNCT	$.	_	2	punct	_	t_start=17|t_end=18
+
