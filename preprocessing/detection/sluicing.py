@@ -2,8 +2,8 @@
 
 Operates on a udapi document and returns findings; no CAS dependency.
 
-Detection rule (Universal Dependencies). X is the sluice remnant, G the
-question-embedding governor:
+Detection rule (conceived of in terms of Universal Dependencies).
+X is the sluice remnant, G the question-embedding governor:
   - X is a wh-word for the sentence's language — or a phrase headed by a
     non-wh word that has a wh-word child ("wie viele": head ``viele``,
     wh-child ``wie``).
@@ -11,11 +11,15 @@ question-embedding governor:
     a sluice remnant is a bare wh-phrase, not a clause.
   - X attaches to G by one of:
       * STRICT, language-neutral: ``ccomp``, or ``advmod`` when X follows G;
-      * BROADENED: ``obj``/``iobj``/``obl``/``conj``/``advmod``/``mark``/
-        ``appos`` — accepted only when G is a known question-embedding
-        predicate (see ``EMBEDDING_PREDICATES_BY_LANG``). Elliptical
-        sluices routinely parse-degrade onto these relations; the
-        embedding-predicate lexicon keeps precision.
+      * BROADENED VERBAL/NOMINAL: ``obj``/``iobj``/``obl``/``conj``/
+        ``advmod``/``mark``/``appos`` — accepted only when G is a known
+        question-embedding *predicate* (see ``EMBEDDING_PREDICATES_BY_LANG``)
+        or *noun* (see ``EMBEDDING_NOUNS_BY_LANG``). Elliptical sluices
+        routinely parse-degrade onto these relations; the embedding
+        lexicons keep precision.
+      * NOMINAL: ``acl``/``nmod`` — relations that only make sense for
+        noun governors; accepted only when G is a known embedding noun
+        (e.g. "no idea why", "die Frage warum").
     A governor that is itself an embedded clause head (deprel ``ccomp``/
     ``xcomp``/``acl``/``csubj``) is the verb of a *full* embedded question,
     not the embedding predicate — its wh dependent is not a sluice.
@@ -32,6 +36,7 @@ from dataclasses import dataclass
 
 from preprocessing.detection.language import UnsupportedLanguage, tree_lang
 from preprocessing.detection.lexicons.sluicing_wh import (
+    embedding_nouns,
     embedding_predicates,
     wh_words,
 )
@@ -41,9 +46,17 @@ logger = logging.getLogger(__name__)
 
 SUBJECT_RELS = {"nsubj", "csubj", "nsubj:pass"}
 
-# Relations the remnant degrades onto in elliptical parses; accepted only
-# when the governor is a known question-embedding predicate.
+# The correctness of dependency relations for the remnant
+# degrades in elliptical parses; we accept these additional rels only
+# when the governor is a known question-embedding predicate or noun.
 BROAD_RELS = {"obj", "iobj", "obl", "conj", "advmod", "mark", "appos"}
+
+# Relations that only make sense for a NOUN governor (a wh-word modifying
+# a noun). Accepted only when the noun is a known embedding noun
+# (``EMBEDDING_NOUNS_BY_LANG``). Kept disjoint from ``BROAD_RELS`` so
+# adding a noun lexicon entry doesn't accidentally open these relations
+# for verbal governors.
+NOUN_GOVERNOR_RELS = {"acl", "nmod"}
 
 # A governor bearing one of these is itself an embedded clause head (the
 # verb of a full embedded question), not the embedding predicate.
@@ -114,6 +127,8 @@ def detect_sluicing(
             logger.warning(str(e))
             continue
         embed = embedding_predicates(lang)
+        noun_embed = embedding_nouns(lang)
+        embed_all = embed | noun_embed
 
         for node in tree.descendants:
             wh_n = _wh_node(node, wh)
@@ -130,23 +145,33 @@ def detect_sluicing(
             if g is None or g.is_root():
                 continue
 
-            # (a) strict, language-neutral path — the parse is "clean".
+            # (a) the strict, language-neutral path — assumes the parse is "clean".
             if node.deprel == "ccomp" or (
                 node.deprel == "advmod" and node.ord > g.ord
             ):
                 governor = g
-            # (b) broadened path — the parse degraded; license it with a
-            # known question-embedding governor.
+            # (b) broadened path — the parse may be degraded; use it with a
+            # known question-embedding governor (verbal OR nominal). See
+            # ``EMBEDDING_PREDICATES_BY_LANG`` / ``EMBEDDING_NOUNS_BY_LANG``
+            # in the lexicons subdirectory.
             elif node.deprel in BROAD_RELS:
                 governor = _embedding_governor(node)
-                if not _is_embedding(governor, embed):
+                if not _is_embedding(governor, embed_all):
                     continue
+            # (c) noun-only relations (acl/nmod) — make sense only when the
+            # governor is a known embedding noun ("no idea why", "die
+            # Frage warum"). Kept separate from BROAD_RELS so verb embedders
+            # aren't licensed on these relations.
+            elif node.deprel in NOUN_GOVERNOR_RELS:
+                if not _is_embedding(g, noun_embed):
+                    continue
+                governor = g
             else:
                 continue
 
             # Remnant span: the wh-word plus any modifiers it heads
-            # (so "wie viele" is reported whole, not just "viele");
-            # punctuation children are left out.
+            # (so "wie viele" is reported as a whole, not just as "viele").
+            # Punctuation child nodes are left out.
             remnant = sorted(
                 [node, *(c for c in node.children if c.upos != "PUNCT")],
                 key=lambda n: n.ord,

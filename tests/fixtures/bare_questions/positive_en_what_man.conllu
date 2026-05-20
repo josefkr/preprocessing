@@ -1,0 +1,7 @@
+# sent_id = 1
+# text = What man ?
+# lang = en
+1	What	what	DET	WDT	_	2	det	_	t_start=0|t_end=4
+2	man	man	NOUN	NN	_	0	root	_	t_start=5|t_end=8
+3	?	?	PUNCT	.	_	2	punct	_	t_start=9|t_end=10
+

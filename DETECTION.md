@@ -2,8 +2,9 @@
 
 This document describes the suite of annotators that detect linguistic
 phenomena (sluicing, subject sharing, verbal ellipsis, passive,
-nominal-head ellipsis) in CAS XMI files, how they are organized, and
-how to extend them with new phenomena or new languages.
+nominal-head ellipsis, clefts, bare wh-questions) in CAS XMI files, how
+they are organized, and how to extend them with new phenomena or new
+languages.
 
 ## Overview
 
@@ -48,19 +49,33 @@ preprocessing/detection/
   nominal_ellipsis_de.py  German nominal-head ellipsis rules — German
                        Stanza output (STTS XPOS, DET/PIS quantifiers)
                        does not fit the English Penn-Treebank rules.
+  clefts.py            Pure cleft detector (English it-clefts + wh-clefts).
+  bare_questions.py    Pure bare-wh-question detector. Whole sentence is
+                       a wh-phrase ("Why?", "What for?", "What man?") —
+                       no verb, no embedding governor.
   lexicons/
-    sluicing_wh.py        Wh-words and question-embedding predicates
-                          per language.
+    sluicing_wh.py        Wh-words, question-embedding predicates
+                          (verbal), and question-embedding nouns per
+                          language.
     passive.py            Agent prepositions + participle XPOS sets.
     nominal_ellipsis.py   English quantifier forms, idiomatic patterns,
                           definite articles, comparative/JJ XPOS.
+    clefts.py             Cleft-pronoun forms etc. per language.
 
 add_sluicing.py            Thin CLIs (one per phenomenon).
 add_subject_sharing.py
 add_verbal_ellipsis.py
 add_passive.py
 add_nominal_ellipsis.py
+add_clefts.py
+add_bare_questions.py
 ```
+
+`add_spelling_errors.py` and `add_coreference.py` follow the same CLI
+template but wrap external annotators (py_lift's spell checker and the
+Maverick coreference service respectively) rather than detectors in
+`preprocessing/detection/`. They share the `--replace` skip/overwrite
+semantics described in [CLI conventions](#cli-conventions).
 
 ## Pipeline per detector
 
@@ -99,11 +114,13 @@ the writer creates.
 
 | Phenomenon | Module | CAS annotations (UIMA types) |
 |---|---|---|
-| Sluicing | `detection/sluicing.py` | `GrammarAnomaly(description="Ellipsis", category="sluicing")` on the wh-word, plus `LexicalPhrase(text="QEmbedder")` on the embedding predicate. |
+| Sluicing | `detection/sluicing.py` | `GrammarAnomaly(description="Ellipsis", category="sluicing")` on the wh-word, plus `LexicalPhrase(text="QEmbedder")` on the embedding predicate (verb or noun). |
 | Subject sharing | `detection/subject_sharing.py` | `GrammarAnomaly(description="Ellipsis", category="right_conj_subject")` on the subjectless right conjunct, plus one `LexicalPhrase(text="Shared_subject")` per shared subject of the left conjunct. |
 | Verbal ellipsis | `detection/verbal_ellipsis.py` | `GrammarAnomaly(description="Ellipsis", category="auxiliary")` on the AUX token. |
 | Passive | `detection/passive.py` | Up to five `LexicalPhrase`s per finding: `Passive_verb`, `Passive_aux`, `Passive_subject`, `Passive_agent`, `Passive_agent_marker`. Aux+subject for canonical passives; agent+marker for short passives; verb is always emitted. |
 | Nominal-head ellipsis | `detection/nominal_ellipsis.py` (+ `nominal_ellipsis_de.py` for German) | `GrammarAnomaly(description="Ellipsis", category="nominal_head_<subtype>")`. English subtypes: `quantifier`, `none`, `numeral`, `every_one`, `comparative`, `elder`, `adjective`. German subtypes: `quantifier`, `cardinal`, `ordinal`, `comparative`, `superlative`, `adjective`, `possessive_pronoun`, `demonstrative_pronoun`. |
+| Clefts | `detection/clefts.py` | Three `LexicalPhrase`s per finding — `Cleft_focus` over the focused phrase, `Cleft_presupposition` over the relative clause, plus the cleft pronoun (`Cleft_it` for it-clefts, `Cleft_wh` for wh-clefts). |
+| Bare wh-questions | `detection/bare_questions.py` | `GrammarAnomaly(description="Ellipsis", category="bare_wh")` on the wh-phrase span. No second annotation — bare wh-questions have no governor. |
 
 ### Detection rules (concise)
 
@@ -111,16 +128,24 @@ the writer creates.
   non-wh word that has a wh-word child (`wie viele`: head `viele`,
   wh-child `wie`). X has no subject child and no verbal child (a sluice
   remnant is a bare wh-phrase, not a clause). X attaches to its
-  governor G by one of two paths:
+  governor G by one of three paths:
   - **strict, language-neutral** — `ccomp`, or `advmod` when X follows G
     linearly (so fronted "Why did you ask?" is not flagged);
-  - **broadened** — `obj`/`iobj`/`obl`/`conj`/`advmod`/`mark`/`appos`,
-    accepted *only* when G is a known question-embedding predicate.
-    Elliptical sluices routinely parse-degrade off `ccomp`; the
-    embedding-predicate lexicon keeps the broadened path precise.
+  - **broadened verbal/nominal** — `obj`/`iobj`/`obl`/`conj`/`advmod`/
+    `mark`/`appos`, accepted *only* when G is a known
+    question-embedding predicate *or* a known embedding noun ("no idea
+    why", "die Frage warum"). Elliptical sluices routinely parse-degrade
+    off `ccomp`; the embedding-predicate and embedding-noun lexicons
+    keep the broadened path precise.
+  - **nominal** — `acl`/`nmod`, relations that only make sense for noun
+    governors. Accepted *only* when the parent is in the embedding-noun
+    lexicon. Kept disjoint from the broadened verbal set so adding a
+    noun lexicon entry doesn't license verbal governors on these
+    relations.
 
-  The wh-word list and the question-embedding-predicate list are both
-  per-language lexicons (`lexicons/sluicing_wh.py`).
+  The wh-word list, the question-embedding-predicate (verbal) list, and
+  the embedding-noun list are all per-language lexicons
+  (`lexicons/sluicing_wh.py`).
 - **Subject sharing.** X is `conj` of Y; Y has at least one subject
   child (`nsubj`/`csubj`/`nsubj:pass`); X has none.
 - **Verbal ellipsis.** Token has POS `AUX` (matched in either UPOS or
@@ -150,6 +175,27 @@ the writer creates.
      deprel ≠ `amod`, only optional `det` child, parent is a verb.
   All subtypes additionally require a core nominal relation
   (`nsubj`/`nsubj:pass`/`obj`/`iobj`/`nmod`).
+- **Clefts (English).** Currently it-clefts and wh-clefts:
+  - **it-cleft** — a nominal focus F (UPOS in `{NOUN, PRON, PROPN}`,
+    deprel `root` or `ccomp`) with a copula `be` child (`deprel=cop`),
+    an `acl:relcl` child (the presupposition clause), and a child whose
+    deprel is `nsubj`/`expl` with lemma `it`.
+  - **wh-cleft** — analogous with a free-relative subject headed by a
+    wh-word ("What he wanted was rest.").
+- **Bare wh-questions.** A sentence-level rule: the whole sentence is a
+  wh-phrase with no main predicate. Requirements:
+  - At least one descendant has form `?`.
+  - No descendant is `VERB`/`AUX`; no descendant has an
+    `nsubj`/`csubj`/`nsubj:pass` child — i.e. nothing is a clause.
+  - Either the sentence root *is* a wh-word, **or** the root has a
+    wh-word child with deprel in `{det, advmod, amod, case}` — the
+    modifier slots from which a wh-word can head a wh-phrase ("What
+    man?" — `det`; "How viable?" — `advmod`; "For what?" — `case` on
+    the wh-root).
+  - Echo questions like "Morris who?" are excluded: there `who`
+    attaches by `appos`/`parataxis`, *not* a wh-phrase modifier slot.
+  Reuses the wh-word lexicon from sluicing — there's no separate
+  bare-wh lexicon.
 - **Nominal-head ellipsis (German).** German Stanza emits STTS XPOS
   (which carries no degree) and tags quantifiers `DET`/`PIS`, so the
   English XPOS-based rules do not transfer; German has its own rule
@@ -164,13 +210,16 @@ the writer creates.
   whitelist — elliptical structures routinely get parser-degraded
   deprels (`appos`/`obl`/`conj`/`ccomp`).
 
-> **POS-column note.** When a CAS view is converted via
-> `view_to_conllu`, py_lift's `cas_to_str` hardcodes the UPOS column to
-> `"FM"` and stores the original `PosValue` in XPOS. Detectors that
-> need to recognize POS tags (verbal ellipsis, passive, nominal
-> ellipsis) accept matches in either column, so the same code works
-> against converted CAS data and against UD-convention `.conllu`
-> fixtures.
+> **POS-column note.** `view_to_conllu` builds its CoNLL-U via a local
+> serializer (`_cas_to_conllu_block` in `detection/cas_conllu.py`) that
+> reads the DKPro POS type's two fields: `coarseValue` populates the
+> UPOS column and `PosValue` populates the XPOS column. `add_stanza_parses.py`
+> writes both fields (UD `word.upos` → `coarseValue`, fine-grained
+> `word.xpos` → `PosValue`), so converted CAS data matches the
+> UD-convention `.conllu` fixtures the detectors are tested against.
+> Where `coarseValue` is missing, the UPOS column falls back to `"FM"`.
+> Detectors that need to recognize POS tags accept matches in either
+> column, so fixtures using only UPOS still work.
 
 ## Language handling
 
@@ -211,16 +260,23 @@ python add_<phenomenon>.py INPUT \
     [--view _InitialView spelling_normalized ...] \
     [--output OUTPUT_DIR] \
     [--lang {en,de,fr,es}] \
-    [--mixed]
+    [--mixed] \
+    [--replace]
 ```
 
 - `INPUT` is a single XMI file or a directory of XMI files.
 - `--output` writes annotated copies; omitted, the input files are
   overwritten in place.
-- Each script is **idempotent**: views that already contain the
-  target annotation type are skipped (the skip-key is per script —
+- Each script is **idempotent by default**: views that already contain
+  the target annotation type are skipped (the skip-key is per script —
   e.g. `category == "sluicing"` for sluicing,
-  `text == "Passive_verb"` for passive).
+  `text in {Passive_verb, Passive_aux, …}` for passive,
+  `category == "bare_wh"` for bare wh-questions).
+- `--replace` overrides the skip: the script removes all annotations
+  this detector would have created (signature-matched) and re-runs.
+  Useful when iterating on a detector or lexicon and re-annotating an
+  existing corpus in place. The same flag exists on
+  `add_spelling_errors.py` and `add_coreference.py`.
 
 A typical run order on a corpus is documented in
 [`CALL_SEQUENCING.md`](./CALL_SEQUENCING.md).
@@ -249,7 +305,8 @@ Run the detector test suite with:
 ```bash
 poetry run pytest tests/test_sluicing.py tests/test_subject_sharing.py \
                   tests/test_verbal_ellipsis.py tests/test_passive.py \
-                  tests/test_nominal_ellipsis.py
+                  tests/test_nominal_ellipsis.py tests/test_clefts.py \
+                  tests/test_bare_questions.py
 ```
 
 ## Adding a new phenomenon
@@ -281,9 +338,10 @@ means adding a row to a per-phenomenon lexicon module:
 
 | Lexicon | Add an entry to |
 |---|---|
-| `lexicons/sluicing_wh.py` | `WH_WORDS_BY_LANG` (closed wh-word list) and `EMBEDDING_PREDICATES_BY_LANG` (question-embedding predicate lemmas — these license the broadened relation gate; absent ⇒ only the strict path runs). |
+| `lexicons/sluicing_wh.py` | `WH_WORDS_BY_LANG` (closed wh-word list — shared by sluicing **and** bare-wh-question detection), `EMBEDDING_PREDICATES_BY_LANG` (question-embedding *predicate* lemmas — license the verbal broadened relation gate), and `EMBEDDING_NOUNS_BY_LANG` (question-embedding *noun* lemmas — license the nominal relation gate and noun governors on the broadened path). Absent ⇒ that path simply never fires for the language. |
 | `lexicons/passive.py` | `PASSIVE_AGENT_PREPS_BY_LANG` and `PARTICIPLE_XPOS_BY_LANG` (or rely on the `VerbForm=Part` fallback). |
 | `lexicons/nominal_ellipsis.py` | `LEXICONS_BY_LANG` with a complete `NominalEllipsisLexicon` — for languages whose Stanza output uses Penn-Treebank-like XPOS. German does **not** use this lexicon: its rules live in `detection/nominal_ellipsis_de.py` (see the German rule above). A language whose tagging resembles German's (STTS-style XPOS, no degree in the tag) likely needs a similar dedicated rule module rather than a lexicon row. |
+| `lexicons/clefts.py` | Cleft-pronoun forms and copula lemmas per language. |
 
 Also add the new ISO code to `SUPPORTED_LANGS` in
 `preprocessing/detection/language.py` so the CLI's `--lang` choices

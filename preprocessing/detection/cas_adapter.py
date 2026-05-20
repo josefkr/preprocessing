@@ -28,6 +28,10 @@ from preprocessing.detection.language import (
     SUPPORTED_LANGS,
     detect_language,
 )
+from preprocessing.detection.bare_questions import (
+    BareQuestionFinding,
+    detect_bare_questions,
+)
 from preprocessing.detection.clefts import CleftFinding, detect_clefts
 from preprocessing.detection.nominal_ellipsis import (
     NominalEllipsisFinding,
@@ -206,6 +210,25 @@ def find_and_annotate_clefts(
     return len(findings)
 
 
+def find_and_annotate_bare_questions(
+    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
+) -> int:
+    """Detect bare wh-question sentences on ``view`` and add CAS annotations.
+
+    Unlike sluicing, bare wh-questions have no embedding governor, so a
+    single GrammarAnomaly is emitted per finding (no QEmbedder
+    LexicalPhrase).
+    """
+    doc, restrict = _build_doc(
+        view, phenomenon="bare-questions", lang=lang, mixed=mixed
+    )
+    if doc is None:
+        return 0
+    findings = detect_bare_questions(doc, restrict_to_lang=restrict)
+    _write_bare_questions(view, ts, findings)
+    return len(findings)
+
+
 def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
     GA = ts.get_type(T_GRAMMAR_ANOMALY)
     LP = ts.get_type(T_LEXICAL_PHRASE)
@@ -215,6 +238,17 @@ def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
             description="Ellipsis", category="sluicing",
         ))
         view.add(LP(begin=f.g_begin, end=f.g_end, text="QEmbedder"))
+
+
+def _write_bare_questions(
+    view, ts, findings: list[BareQuestionFinding]
+) -> None:
+    GA = ts.get_type(T_GRAMMAR_ANOMALY)
+    for f in findings:
+        view.add(GA(
+            begin=f.begin, end=f.end,
+            description="Ellipsis", category="bare_wh",
+        ))
 
 
 def _write_subject_sharing(

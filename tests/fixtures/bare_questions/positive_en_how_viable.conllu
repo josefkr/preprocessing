@@ -1,0 +1,7 @@
+# sent_id = 1
+# text = How viable ?
+# lang = en
+1	How	how	ADV	WRB	_	2	advmod	_	t_start=0|t_end=3
+2	viable	viable	ADJ	JJ	_	0	root	_	t_start=4|t_end=10
+3	?	?	PUNCT	.	_	2	punct	_	t_start=11|t_end=12
+

@@ -110,30 +110,96 @@ def wh_words(lang: str) -> frozenset[str]:
 EMBEDDING_PREDICATES_BY_LANG: dict[str, frozenset[str]] = {
     "de": frozenset(
         {
-            "wissen",
-            "weiss",  # non-standard spelling — covered via form match too
-            "fragen",
-            "sagen",
+            "abfragen",
+            "abklären",
+            "ablesen",
+            "abstimmen",
+            "abwägen",
+            "ahnen",
+            "auslosen",
+            "befragen",
+            "bestimmen",
+            "entscheiden",
+            "erfahren",
+            "erinnern",
             "erklären",
-            "verstehen",
+            "erörtern",
+            "festlegen",
+            "fragen",
             "herausfinden",
             "klären",
-            "verraten",
+            "melden",
             "mitteilen",
-            "erfahren",
-            "ahnen",
-            "vergessen",
-            "erinnern",
-            "bestimmen",
-            "festlegen",
-            "entscheiden",
-            "überlegen",
             "nachvollziehen",
             "raten",
+            "sagen",
+            "vergessen",
+            "verraten",
+            "verstehen",
+            "weiss",  # non-standard form for when lemmatization goes wrong 
+            "wissen",
+            "witttern",
             "zeigen",
+            "überlegen",
+        }
+    ),
+    "en": frozenset(
+        {
+            "decide",
+            "tell",
+            "weigh",
+            "settle",
+            "determine",
+            "remember",
+            "explain",
+            "deliberate",
+            "ask",
+            "report",
+            "understand",
+            "disclose",
+            "know",
+            "show",
+        }
+    ),
+    
+}
+
+# Nouns that can head an embedded question (e.g. "no idea why", "die Frage
+# warum"). Used by the detector's nominal relation gate (acl/nmod) and also
+# admitted into the broadened verbal gate so e.g. "what" attached as ``obj``
+# of "idea" is recognised. Matched case-insensitively against ``node.lemma``
+# and ``node.form``.
+EMBEDDING_NOUNS_BY_LANG: dict[str, frozenset[str]] = {
+    "de": frozenset(
+        {
+            "ahnung",
+            "frage",
+            "grund",
+            "erklärung",
+            "entscheidung",
+            "idee",
+        }
+    ),
+    "en": frozenset(
+        {
+            "clue",
+            "guess",
+            "idea",
+            "question",
+            "reason",
+            "explanation",
         }
     ),
 }
+
+# TODO consult **List of clause embedding predicates from ZAS/IDS**
+# Verbal predicates that can embed questions under negation: nicht glauben
+#  Adjectival predicates not yet covered: überrascht.a ;
+# Multiword expressions not yet covered:
+# Gedanken machen.mwe ; begreiflich machen.mwe
+#
+# reflexives
+# s. vorstellen
 
 
 def embedding_predicates(lang: str) -> frozenset[str]:
@@ -143,3 +209,11 @@ def embedding_predicates(lang: str) -> frozenset[str]:
     relation gate then simply never fires for that language, leaving the
     strict ``ccomp``/``advmod`` detection unchanged."""
     return EMBEDDING_PREDICATES_BY_LANG.get(lang, frozenset())
+
+
+def embedding_nouns(lang: str) -> frozenset[str]:
+    """Question-embedding noun lemmas/forms for ``lang``.
+
+    Returns an empty set for languages without an entry — the nominal
+    relation gate then simply never fires for that language."""
+    return EMBEDDING_NOUNS_BY_LANG.get(lang, frozenset())

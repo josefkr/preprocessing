@@ -1,0 +1,7 @@
+# sent_id = 1
+# text = For what ?
+# lang = en
+1	For	for	ADP	IN	_	2	case	_	t_start=0|t_end=3
+2	what	what	PRON	WP	_	0	root	_	t_start=4|t_end=8
+3	?	?	PUNCT	.	_	2	punct	_	t_start=9|t_end=10
+

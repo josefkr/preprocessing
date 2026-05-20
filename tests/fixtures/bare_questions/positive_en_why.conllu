@@ -1,0 +1,6 @@
+# sent_id = 1
+# text = Why ?
+# lang = en
+1	Why	why	ADV	WRB	_	0	root	_	t_start=0|t_end=3
+2	?	?	PUNCT	.	_	1	punct	_	t_start=4|t_end=5
+

@@ -92,3 +92,52 @@ def test_negative_de_full_embedded_question():
     the precision of the broadened relation gate."""
     findings = detect_sluicing(_load("negative_de_full_embedded.conllu"))
     assert findings == []
+
+
+def test_positive_en_obj_remnant():
+    """English broadened-relation gate: a wh-word attached as `obj` (not
+    `ccomp`) to a known question-embedding predicate ("know") is licensed
+    as a sluice. Validates EMBEDDING_PREDICATES_BY_LANG['en']."""
+    findings = detect_sluicing(_load("positive_en_obj_remnant.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.x_text.lower() == "what"
+    assert f.g_text.lower() == "know"
+    assert f.lang == "en"
+
+
+def test_negative_en_non_embedding_governor():
+    """The same broadened-gate shape but with a non-embedding governor
+    ("bought") must NOT fire — guards precision of the English lexicon."""
+    findings = detect_sluicing(_load("negative_en_non_embedding_governor.conllu"))
+    assert findings == []
+
+
+def test_positive_en_noun_embedder():
+    """English nominal relation gate: a wh-word attached via `acl` to a
+    known embedding noun ("idea") is licensed as a sluice."""
+    findings = detect_sluicing(_load("positive_en_noun_embedder.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.x_text.lower() == "why"
+    assert f.g_text.lower() == "idea"
+    assert f.lang == "en"
+
+
+def test_positive_de_noun_embedder():
+    """German nominal relation gate: a wh-word attached via `acl` to a
+    known embedding noun ("Ahnung") is licensed as a sluice."""
+    findings = detect_sluicing(_load("positive_de_noun_embedder.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.x_text.lower() == "warum"
+    assert f.g_text.lower() == "ahnung"
+    assert f.lang == "de"
+
+
+def test_negative_en_noun_non_embedder():
+    """Same nominal-gate shape ("X why" via `acl`) but with a noun NOT in
+    the embedders set ("time") — the nominal path must reject. Guards
+    precision of the nominal lexicon."""
+    findings = detect_sluicing(_load("negative_en_noun_non_embedder.conllu"))
+    assert findings == []
