@@ -83,3 +83,65 @@ def test_negative_en_full_question():
     and must NOT fire."""
     findings = detect_bare_questions(_load("negative_en_full_question.conllu"))
     assert findings == []
+
+
+# --- German -----------------------------------------------------------------
+
+
+def test_positive_de_warum():
+    """German bare wh-adverb root — direct analogue of 'Why?'."""
+    findings = detect_bare_questions(_load("positive_de_warum.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.text == "Warum"
+    assert f.wh_form == "Warum"
+    assert (f.begin, f.end) == (0, 5)
+    assert f.lang == "de"
+
+
+def test_positive_de_an_wen():
+    """German pied-piped preposition: wh-pronoun is the root, the
+    preposition is its `case` child — analogue of 'For what?'."""
+    findings = detect_bare_questions(_load("positive_de_an_wen.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.text == "An wen"
+    assert f.wh_form == "wen"
+    assert f.lang == "de"
+
+
+def test_positive_de_welcher_mann():
+    """German wh-determiner + noun: root is the noun, wh-word attaches
+    as `det` — analogue of 'What man?'."""
+    findings = detect_bare_questions(_load("positive_de_welcher_mann.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.text == "Welcher Mann"
+    assert f.wh_form == "Welcher"
+    assert f.lang == "de"
+
+
+def test_positive_de_wie_gross():
+    """German wh-adverb + predicative adjective: root is the adjective,
+    'Wie' attaches as `advmod` — analogue of 'How viable?'."""
+    findings = detect_bare_questions(_load("positive_de_wie_gross.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.text == "Wie groß"
+    assert f.wh_form == "Wie"
+    assert f.lang == "de"
+
+
+def test_negative_de_schmidt_wer():
+    """German echo question: 'wer' attaches by `appos` to a proper
+    name, not a wh-phrase modifier slot — must NOT fire (analogue of
+    'Morris who?')."""
+    findings = detect_bare_questions(_load("negative_de_schmidt_wer.conllu"))
+    assert findings == []
+
+
+def test_negative_de_full_question():
+    """German full finite question (finite verb + subject) — must NOT
+    fire (analogue of 'Why did he do it?')."""
+    findings = detect_bare_questions(_load("negative_de_full_question.conllu"))
+    assert findings == []

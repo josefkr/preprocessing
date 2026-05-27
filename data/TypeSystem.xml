@@ -3199,6 +3199,16 @@ d) redundant/wrongly added negation word (G_Neg_neggen_Ad-->
 
         <typeDescription>
 
+            <name>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.ElementaryDiscourseUnit</name>
+
+            <description>An Elementary Discourse Unit — a clause-sized discourse span emitted by the EDU segmenter (preprocessing/add_edus.py). One sentence may yield one or more EDUs.</description>
+
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+
+        </typeDescription>
+
+        <typeDescription>
+
             <name>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Split</name>
 
             <description/>

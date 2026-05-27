@@ -46,7 +46,7 @@ DEFAULT_VIEW = "_InitialView"
 
 ENDPOINTS = {
     "en": "https://maverick-en.cats.fernuni-hagen.de/predict",
-    # "de": "https://maverick-de.cats.fernuni-hagen.de/predict",  # uncomment when available
+    "de": "https://maverick-de.cats.fernuni-hagen.de/predict",
 }
 
 API_TOKEN = os.environ.get("MAVERICK_API_TOKEN", "")

@@ -33,6 +33,10 @@ from preprocessing.detection.bare_questions import (
     detect_bare_questions,
 )
 from preprocessing.detection.clefts import CleftFinding, detect_clefts
+from preprocessing.detection.gapped_coordination import (
+    GappedCoordinationFinding,
+    detect_gapped_coordination,
+)
 from preprocessing.detection.nominal_ellipsis import (
     NominalEllipsisFinding,
     detect_nominal_ellipsis,
@@ -229,6 +233,25 @@ def find_and_annotate_bare_questions(
     return len(findings)
 
 
+def find_and_annotate_gapped_coordination(
+    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
+) -> int:
+    """Detect gapped-coordination clauses on ``view`` and add CAS annotations.
+
+    Mirrors the sluicing writer's two-annotation pattern: a
+    ``GrammarAnomaly`` on the gapped clause and a ``LexicalPhrase`` on
+    the antecedent verb whose predicate the gap is borrowing.
+    """
+    doc, restrict = _build_doc(
+        view, phenomenon="gapped-coordination", lang=lang, mixed=mixed
+    )
+    if doc is None:
+        return 0
+    findings = detect_gapped_coordination(doc, restrict_to_lang=restrict)
+    _write_gapped_coordination(view, ts, findings)
+    return len(findings)
+
+
 def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
     GA = ts.get_type(T_GRAMMAR_ANOMALY)
     LP = ts.get_type(T_LEXICAL_PHRASE)
@@ -248,6 +271,22 @@ def _write_bare_questions(
         view.add(GA(
             begin=f.begin, end=f.end,
             description="Ellipsis", category="bare_wh",
+        ))
+
+
+def _write_gapped_coordination(
+    view, ts, findings: list[GappedCoordinationFinding]
+) -> None:
+    GA = ts.get_type(T_GRAMMAR_ANOMALY)
+    LP = ts.get_type(T_LEXICAL_PHRASE)
+    for f in findings:
+        view.add(GA(
+            begin=f.begin, end=f.end,
+            description="Ellipsis", category="gapped_coordination",
+        ))
+        view.add(LP(
+            begin=f.antecedent_begin, end=f.antecedent_end,
+            text="GappedAntecedent",
         ))
 
 

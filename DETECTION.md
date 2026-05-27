@@ -2,9 +2,9 @@
 
 This document describes the suite of annotators that detect linguistic
 phenomena (sluicing, subject sharing, verbal ellipsis, passive,
-nominal-head ellipsis, clefts, bare wh-questions) in CAS XMI files, how
-they are organized, and how to extend them with new phenomena or new
-languages.
+nominal-head ellipsis, clefts, bare wh-questions, gapped coordination)
+in CAS XMI files, how they are organized, and how to extend them with
+new phenomena or new languages.
 
 ## Overview
 
@@ -53,6 +53,11 @@ preprocessing/detection/
   bare_questions.py    Pure bare-wh-question detector. Whole sentence is
                        a wh-phrase ("Why?", "What for?", "What man?") —
                        no verb, no embedding governor.
+  gapped_coordination.py
+                       Pure gapped-coordination detector. A coordinated
+                       clause whose main predicate is missing must
+                       borrow it from the antecedent ("Paul wanted a
+                       milk shake and Mr Leonard a coffee").
   lexicons/
     sluicing_wh.py        Wh-words, question-embedding predicates
                           (verbal), and question-embedding nouns per
@@ -69,13 +74,18 @@ add_passive.py
 add_nominal_ellipsis.py
 add_clefts.py
 add_bare_questions.py
+add_gapped_coordination.py
 ```
 
-`add_spelling_errors.py` and `add_coreference.py` follow the same CLI
-template but wrap external annotators (py_lift's spell checker and the
-Maverick coreference service respectively) rather than detectors in
-`preprocessing/detection/`. They share the `--replace` skip/overwrite
-semantics described in [CLI conventions](#cli-conventions).
+`add_spelling_errors.py`, `add_coreference.py`, and `add_edus.py`
+follow the same CLI template but wrap external annotators
+(py_lift's spell checker, the Maverick coreference service, and the
+HF model `poyum/test_discut` for Elementary Discourse Unit
+segmentation respectively) rather than detectors in
+`preprocessing/detection/`. They share the `--replace`
+skip/overwrite semantics described in [CLI conventions](#cli-conventions).
+`add_edus.py` additionally requires upstream `Sentence` annotations
+on the chosen view — sentence segmentation is not auto-run.
 
 ## Pipeline per detector
 
@@ -121,6 +131,7 @@ the writer creates.
 | Nominal-head ellipsis | `detection/nominal_ellipsis.py` (+ `nominal_ellipsis_de.py` for German) | `GrammarAnomaly(description="Ellipsis", category="nominal_head_<subtype>")`. English subtypes: `quantifier`, `none`, `numeral`, `every_one`, `comparative`, `elder`, `adjective`. German subtypes: `quantifier`, `cardinal`, `ordinal`, `comparative`, `superlative`, `adjective`, `possessive_pronoun`, `demonstrative_pronoun`. |
 | Clefts | `detection/clefts.py` | Three `LexicalPhrase`s per finding — `Cleft_focus` over the focused phrase, `Cleft_presupposition` over the relative clause, plus the cleft pronoun (`Cleft_it` for it-clefts, `Cleft_wh` for wh-clefts). |
 | Bare wh-questions | `detection/bare_questions.py` | `GrammarAnomaly(description="Ellipsis", category="bare_wh")` on the wh-phrase span. No second annotation — bare wh-questions have no governor. |
+| Gapped coordination | `detection/gapped_coordination.py` | `GrammarAnomaly(description="Ellipsis", category="gapped_coordination")` on the gapped clause span, plus `LexicalPhrase(text="GappedAntecedent")` on the antecedent verb whose predicate the gap borrows. |
 
 ### Detection rules (concise)
 
@@ -196,6 +207,34 @@ the writer creates.
     attaches by `appos`/`parataxis`, *not* a wh-phrase modifier slot.
   Reuses the wh-word lexicon from sluicing — there's no separate
   bare-wh lexicon.
+- **Gapped coordination.** A coordinated clause whose main predicate
+  (verb, copula, or adjective) is missing has to borrow it from the
+  antecedent — *Paul wanted a milk shake and Mr Leonard a coffee*. The
+  parser, with no head for the gapped clause, typically attaches the
+  gap's arguments via `conj` to some token in the antecedent clause
+  (most often the deepest plausible host — `obj`/`obl`/`xcomp`/cop
+  predicate). Two signals fire on those structural artefacts (v1):
+  - **Signal A** — a non-`VERB`/`AUX` token has *two or more* `conj`
+    children that are themselves non-`VERB`/`AUX`. The parser
+    collapsed two gapped arguments (subject + object, etc.) onto a
+    single host because no verb could anchor them.
+  - **Signal B** — a non-verbal `conj` token under a non-verbal parent
+    has at least one child with deprel in `{nsubj, csubj, nsubj:pass,
+    appos, nmod, flat}` — a second gapped argument hung off the conj.
+  - **Signal C** — same shape as B but with a *verbal* parent. German
+    Stanza tends to attach the gap anchor directly as a `conj` of the
+    matrix verb rather than to one of its arguments, so Signal B's
+    parent constraint is relaxed for this case. The conj token itself
+    is still required to be non-verbal, which keeps well-formed
+    verbal coordinations (where *both* conjuncts are verbs) out of
+    the findings.
+
+  The antecedent verb is the *outermost* (matrix) verbal ancestor on
+  the path to the root; for copular antecedents it's the `cop` child
+  of the non-verbal head. Lexicon-free, language-agnostic. Coverage
+  (Signal A + B + C): ~half of the parser-recoverable English cases
+  and roughly the same on German. See `tests/test_gapped_coordination.py`
+  for the per-sentence EN/DE EXPECTED_HITS tables.
 - **Nominal-head ellipsis (German).** German Stanza emits STTS XPOS
   (which carries no degree) and tags quantifiers `DET`/`PIS`, so the
   English XPOS-based rules do not transfer; German has its own rule
@@ -276,7 +315,7 @@ python add_<phenomenon>.py INPUT \
   this detector would have created (signature-matched) and re-runs.
   Useful when iterating on a detector or lexicon and re-annotating an
   existing corpus in place. The same flag exists on
-  `add_spelling_errors.py` and `add_coreference.py`.
+  `add_spelling_errors.py`, `add_coreference.py`, and `add_edus.py`.
 
 A typical run order on a corpus is documented in
 [`CALL_SEQUENCING.md`](./CALL_SEQUENCING.md).
@@ -306,7 +345,7 @@ Run the detector test suite with:
 poetry run pytest tests/test_sluicing.py tests/test_subject_sharing.py \
                   tests/test_verbal_ellipsis.py tests/test_passive.py \
                   tests/test_nominal_ellipsis.py tests/test_clefts.py \
-                  tests/test_bare_questions.py
+                  tests/test_bare_questions.py tests/test_gapped_coordination.py
 ```
 
 ## Adding a new phenomenon

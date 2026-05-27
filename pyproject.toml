@@ -24,6 +24,11 @@ streamlit = "^1.56.0"
 py-lift = {path = "/home/ruppenhofer/.cache/pypoetry/virtualenvs/preprocessing-cmlifn-K-py3.12/src/linguistic-features-in-text/py_lift"}
 python-dotenv = "^1.2.2"
 lingua-language-detector = "^2.0.0"
+# EDU segmenter (preprocessing.discourse / add_edus.py) — wraps
+# the HF model poyum/test_discut. The model itself is downloaded
+# once into the HF cache; runtime is offline (see preprocessing/_hf_offline.py).
+transformers = ">=4.40.0"
+torch = ">=2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.3,<8.0.0"
