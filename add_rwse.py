@@ -242,7 +242,7 @@ def process_file(
 ) -> None:
     """Load an XMI file, add RWSE annotations to specified views, save."""
     with open(xmi_path, "rb") as f:
-        cas = cassis.load_cas_from_xmi(f, typesystem=ts)
+        cas = cassis.load_cas_from_xmi(f, typesystem=ts, lenient=True)
 
     any_change = False
     for view_name in views:

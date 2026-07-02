@@ -92,13 +92,16 @@ class Stanza_Preprocessor(BasePreprocessor):
 
         # First pass: add sentences
         for sentence in doc.sentences:
-            # Get character offsets from first and last word
-            first_word = sentence.tokens[0].words[0]
-            last_word = sentence.tokens[-1].words[-1]
-            
+            # Get character offsets from the first and last *token*. Use the
+            # parent token rather than its words: a sentence-initial/final
+            # multi-word token (German "Im" = "in"+"dem") exposes sub-words
+            # with start_char/end_char == None, which the parent token spans.
+            first_token = sentence.tokens[0]
+            last_token = sentence.tokens[-1]
+
             cas_sentence = S(
-                begin=first_word.start_char,
-                end=last_word.end_char
+                begin=first_token.start_char,
+                end=last_token.end_char
             )
             self.cas.add(cas_sentence)
         
@@ -113,10 +116,28 @@ class Stanza_Preprocessor(BasePreprocessor):
                 # Each token can have multiple words (multiword tokens)
                 # We expand them into separate CAS tokens
                 for word_idx, word in enumerate(token.words):
-                    # Extract character offsets
-                    begin = word.start_char
-                    end = word.end_char
-                    
+                    # Extract character offsets. Multi-word tokens (German
+                    # contractions like "zum" = "zu"+"dem") expose
+                    # sub-words with start_char/end_char == None; inherit the
+                    # parent token's span so downstream offset-sorted CAS
+                    # indexing doesn't compare None to int.
+                    begin = (
+                        word.start_char
+                        if word.start_char is not None
+                        else token.start_char
+                    )
+                    end = (
+                        word.end_char
+                        if word.end_char is not None
+                        else token.end_char
+                    )
+                    if begin is None or end is None:
+                        logger.warning(
+                            f"Skipping word '{word.text}' with no character "
+                            f"offsets in sentence {sent_idx}"
+                        )
+                        continue
+
                     # Create POS annotation. DKPro convention:
                     #   PosValue    = fine-grained (XPOS, e.g. Penn Treebank)
                     #   coarseValue = coarse UD POS (UPOS)
@@ -166,8 +187,12 @@ class Stanza_Preprocessor(BasePreprocessor):
         for sent_idx, sentence in enumerate(doc.sentences):
             for token_idx, token in enumerate(sentence.tokens):
                 for word_idx, word in enumerate(token.words):
-                    dependent_anno, dependent_word = token_map[(sent_idx, token_idx, word_idx)]
-                    
+                    key = (sent_idx, token_idx, word_idx)
+                    if key not in token_map:
+                        # Word was skipped in the second pass (no offsets).
+                        continue
+                    dependent_anno, dependent_word = token_map[key]
+
                     # Get the head token
                     head_idx = word.head
                     

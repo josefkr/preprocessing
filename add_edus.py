@@ -96,7 +96,12 @@ def process_file(
 ) -> None:
     """Load an XMI file, add EDU annotations to specified views, save."""
     with open(xmi_path, "rb") as f:
-        cas = cassis.load_cas_from_xmi(f, typesystem=ts)
+        # ``lenient=True``: skip rather than fail on type references the
+        # passed typesystem doesn't know. The XMI is re-saved at the end,
+        # so unknown FSes silently fall off; the EDU pass itself only
+        # needs Sentence + Token + the EDU type, all of which the ASLAN
+        # typesystem carries.
+        cas = cassis.load_cas_from_xmi(f, typesystem=ts, lenient=True)
 
     any_change = False
     for view_name in views:

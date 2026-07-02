@@ -51,6 +51,55 @@ def test_negative_active():
     assert findings == []
 
 
+# ---- canonical passives WITH an agent (agentful) ------------------------
+
+
+def test_canonical_passive_en_agent():
+    # "The cake was eaten by John." — aux:pass present (canonical) AND a
+    # by-agent. The agent must be extracted on the canonical path too.
+    findings = detect_passive(_load("positive_canonical_agent_en.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.kind == "canonical"
+    assert f.lang == "en"
+    assert f.aux is not None and f.aux.text.lower() == "was"
+    assert f.verb.text.lower() == "eaten"
+    assert f.subject is not None and f.subject.text.lower() == "cake"
+    assert f.agent is not None and f.agent.text.lower() == "john"
+    assert f.agent_marker is not None and f.agent_marker.text.lower() == "by"
+    # Full-phrase spans cover the whole NP (head + subtree), incl. the marker.
+    assert f.subject_phrase is not None and f.subject_phrase.text == "The cake"
+    assert f.agent_phrase is not None and f.agent_phrase.text == "by John"
+
+
+def test_canonical_passive_de_agent():
+    # "Der Motor wird vom Mechaniker repariert." — Stanza keeps the surface
+    # "vom" on both expanded tokens but lemmatises them to "von", so the agent
+    # is recognised by LEMMA (a form-only check would miss the contraction).
+    findings = detect_passive(_load("positive_canonical_agent_de.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.kind == "canonical"
+    assert f.lang == "de"
+    assert f.aux is not None and f.aux.text.lower() == "wird"
+    assert f.verb.text.lower() == "repariert"
+    assert f.subject is not None and f.subject.text.lower() == "motor"
+    assert f.agent is not None and f.agent.text.lower() == "mechaniker"
+    assert f.agent_marker is not None and f.agent_marker.text.lower() == "vom"
+    # Agent phrase spans the contracted marker through the head (15:29).
+    assert f.agent_phrase is not None
+    assert (f.agent_phrase.begin, f.agent_phrase.end) == (15, 29)
+    assert f.subject_phrase is not None and f.subject_phrase.text == "Der Motor"
+
+
+def test_canonical_passive_no_agent_stays_none():
+    # Regression: an agentless canonical passive still has agent == None.
+    findings = detect_passive(_load("positive_with_subject_en.conllu"))
+    assert len(findings) == 1
+    assert findings[0].agent is None
+    assert findings[0].agent_marker is None
+
+
 # ---- short passives -----------------------------------------------------
 
 

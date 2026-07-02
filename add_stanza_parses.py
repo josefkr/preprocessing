@@ -24,6 +24,12 @@ import logging
 import sys
 from pathlib import Path
 
+# Patch stanza.Pipeline to skip its online resources check (and point at the
+# legacy ~/stanza_resources/ cache) before any pipeline is constructed —
+# necessary when running behind a VPN that doesn't route to the Stanza
+# model server. Must be imported BEFORE preprocessing.stanza.
+import preprocessing._stanza_offline  # noqa: F401
+
 import cassis
 
 from preprocessing.api import T_DEP, T_LEMMA, T_MORPH, T_NER, T_POS, T_SENT, T_TOKEN
@@ -35,7 +41,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_VIEW = "_InitialView"
 
 
-def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
+def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> bool:
     """Run Stanza on a CAS view's text and add annotations to that view.
 
     This reuses the Stanza pipeline from the preprocessor but adds
@@ -48,6 +54,10 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
     is back-filled even into views that were already parsed before NER
     support existed.
 
+    Returns ``True`` if it added any annotations to the view, ``False`` if it
+    was a no-op (empty text, or tokens and NER already present) — so the caller
+    can avoid rewriting an unchanged file.
+
     Args:
         preprocessor: An initialized Stanza_Preprocessor instance.
         view: A cassis CAS view whose sofaString will be parsed.
@@ -55,13 +65,13 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
     text = view.sofa_string
     if not text or not text.strip():
         logger.warning("View has empty sofaString, skipping.")
-        return
+        return False
 
     has_tokens = bool(list(view.select(T_TOKEN)))
     has_ner = bool(list(view.select(T_NER)))
     if has_tokens and has_ner:
         logger.info("View already has token and NER annotations, skipping.")
-        return
+        return False
 
     ts = preprocessor.ts
     pipeline = preprocessor._load_pipeline()
@@ -85,13 +95,16 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
 
     if has_tokens:
         logger.info("View already has token annotations, skipping parse.")
-        return
+        return True  # NER was back-filled above
 
-    # First pass: sentences
+    # First pass: sentences. Use the first/last *token* rather than its
+    # sub-words: a sentence-initial/final multi-word token (German "Im" =
+    # "in"+"dem") exposes sub-words with start_char/end_char == None, which
+    # the parent token spans.
     for sentence in doc.sentences:
-        first_word = sentence.tokens[0].words[0]
-        last_word = sentence.tokens[-1].words[-1]
-        view.add(S(begin=first_word.start_char, end=last_word.end_char))
+        first_token = sentence.tokens[0]
+        last_token = sentence.tokens[-1]
+        view.add(S(begin=first_token.start_char, end=last_token.end_char))
 
     # Second pass: tokens and their annotations
     token_map = {}
@@ -100,8 +113,26 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
     for sent_idx, sentence in enumerate(doc.sentences):
         for token_idx, token in enumerate(sentence.tokens):
             for word_idx, word in enumerate(token.words):
-                begin = word.start_char
-                end = word.end_char
+                # Multi-word tokens (German contractions like "zum" =
+                # "zu"+"dem") expose sub-words with start_char/end_char ==
+                # None; inherit the parent token's span so the cassis
+                # offset-sorted index doesn't compare None to int.
+                begin = (
+                    word.start_char
+                    if word.start_char is not None
+                    else token.start_char
+                )
+                end = (
+                    word.end_char
+                    if word.end_char is not None
+                    else token.end_char
+                )
+                if begin is None or end is None:
+                    logger.warning(
+                        f"Skipping word '{word.text}' with no character "
+                        f"offsets in sentence {sent_idx}"
+                    )
+                    continue
 
                 # DKPro convention: PosValue=xpos (fine), coarseValue=upos (UD).
                 cas_pos = P(
@@ -134,7 +165,11 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
     for sent_idx, sentence in enumerate(doc.sentences):
         for token_idx, token in enumerate(sentence.tokens):
             for word_idx, word in enumerate(token.words):
-                dependent_anno, _ = token_map[(sent_idx, token_idx, word_idx)]
+                key = (sent_idx, token_idx, word_idx)
+                if key not in token_map:
+                    # Word was skipped in the second pass (no offsets).
+                    continue
+                dependent_anno, _ = token_map[key]
                 head_idx = word.head
 
                 if head_idx == 0:
@@ -172,6 +207,8 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> None:
                     )
                 )
 
+    return True  # added parse layers (and possibly NER)
+
 
 def process_file(
     xmi_path: Path,
@@ -180,10 +217,17 @@ def process_file(
     views: list[str],
     output_path: Path,
 ) -> None:
-    """Load an XMI file, add Stanza annotations to the specified views, and save."""
-    with open(xmi_path, "rb") as f:
-        cas = cassis.load_cas_from_xmi(f, typesystem=ts)
+    """Load an XMI file, add Stanza annotations to the specified views, and save.
 
+    Writes the file only if a view was actually modified, or if writing to a
+    separate ``--output`` directory (so that dir gets a complete copy). This
+    avoids re-serializing — and bumping the mtime of — files where the requested
+    view is absent or already annotated (a no-op).
+    """
+    with open(xmi_path, "rb") as f:
+        cas = cassis.load_cas_from_xmi(f, typesystem=ts, lenient=True)
+
+    changed = False
     for view_name in views:
         try:
             view = cas.get_view(view_name)
@@ -192,9 +236,13 @@ def process_file(
             continue
 
         logger.info(f"{xmi_path.name}: processing view '{view_name}'")
-        add_stanza_annotations(preprocessor, view)
+        changed |= add_stanza_annotations(preprocessor, view)
 
-    cas.to_xmi(str(output_path), pretty_print=True)
+    to_separate_dir = output_path.resolve() != xmi_path.resolve()
+    if changed or to_separate_dir:
+        cas.to_xmi(str(output_path), pretty_print=True)
+    else:
+        logger.info(f"{xmi_path.name}: no changes, not rewritten.")
 
 
 def main():

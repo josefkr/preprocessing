@@ -9,6 +9,13 @@ Two kinds of passive are detected:
   - V = X's parent is the lexical (head) verb.
   - Optionally, S = a child of V with ``deprel`` in
     {nsubj:pass, csubj:pass} is the passive subject.
+  - Optionally, an agent: a child of V with ``deprel`` in
+    {obl, obl:agent} whose ``case`` child is an agent preposition
+    (by / von / durch / ...). This is the "agentful" passive that the
+    normalizer rewrites to active; it is the common case in the target
+    data ("Der Motor wird *vom Mechaniker* repariert."). Agent extraction
+    needs the language's lexicon, so it is skipped (agent stays ``None``)
+    for sentences with no ``# lang =`` tag or an unsupported language.
 
 **Short** (``kind="short"``):
   - V is a passive participle (per-language XPOS set, with a fallback
@@ -34,12 +41,66 @@ from preprocessing.detection.lexicons.passive import (
     is_passive_participle,
     passive_agent_preps,
 )
-from preprocessing.detection.offsets import token_offsets
+from preprocessing.detection.offsets import span_offsets, token_offsets
 
 logger = logging.getLogger(__name__)
 
 PASSIVE_SUBJ_RELS = {"nsubj:pass", "csubj:pass"}
 AGENT_OBL_RELS = {"obl", "obl:agent"}
+
+
+def _agent_preps_or_empty(lang) -> frozenset[str]:
+    """Agent-preposition lexicon for ``lang``, or empty if unavailable.
+
+    Canonical-passive detection is purely structural and runs even for
+    languages with no passive lexicon (or no ``# lang =`` tag); in that
+    case we simply can't recognise an agent, so return an empty set
+    rather than raising.
+    """
+    if lang is None:
+        return frozenset()
+    try:
+        return passive_agent_preps(lang)
+    except UnsupportedLanguage as e:
+        logger.debug(str(e))
+        return frozenset()
+
+
+def _find_agent(v, agent_preps: frozenset[str]):
+    """Return ``(agent_node, marker_node)`` for V's by/von/durch agent PP.
+
+    The agent is an ``obl`` / ``obl:agent`` child of the (participle) verb
+    ``v`` whose own ``case`` child is one of the language's agent
+    prepositions. Returns ``(None, None)`` when there is no such child
+    (e.g. an agentless passive, or no lexicon for the language).
+    """
+    if not agent_preps:
+        return None, None
+    for c in v.children:
+        if c.deprel not in AGENT_OBL_RELS:
+            continue
+        mk = next(
+            (gc for gc in c.children
+             if gc.deprel == "case" and _is_agent_prep(gc, agent_preps)),
+            None,
+        )
+        if mk is not None:
+            return c, mk
+    return None, None
+
+
+def _is_agent_prep(node, agent_preps: frozenset[str]) -> bool:
+    """Whether a ``case`` node is an agent preposition.
+
+    Matches on lemma OR surface form, lowercased. The lemma check is what
+    catches German contractions: Stanza expands ``vom`` into two tokens that
+    both keep the surface form ``vom`` but carry the lemma ``von`` (the
+    expected ``von dem``), so a form-only test would miss ``vom``/``zum``-style
+    contracted agents."""
+    for attr in (node.lemma, node.form):
+        if attr and attr.lower() in agent_preps:
+            return True
+    return False
 
 
 @dataclass(frozen=True)
@@ -58,6 +119,13 @@ class PassiveFinding:
     agent: PassiveRole | None
     agent_marker: PassiveRole | None
     lang: str | None
+    # Full-phrase spans (head token + its whole subtree), as opposed to the
+    # head-only spans in ``subject`` / ``agent``. The passive→active normalizer
+    # quotes these so it gets "by Trading Officer Craig Methven" / "vom
+    # Mechaniker" rather than just the head noun. ``None`` when the
+    # corresponding head role is absent.
+    subject_phrase: PassiveRole | None = None
+    agent_phrase: PassiveRole | None = None
 
 
 def _role(node) -> PassiveRole:
@@ -65,7 +133,16 @@ def _role(node) -> PassiveRole:
     return PassiveRole(begin=b, end=e, text=node.form)
 
 
+def _phrase_role(node) -> PassiveRole:
+    """A role spanning ``node``'s whole subtree (the head plus all descendants),
+    e.g. the full agent or subject NP including its determiner/modifiers."""
+    nodes = list(node.descendants(add_self=True))
+    b, e = span_offsets(nodes)
+    return PassiveRole(begin=b, end=e, text=" ".join(n.form for n in nodes))
+
+
 def _detect_canonical(tree, lang) -> list[PassiveFinding]:
+    agent_preps = _agent_preps_or_empty(lang)
     findings: list[PassiveFinding] = []
     for node in tree.descendants:
         if node.deprel != "aux:pass":
@@ -78,6 +155,7 @@ def _detect_canonical(tree, lang) -> list[PassiveFinding]:
             (c for c in v.children if c.deprel in PASSIVE_SUBJ_RELS),
             None,
         )
+        agent_node, marker_node = _find_agent(v, agent_preps)
 
         findings.append(
             PassiveFinding(
@@ -85,14 +163,23 @@ def _detect_canonical(tree, lang) -> list[PassiveFinding]:
                 verb=_role(v),
                 aux=_role(node),
                 subject=_role(subj_node) if subj_node is not None else None,
-                agent=None,
-                agent_marker=None,
+                agent=_role(agent_node) if agent_node is not None else None,
+                agent_marker=(
+                    _role(marker_node) if marker_node is not None else None
+                ),
                 lang=lang,
+                subject_phrase=(
+                    _phrase_role(subj_node) if subj_node is not None else None
+                ),
+                agent_phrase=(
+                    _phrase_role(agent_node) if agent_node is not None else None
+                ),
             )
         )
         logger.debug(
             f"Passive[canonical,{lang}]: aux={node.form!r} verb={v.form!r} "
-            f"subject={subj_node.form if subj_node else None!r}"
+            f"subject={subj_node.form if subj_node else None!r} "
+            f"agent={agent_node.form if agent_node else None!r}"
         )
     return findings
 
@@ -114,22 +201,7 @@ def _detect_short(tree, lang) -> list[PassiveFinding]:
         if any(c.udeprel == "aux" for c in v.children):
             continue
 
-        agent_node = None
-        marker_node = None
-        for c in v.children:
-            if c.deprel not in AGENT_OBL_RELS:
-                continue
-            mk = next(
-                (gc for gc in c.children
-                 if gc.deprel == "case" and gc.form
-                 and gc.form.lower() in agent_preps),
-                None,
-            )
-            if mk is not None:
-                agent_node = c
-                marker_node = mk
-                break
-
+        agent_node, marker_node = _find_agent(v, agent_preps)
         if agent_node is None:
             continue
 
@@ -142,6 +214,8 @@ def _detect_short(tree, lang) -> list[PassiveFinding]:
                 agent=_role(agent_node),
                 agent_marker=_role(marker_node),
                 lang=lang,
+                subject_phrase=None,
+                agent_phrase=_phrase_role(agent_node),
             )
         )
         logger.debug(

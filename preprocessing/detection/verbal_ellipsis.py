@@ -28,6 +28,41 @@ logger = logging.getLogger(__name__)
 
 AUX_DEP_TYPES = {"aux", "aux:pass", "cop"}
 
+# German modal lemmas. Used by the "stranded modal" extension below:
+# in passage context Stanza often tags an absolutely-used modal
+# ("er will nicht", "wir durften nicht") as UPOS=VERB (deprel root/conj)
+# rather than AUX, so the AUX-only rule misses it. This lexicon lets the
+# detector also flag a modal-lemma VERB that has no overt verbal
+# complement and no direct object — i.e. the main VP is elided.
+DE_MODAL_LEMMAS = frozenset(
+    {"wollen", "können", "dürfen", "müssen", "sollen", "mögen"}
+)
+
+# Deprels marking a direct/accusative object. A modal carrying one is a
+# *lexical* modal use ("sie kann Französisch" = she knows French), not
+# verb-phrase ellipsis. (Oblique/directional dependents like
+# "auf die Seitenlage" are NOT excluded — a stranded modal may keep a
+# place/direction adverbial: "ich will nicht auf die Seitenlage".)
+_OBJECT_DEPRELS = {"obj", "obja"}
+
+
+def _is_stranded_modal(node) -> bool:
+    """True for a German modal lemma tagged VERB/AUX that stands in for a
+    missing main verb: not itself an auxiliary of another verb, with no
+    overt verbal complement and no direct object."""
+    if (node.lemma or "").lower() not in DE_MODAL_LEMMAS:
+        return False
+    if node.upos not in ("VERB", "AUX"):
+        return False
+    if node.deprel in AUX_DEP_TYPES:
+        return False
+    for child in node.children:
+        if child.upos in ("VERB", "AUX"):
+            return False  # overt main verb present — not ellipsis
+        if child.deprel in _OBJECT_DEPRELS:
+            return False  # lexical modal use ("kann Französisch")
+    return True
+
 
 @dataclass(frozen=True)
 class VerbalEllipsisFinding:
@@ -49,9 +84,16 @@ def detect_verbal_ellipsis(
             continue
 
         for node in tree.descendants:
-            if "AUX" not in (node.upos, node.xpos):
-                continue
-            if node.deprel in AUX_DEP_TYPES:
+            # Rule 1: a token tagged AUX (UPOS or XPOS) whose relation to
+            # its head is not aux/aux:pass/cop.
+            is_stranded_aux = (
+                "AUX" in (node.upos, node.xpos)
+                and node.deprel not in AUX_DEP_TYPES
+            )
+            # Rule 2: a German modal lemma tagged VERB (the AUX-only rule
+            # misses these in passage context) standing in for a missing
+            # main verb.
+            if not (is_stranded_aux or _is_stranded_modal(node)):
                 continue
 
             begin, end = token_offsets(node)

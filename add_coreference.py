@@ -46,7 +46,7 @@ DEFAULT_VIEW = "_InitialView"
 
 ENDPOINTS = {
     "en": "https://maverick-en.cats.fernuni-hagen.de/predict",
-    "de": "https://maverick-de.cats.fernuni-hagen.de/predict",
+    "de": "https://maverick.cats.fernuni-hagen.de/predict",
 }
 
 API_TOKEN = os.environ.get("MAVERICK_API_TOKEN", "")
@@ -222,7 +222,7 @@ def process_file(
 ) -> None:
     """Load an XMI file, add coreference annotations to specified views, and save."""
     with open(xmi_path, "rb") as f:
-        cas = cassis.load_cas_from_xmi(f, typesystem=ts)
+        cas = cassis.load_cas_from_xmi(f, typesystem=ts, lenient=True)
 
     for view_name in views:
         try:

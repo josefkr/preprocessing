@@ -29,6 +29,10 @@ lingua-language-detector = "^2.0.0"
 # once into the HF cache; runtime is offline (see preprocessing/_hf_offline.py).
 transformers = ">=4.40.0"
 torch = ">=2.0.0"
+# RWSE checker (add_rwse.py) — editable path dep on the checked-out
+# rwse-checker fork so its extended check_multi (and confusion-set
+# data) are the live source rather than a frozen pip copy.
+rwse-checker = { path = "../rwse-checker", develop = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.3,<8.0.0"

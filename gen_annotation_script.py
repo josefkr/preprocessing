@@ -172,9 +172,12 @@ def main() -> None:
         "containing views.yaml).",
     )
     parser.add_argument(
-        "--runner", default="poetry run python3",
+        "--runner", default="poetry run -- python3",
         help="Command used to run each annotator (default: 'poetry run "
-        "python3'). The script cd's into the preprocessing fork first.",
+        "-- python3'). The ``--`` after ``poetry run`` is required: it "
+        "stops Poetry's CLI from parsing flags like ``--language`` / "
+        "``--view`` as its own options. Pass ``--runner python3`` if "
+        "you're already in the activated preprocessing venv.",
     )
     parser.add_argument(
         "--output", type=Path, default=None,

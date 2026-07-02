@@ -47,7 +47,7 @@ def process_file(
 ) -> None:
     """Load an XMI file, run spell checking on specified views, and save."""
     with open(xmi_path, "rb") as f:
-        cas = cassis.load_cas_from_xmi(f, typesystem=ts)
+        cas = cassis.load_cas_from_xmi(f, typesystem=ts, lenient=True)
 
     for view_name in views:
         print(f"processing {view_name} in {xmi_path}")

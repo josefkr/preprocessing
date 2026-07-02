@@ -14,7 +14,12 @@ from preprocessing.detection.language import UnsupportedLanguage
 
 PASSIVE_AGENT_PREPS_BY_LANG: dict[str, frozenset[str]] = {
     "en": frozenset({"by"}),
-    "de": frozenset({"von", "durch"}),
+    # "vom" is the contraction "von dem". Stanza expands it to two sub-words
+    # but (a) keeps the surface form "vom" on both and (b) lemmatises them
+    # inconsistently across runs ("von" or "der"), so the contracted surface
+    # form is listed here to recognise it by form, not just lemma. "vom" can
+    # only mean "von + dem", so it never causes a false agent.
+    "de": frozenset({"von", "durch", "vom"}),
     "fr": frozenset({"par"}),
     "es": frozenset({"por"}),
 }
