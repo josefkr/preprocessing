@@ -1,0 +1,7 @@
+# sent_id = 1
+# text = Schmidt wer ?
+# lang = de
+1	Schmidt	Schmidt	PROPN	NE	_	0	root	_	t_start=0|t_end=7
+2	wer	wer	PRON	PWS	_	1	appos	_	t_start=8|t_end=11
+3	?	?	PUNCT	$.	_	1	punct	_	t_start=12|t_end=13
+

@@ -1,0 +1,461 @@
+# sent_id = 1
+# text = Paul wanted a milk shake and Mr Leonard a coffee.
+# lang = en
+1	Paul	Paul	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	wanted	want	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=11
+3	a	a	DET	DT	Definite=Ind|PronType=Art	5	det	_	t_start=12|t_end=13
+4	milk	milk	NOUN	NN	Number=Sing	5	compound	_	t_start=14|t_end=18
+5	shake	shake	NOUN	NN	Number=Sing	2	obj	_	t_start=19|t_end=24
+6	and	and	CCONJ	CC	_	7	cc	_	t_start=25|t_end=28
+7	Mr	Mr	PROPN	NNP	Number=Sing	5	conj	_	t_start=29|t_end=31
+8	Leonard	Leonard	PROPN	NNP	Number=Sing	7	flat	_	t_start=32|t_end=39
+9	a	a	DET	DT	Definite=Ind|PronType=Art	10	det	_	t_start=40|t_end=41
+10	coffee	coffee	NOUN	NN	Number=Sing	5	conj	_	t_start=42|t_end=48
+11	.	.	PUNCT	.	_	2	punct	_	t_start=48|t_end=49
+
+# sent_id = 2
+# text = I bought Harry a water and Sue a mojito.
+# lang = en
+1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=1
+2	bought	buy	VERB	VBD	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=2|t_end=8
+3	Harry	Harry	PROPN	NNP	Number=Sing	2	obj	_	t_start=9|t_end=14
+4	a	a	DET	DT	Definite=Ind|PronType=Art	5	det	_	t_start=15|t_end=16
+5	water	water	NOUN	NN	Number=Sing	2	obj	_	t_start=17|t_end=22
+6	and	and	CCONJ	CC	_	7	cc	_	t_start=23|t_end=26
+7	Sue	Sue	PROPN	NNP	Number=Sing	5	conj	_	t_start=27|t_end=30
+8	a	a	DET	DT	Definite=Ind|PronType=Art	9	det	_	t_start=31|t_end=32
+9	mojito	mojito	NOUN	NN	Number=Sing	5	conj	_	t_start=33|t_end=39
+10	.	.	PUNCT	.	_	2	punct	_	t_start=39|t_end=40
+
+# sent_id = 3
+# text = Paul wore Adiddas and Mr Leonard Nike.
+# lang = en
+1	Paul	Paul	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	wore	wear	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=9
+3	Adiddas	Adiddas	PROPN	NNP	Number=Sing	2	obj	_	t_start=10|t_end=17
+4	and	and	CCONJ	CC	_	5	cc	_	t_start=18|t_end=21
+5	Mr	Mr	PROPN	NNP	Number=Sing	3	conj	_	t_start=22|t_end=24
+6	Leonard	Leonard	PROPN	NNP	Number=Sing	5	flat	_	t_start=25|t_end=32
+7	Nike	Nike	PROPN	NNP	Number=Sing	5	flat	_	t_start=33|t_end=37
+8	.	.	PUNCT	.	_	2	punct	_	t_start=37|t_end=38
+
+# sent_id = 4
+# text = I gave $10 to Kim and $5 to Pat.
+# lang = en
+1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=1
+2	gave	give	VERB	VBD	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=2|t_end=6
+3	$	$	SYM	$	_	2	obj	_	t_start=7|t_end=8
+4	10	10	NUM	CD	NumForm=Digit|NumType=Card	3	nummod	_	t_start=8|t_end=10
+5	to	to	ADP	IN	_	6	case	_	t_start=11|t_end=13
+6	Kim	Kim	PROPN	NNP	Number=Sing	2	obl	_	t_start=14|t_end=17
+7	and	and	CCONJ	CC	_	8	cc	_	t_start=18|t_end=21
+8	$	$	SYM	$	_	3	conj	_	t_start=22|t_end=23
+9	5	5	NUM	CD	NumForm=Digit|NumType=Card	8	nummod	_	t_start=23|t_end=24
+10	to	to	ADP	IN	_	11	case	_	t_start=25|t_end=27
+11	Pat	Pat	PROPN	NNP	Number=Sing	8	nmod	_	t_start=28|t_end=31
+12	.	.	PUNCT	.	_	2	punct	_	t_start=31|t_end=32
+
+# sent_id = 5
+# text = Kim is an engineer and Pat a barrister.
+# lang = en
+1	Kim	Kim	PROPN	NNP	Number=Sing	4	nsubj	_	t_start=0|t_end=3
+2	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	cop	_	t_start=4|t_end=6
+3	an	a	DET	DT	Definite=Ind|PronType=Art	4	det	_	t_start=7|t_end=9
+4	engineer	engineer	NOUN	NN	Number=Sing	0	root	_	t_start=10|t_end=18
+5	and	and	CCONJ	CC	_	8	cc	_	t_start=19|t_end=22
+6	Pat	Pat	PROPN	NNP	Number=Sing	4	conj	_	t_start=23|t_end=26
+7	a	a	DET	DT	Definite=Ind|PronType=Art	8	det	_	t_start=27|t_end=28
+8	barrister	barrister	NOUN	NN	Number=Sing	4	conj	_	t_start=29|t_end=38
+9	.	.	PUNCT	.	_	4	punct	_	t_start=38|t_end=39
+
+# sent_id = 6
+# text = Their daughter studied law, their son medicine.
+# lang = en
+1	Their	their	PRON	PRP$	Case=Gen|Number=Plur|Person=3|Poss=Yes|PronType=Prs	2	nmod:poss	_	t_start=0|t_end=5
+2	daughter	daughter	NOUN	NN	Number=Sing	3	nsubj	_	t_start=6|t_end=14
+3	studied	study	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=15|t_end=22
+4	law	law	NOUN	NN	Number=Sing	3	obj	_	t_start=23|t_end=26
+5	,	,	PUNCT	,	_	8	punct	_	t_start=26|t_end=27
+6	their	their	PRON	PRP$	Case=Gen|Number=Plur|Person=3|Poss=Yes|PronType=Prs	8	nmod:poss	_	t_start=28|t_end=33
+7	son	son	NOUN	NN	Number=Sing	8	compound	_	t_start=34|t_end=37
+8	medicine	medicine	NOUN	NN	Number=Sing	4	conj	_	t_start=38|t_end=46
+9	.	.	PUNCT	.	_	3	punct	_	t_start=46|t_end=47
+
+# sent_id = 7
+# text = The PM arrived at six and the Queen an hour later.
+# lang = en
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	t_start=0|t_end=3
+2	PM	p.m.	NOUN	NN	Number=Sing	3	nsubj	_	t_start=4|t_end=6
+3	arrived	arrive	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=7|t_end=14
+4	at	at	ADP	IN	_	5	case	_	t_start=15|t_end=17
+5	six	six	NUM	CD	NumForm=Word|NumType=Card	3	obl	_	t_start=18|t_end=21
+6	and	and	CCONJ	CC	_	8	cc	_	t_start=22|t_end=25
+7	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	t_start=26|t_end=29
+8	Queen	Queen	PROPN	NNP	Number=Sing	5	conj	_	t_start=30|t_end=35
+9	an	a	DET	DT	Definite=Ind|PronType=Art	10	det	_	t_start=36|t_end=38
+10	hour	hour	NOUN	NN	Number=Sing	11	obl:unmarked	_	t_start=39|t_end=43
+11	later	late	ADV	RBR	Degree=Cmp	3	advmod	_	t_start=44|t_end=49
+12	.	.	PUNCT	.	_	3	punct	_	t_start=49|t_end=50
+
+# sent_id = 8
+# text = Jill came to Fiji in 1967 and her parents the following year.
+# lang = en
+1	Jill	Jill	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	came	come	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=9
+3	to	to	ADP	IN	_	4	case	_	t_start=10|t_end=12
+4	Fiji	Fiji	PROPN	NNP	Number=Sing	2	obl	_	t_start=13|t_end=17
+5	in	in	ADP	IN	_	6	case	_	t_start=18|t_end=20
+6	1967	1967	NUM	CD	NumForm=Digit|NumType=Card	2	obl	_	t_start=21|t_end=25
+7	and	and	CCONJ	CC	_	9	cc	_	t_start=26|t_end=29
+8	her	her	PRON	PRP$	Case=Gen|Gender=Fem|Number=Sing|Person=3|Poss=Yes|PronType=Prs	9	nmod:poss	_	t_start=30|t_end=33
+9	parents	parent	NOUN	NNS	Number=Plur	4	conj	_	t_start=34|t_end=41
+10	the	the	DET	DT	Definite=Def|PronType=Art	12	det	_	t_start=42|t_end=45
+11	following	follow	VERB	VBG	VerbForm=Ger	12	amod	_	t_start=46|t_end=55
+12	year	year	NOUN	NN	Number=Sing	2	obl:unmarked	_	t_start=56|t_end=60
+13	.	.	PUNCT	.	_	2	punct	_	t_start=60|t_end=61
+
+# sent_id = 9
+# text = His father wanted him to marry Sue, but his mother Louise.
+# lang = en
+1	His	his	PRON	PRP$	Case=Gen|Gender=Masc|Number=Sing|Person=3|Poss=Yes|PronType=Prs	2	nmod:poss	_	t_start=0|t_end=3
+2	father	father	NOUN	NN	Number=Sing	3	nsubj	_	t_start=4|t_end=10
+3	wanted	want	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=11|t_end=17
+4	him	he	PRON	PRP	Case=Acc|Gender=Masc|Number=Sing|Person=3|PronType=Prs	3	obj	_	t_start=18|t_end=21
+5	to	to	PART	TO	_	6	mark	_	t_start=22|t_end=24
+6	marry	marry	VERB	VB	VerbForm=Inf	3	xcomp	_	t_start=25|t_end=30
+7	Sue	Sue	PROPN	NNP	Number=Sing	6	obj	_	t_start=31|t_end=34
+8	,	,	PUNCT	,	_	11	punct	_	t_start=34|t_end=35
+9	but	but	CCONJ	CC	_	11	cc	_	t_start=36|t_end=39
+10	his	his	PRON	PRP$	Case=Gen|Gender=Masc|Number=Sing|Person=3|Poss=Yes|PronType=Prs	11	nmod:poss	_	t_start=40|t_end=43
+11	mother	mother	NOUN	NN	Number=Sing	7	conj	_	t_start=44|t_end=50
+12	Louise	Louise	PROPN	NNP	Number=Sing	11	flat	_	t_start=51|t_end=57
+13	.	.	PUNCT	.	_	3	punct	_	t_start=57|t_end=58
+
+# sent_id = 10
+# text = Kim was hoping to go to university and Pat to join the family business.
+# lang = en
+1	Kim	Kim	PROPN	NNP	Number=Sing	3	nsubj	_	t_start=0|t_end=3
+2	was	be	AUX	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	3	aux	_	t_start=4|t_end=7
+3	hoping	hope	VERB	VBG	Tense=Pres|VerbForm=Part	0	root	_	t_start=8|t_end=14
+4	to	to	PART	TO	_	5	mark	_	t_start=15|t_end=17
+5	go	go	VERB	VB	VerbForm=Inf	3	xcomp	_	t_start=18|t_end=20
+6	to	to	ADP	IN	_	7	case	_	t_start=21|t_end=23
+7	university	university	NOUN	NN	Number=Sing	5	obl	_	t_start=24|t_end=34
+8	and	and	CCONJ	CC	_	9	cc	_	t_start=35|t_end=38
+9	Pat	Pat	PROPN	NNP	Number=Sing	7	conj	_	t_start=39|t_end=42
+10	to	to	PART	TO	_	11	mark	_	t_start=43|t_end=45
+11	join	join	VERB	VB	VerbForm=Inf	5	advcl	_	t_start=46|t_end=50
+12	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	t_start=51|t_end=54
+13	family	family	NOUN	NN	Number=Sing	14	compound	_	t_start=55|t_end=61
+14	business	business	NOUN	NN	Number=Sing	11	obj	_	t_start=62|t_end=70
+15	.	.	PUNCT	.	_	3	punct	_	t_start=70|t_end=71
+
+# sent_id = 11
+# text = Ed wanted to join the firm because of the pay, Bill because his girlfriend worked there.
+# lang = en
+1	Ed	Ed	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=2
+2	wanted	want	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=3|t_end=9
+3	to	to	PART	TO	_	4	mark	_	t_start=10|t_end=12
+4	join	join	VERB	VB	VerbForm=Inf	2	xcomp	_	t_start=13|t_end=17
+5	the	the	DET	DT	Definite=Def|PronType=Art	6	det	_	t_start=18|t_end=21
+6	firm	firm	NOUN	NN	Number=Sing	4	obj	_	t_start=22|t_end=26
+7	because	because	ADP	IN	ExtPos=ADP	10	case	_	t_start=27|t_end=34
+8	of	of	ADP	IN	_	7	fixed	_	t_start=35|t_end=37
+9	the	the	DET	DT	Definite=Def|PronType=Art	10	det	_	t_start=38|t_end=41
+10	pay	pay	NOUN	NN	Number=Sing	4	obl	_	t_start=42|t_end=45
+11	,	,	PUNCT	,	_	12	punct	_	t_start=45|t_end=46
+12	Bill	Bill	PROPN	NNP	Number=Sing	10	appos	_	t_start=47|t_end=51
+13	because	because	SCONJ	IN	_	16	mark	_	t_start=52|t_end=59
+14	his	his	PRON	PRP$	Case=Gen|Gender=Masc|Number=Sing|Person=3|Poss=Yes|PronType=Prs	15	nmod:poss	_	t_start=60|t_end=63
+15	girlfriend	girlfriend	NOUN	NN	Number=Sing	16	nsubj	_	t_start=64|t_end=74
+16	worked	work	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	4	advcl	_	t_start=75|t_end=81
+17	there	there	ADV	RB	PronType=Dem	16	advmod	_	t_start=82|t_end=87
+18	.	.	PUNCT	.	_	2	punct	_	t_start=87|t_end=88
+
+# sent_id = 12
+# text = On Monday she'd been in Paris and on Tuesday in Bonn.
+# lang = en
+1	On	on	ADP	IN	_	2	case	_	t_start=0|t_end=2
+2	Monday	Monday	PROPN	NNP	Number=Sing	7	obl	_	t_start=3|t_end=9
+3-4	she'd	_	_	_	_	_	_	_	_
+3	she	she	PRON	PRP	Case=Nom|Gender=Fem|Number=Sing|Person=3|PronType=Prs	7	nsubj	_	t_start=10|t_end=13
+4	'd	would	AUX	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	7	aux	_	t_start=13|t_end=15
+5	been	be	AUX	VBN	Tense=Past|VerbForm=Part	7	cop	_	t_start=16|t_end=20
+6	in	in	ADP	IN	_	7	case	_	t_start=21|t_end=23
+7	Paris	Paris	PROPN	NNP	Number=Sing	0	root	_	t_start=24|t_end=29
+8	and	and	CCONJ	CC	_	10	cc	_	t_start=30|t_end=33
+9	on	on	ADP	IN	_	10	case	_	t_start=34|t_end=36
+10	Tuesday	Tuesday	PROPN	NNP	Number=Sing	7	conj	_	t_start=37|t_end=44
+11	in	in	ADP	IN	_	12	case	_	t_start=45|t_end=47
+12	Bonn	Bonn	PROPN	NNP	Number=Sing	10	nmod	_	t_start=48|t_end=52
+13	.	.	PUNCT	.	_	7	punct	_	t_start=52|t_end=53
+
+# sent_id = 13
+# text = Always do it with your left hand, never with your right.
+# lang = en
+1	Always	Always	ADV	RB	_	2	advmod	_	t_start=0|t_end=6
+2	do	do	VERB	VB	Mood=Imp|VerbForm=Fin	0	root	_	t_start=7|t_end=9
+3	it	it	PRON	PRP	Case=Acc|Gender=Neut|Number=Sing|Person=3|PronType=Prs	2	obj	_	t_start=10|t_end=12
+4	with	with	ADP	IN	_	7	case	_	t_start=13|t_end=17
+5	your	your	PRON	PRP$	Case=Gen|Person=2|Poss=Yes|PronType=Prs	7	nmod:poss	_	t_start=18|t_end=22
+6	left	left	ADJ	JJ	Degree=Pos	7	amod	_	t_start=23|t_end=27
+7	hand	hand	NOUN	NN	Number=Sing	2	obl	_	t_start=28|t_end=32
+8	,	,	PUNCT	,	_	12	punct	_	t_start=32|t_end=33
+9	never	never	ADV	RB	PronType=Neg	12	advmod	_	t_start=34|t_end=39
+10	with	with	ADP	IN	_	12	case	_	t_start=40|t_end=44
+11	your	your	PRON	PRP$	Case=Gen|Person=2|Poss=Yes|PronType=Prs	12	nmod:poss	_	t_start=45|t_end=49
+12	right	right	NOUN	NN	Number=Sing	2	obl	_	t_start=50|t_end=55
+13	.	.	PUNCT	.	_	2	punct	_	t_start=55|t_end=56
+
+# sent_id = 14
+# text = With Jill intent on resigning and Pat on following her example, we look like losingour two best designers.
+# lang = en
+1	With	with	ADP	IN	_	2	case	_	t_start=0|t_end=4
+2	Jill	Jill	PROPN	NNP	Number=Sing	14	obl	_	t_start=5|t_end=9
+3	intent	intent	NOUN	NN	Number=Sing	14	obl	_	t_start=10|t_end=16
+4	on	on	SCONJ	IN	_	5	mark	_	t_start=17|t_end=19
+5	resigning	resign	VERB	VBG	Tense=Pres|VerbForm=Part	3	acl	_	t_start=20|t_end=29
+6	and	and	CCONJ	CC	_	7	cc	_	t_start=30|t_end=33
+7	Pat	Pat	PROPN	NNP	Number=Sing	5	conj	_	t_start=34|t_end=37
+8	on	on	SCONJ	IN	_	9	mark	_	t_start=38|t_end=40
+9	following	follow	VERB	VBG	Tense=Pres|VerbForm=Part	5	advcl	_	t_start=41|t_end=50
+10	her	her	PRON	PRP$	Case=Gen|Gender=Fem|Number=Sing|Person=3|Poss=Yes|PronType=Prs	11	nmod:poss	_	t_start=51|t_end=54
+11	example	example	NOUN	NN	Number=Sing	9	obj	_	t_start=55|t_end=62
+12	,	,	PUNCT	,	_	3	punct	_	t_start=62|t_end=63
+13	we	we	PRON	PRP	Case=Nom|Number=Plur|Person=1|PronType=Prs	14	nsubj	_	t_start=64|t_end=66
+14	look	look	VERB	VBP	Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin	0	root	_	t_start=67|t_end=71
+15	like	like	ADP	IN	_	19	case	_	t_start=72|t_end=76
+16	losingour	losingour	NOUN	NN	Number=Sing	19	compound	_	t_start=77|t_end=86
+17	two	two	NUM	CD	NumForm=Word|NumType=Card	19	nummod	_	t_start=87|t_end=90
+18	best	good	ADJ	JJS	Degree=Sup	19	amod	_	t_start=91|t_end=95
+19	designers	designer	NOUN	NNS	Number=Plur	14	obl	_	t_start=96|t_end=105
+20	.	.	PUNCT	.	_	14	punct	_	t_start=105|t_end=106
+
+# sent_id = 15
+# text = Ed had given me earrings for Christmas and Bob a necklace for my birthday.
+# lang = en
+1	Ed	Ed	PROPN	NNP	Number=Sing	3	nsubj	_	t_start=0|t_end=2
+2	had	have	AUX	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	3	aux	_	t_start=3|t_end=6
+3	given	give	VERB	VBN	Tense=Past|VerbForm=Part	0	root	_	t_start=7|t_end=12
+4	me	I	PRON	PRP	Case=Acc|Number=Sing|Person=1|PronType=Prs	3	iobj	_	t_start=13|t_end=15
+5	earrings	earring	NOUN	NNS	Number=Plur	3	obj	_	t_start=16|t_end=24
+6	for	for	ADP	IN	_	7	case	_	t_start=25|t_end=28
+7	Christmas	Christmas	PROPN	NNP	Number=Sing	3	obl	_	t_start=29|t_end=38
+8	and	and	CCONJ	CC	_	9	cc	_	t_start=39|t_end=42
+9	Bob	Bob	PROPN	NNP	Number=Sing	7	conj	_	t_start=43|t_end=46
+10	a	a	DET	DT	Definite=Ind|PronType=Art	11	det	_	t_start=47|t_end=48
+11	necklace	necklace	NOUN	NN	Number=Sing	9	appos	_	t_start=49|t_end=57
+12	for	for	ADP	IN	_	14	case	_	t_start=58|t_end=61
+13	my	my	PRON	PRP$	Case=Gen|Number=Sing|Person=1|Poss=Yes|PronType=Prs	14	nmod:poss	_	t_start=62|t_end=64
+14	birthday	birthday	NOUN	NN	Number=Sing	11	nmod	_	t_start=65|t_end=73
+15	.	.	PUNCT	.	_	3	punct	_	t_start=73|t_end=74
+
+# sent_id = 16
+# text = I wanted the Indian to win, my wife the Italian.
+# lang = en
+1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=1
+2	wanted	want	VERB	VBD	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=2|t_end=8
+3	the	the	DET	DT	Definite=Def|PronType=Art	4	det	_	t_start=9|t_end=12
+4	Indian	Indian	PROPN	NNP	Number=Sing	2	obj	_	t_start=13|t_end=19
+5	to	to	PART	TO	_	6	mark	_	t_start=20|t_end=22
+6	win	win	VERB	VB	VerbForm=Inf	2	xcomp	_	t_start=23|t_end=26
+7	,	,	PUNCT	,	_	9	punct	_	t_start=26|t_end=27
+8	my	my	PRON	PRP$	Case=Gen|Number=Sing|Person=1|Poss=Yes|PronType=Prs	9	nmod:poss	_	t_start=28|t_end=30
+9	wife	wife	NOUN	NN	Number=Sing	6	obj	_	t_start=31|t_end=35
+10	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	t_start=36|t_end=39
+11	Italian	Italian	PROPN	NNP	Number=Sing	9	appos	_	t_start=40|t_end=47
+12	.	.	PUNCT	.	_	2	punct	_	t_start=47|t_end=48
+
+# sent_id = 17
+# text = His criticisms of Kim were inaccurate and of Pat irrelevant.
+# lang = en
+1	His	his	PRON	PRP$	Case=Gen|Gender=Masc|Number=Sing|Person=3|Poss=Yes|PronType=Prs	2	nmod:poss	_	t_start=0|t_end=3
+2	criticisms	criticism	NOUN	NNS	Number=Plur	6	nsubj	_	t_start=4|t_end=14
+3	of	of	ADP	IN	_	4	case	_	t_start=15|t_end=17
+4	Kim	Kim	PROPN	NNP	Number=Sing	2	nmod	_	t_start=18|t_end=21
+5	were	be	AUX	VBD	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	6	cop	_	t_start=22|t_end=26
+6	inaccurate	inaccurate	ADJ	JJ	Degree=Pos	0	root	_	t_start=27|t_end=37
+7	and	and	CCONJ	CC	_	10	cc	_	t_start=38|t_end=41
+8	of	of	ADP	IN	_	9	case	_	t_start=42|t_end=44
+9	Pat	Pat	PROPN	NNP	Number=Sing	10	nsubj	_	t_start=45|t_end=48
+10	irrelevant	irrelevant	ADJ	JJ	Degree=Pos	6	conj	_	t_start=49|t_end=59
+11	.	.	PUNCT	.	_	6	punct	_	t_start=59|t_end=60
+
+# sent_id = 18
+# text = Max hadnt finished his assignment nor Jill hers.
+# lang = en
+1	Max	Max	PROPN	NNP	Number=Sing	4	nsubj	_	t_start=0|t_end=3
+2-3	hadnt	_	_	_	_	_	_	_	_
+2	had	have	AUX	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	4	aux	_	t_start=4|t_end=7
+3	nt	not	PART	RB	Polarity=Neg|Typo=Yes	4	advmod	_	t_start=7|t_end=9
+4	finished	finish	VERB	VBN	Tense=Past|VerbForm=Part	0	root	_	t_start=10|t_end=18
+5	his	his	PRON	PRP$	Case=Gen|Gender=Masc|Number=Sing|Person=3|Poss=Yes|PronType=Prs	6	nmod:poss	_	t_start=19|t_end=22
+6	assignment	assignment	NOUN	NN	Number=Sing	4	obj	_	t_start=23|t_end=33
+7	nor	nor	CCONJ	CC	Polarity=Neg	8	cc	_	t_start=34|t_end=37
+8	Jill	Jill	PROPN	NNP	Number=Sing	6	conj	_	t_start=38|t_end=42
+9	hers	her	PRON	PRP	Gender=Fem|Number=Sing|Person=3|Poss=Yes|PronType=Prs	8	flat	_	t_start=43|t_end=47
+10	.	.	PUNCT	.	_	4	punct	_	t_start=47|t_end=48
+
+# sent_id = 19
+# text = Kim can't have a new bicycle and Pat just a t-shirt.
+# lang = en
+1	Kim	Kim	PROPN	NNP	Number=Sing	4	nsubj	_	t_start=0|t_end=3
+2-3	can't	_	_	_	_	_	_	_	_
+2	ca	can	AUX	MD	VerbForm=Fin	4	aux	_	t_start=4|t_end=6
+3	n't	not	PART	RB	Polarity=Neg	4	advmod	_	t_start=6|t_end=9
+4	have	have	VERB	VB	VerbForm=Inf	0	root	_	t_start=10|t_end=14
+5	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	t_start=15|t_end=16
+6	new	new	ADJ	JJ	Degree=Pos	7	amod	_	t_start=17|t_end=20
+7	bicycle	bicycle	NOUN	NN	Number=Sing	4	obj	_	t_start=21|t_end=28
+8	and	and	CCONJ	CC	_	9	cc	_	t_start=29|t_end=32
+9	Pat	Pat	PROPN	NNP	Number=Sing	7	conj	_	t_start=33|t_end=36
+10	just	just	ADV	RB	_	14	advmod	_	t_start=37|t_end=41
+11	a	a	DET	DT	Definite=Ind|PronType=Art	14	det	_	t_start=42|t_end=43
+12	t	t	NOUN	NN	Number=Sing	14	compound	_	t_start=44|t_end=45
+13	-	-	PUNCT	HYPH	_	12	punct	_	t_start=45|t_end=46
+14	shirt	shirt	NOUN	NN	Number=Sing	7	conj	_	t_start=46|t_end=51
+15	.	.	PUNCT	.	_	4	punct	_	t_start=51|t_end=52
+
+# sent_id = 20
+# text = Kim wasn't at work on Monday or Pat on Tuesday.
+# lang = en
+1	Kim	Kim	PROPN	NNP	Number=Sing	5	nsubj	_	t_start=0|t_end=3
+2-3	wasn't	_	_	_	_	_	_	_	_
+2	was	be	AUX	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	5	cop	_	t_start=4|t_end=7
+3	n't	not	PART	RB	Polarity=Neg	5	advmod	_	t_start=7|t_end=10
+4	at	at	ADP	IN	_	5	case	_	t_start=11|t_end=13
+5	work	work	NOUN	NN	Number=Sing	0	root	_	t_start=14|t_end=18
+6	on	on	ADP	IN	_	7	case	_	t_start=19|t_end=21
+7	Monday	Monday	PROPN	NNP	Number=Sing	5	obl	_	t_start=22|t_end=28
+8	or	or	CCONJ	CC	_	9	cc	_	t_start=29|t_end=31
+9	Pat	Pat	PROPN	NNP	Number=Sing	7	conj	_	t_start=32|t_end=35
+10	on	on	ADP	IN	_	11	case	_	t_start=36|t_end=38
+11	Tuesday	Tuesday	PROPN	NNP	Number=Sing	5	obl	_	t_start=39|t_end=46
+12	.	.	PUNCT	.	_	5	punct	_	t_start=46|t_end=47
+
+# sent_id = 21
+# text = We persuaded one of them to cycle and the others to catch a bus.
+# lang = en
+1	We	we	PRON	PRP	Case=Nom|Number=Plur|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=2
+2	persuaded	persuade	VERB	VBD	Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=3|t_end=12
+3	one	one	NUM	CD	NumForm=Word|NumType=Card	2	obj	_	t_start=13|t_end=16
+4	of	of	ADP	IN	_	5	case	_	t_start=17|t_end=19
+5	them	they	PRON	PRP	Case=Acc|Number=Plur|Person=3|PronType=Prs	3	nmod	_	t_start=20|t_end=24
+6	to	to	PART	TO	_	7	mark	_	t_start=25|t_end=27
+7	cycle	cycle	VERB	VB	VerbForm=Inf	2	xcomp	_	t_start=28|t_end=33
+8	and	and	CCONJ	CC	_	10	cc	_	t_start=34|t_end=37
+9	the	the	DET	DT	Definite=Def|PronType=Art	10	det	_	t_start=38|t_end=41
+10	others	other	NOUN	NNS	Number=Plur	7	conj	_	t_start=42|t_end=48
+11	to	to	PART	TO	_	12	mark	_	t_start=49|t_end=51
+12	catch	catch	VERB	VB	VerbForm=Inf	7	advcl	_	t_start=52|t_end=57
+13	a	a	DET	DT	Definite=Ind|PronType=Art	14	det	_	t_start=58|t_end=59
+14	bus	bus	NOUN	NN	Number=Sing	12	obj	_	t_start=60|t_end=63
+15	.	.	PUNCT	.	_	2	punct	_	t_start=63|t_end=64
+
+# sent_id = 22
+# text = It was criticised by some for being too short, by others for being too long.
+# lang = en
+1	It	it	PRON	PRP	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	3	nsubj:pass	_	t_start=0|t_end=2
+2	was	be	AUX	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	3	aux:pass	_	t_start=3|t_end=6
+3	criticised	criticise	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	t_start=7|t_end=17
+4	by	by	ADP	IN	_	5	case	_	t_start=18|t_end=20
+5	some	some	DET	DT	PronType=Ind	3	obl:agent	_	t_start=21|t_end=25
+6	for	for	SCONJ	IN	_	9	mark	_	t_start=26|t_end=29
+7	being	be	AUX	VBG	Tense=Pres|VerbForm=Part	9	cop	_	t_start=30|t_end=35
+8	too	too	ADV	RB	_	9	advmod	_	t_start=36|t_end=39
+9	short	short	ADJ	JJ	Degree=Pos	3	advcl	_	t_start=40|t_end=45
+10	,	,	PUNCT	,	_	12	punct	_	t_start=45|t_end=46
+11	by	by	ADP	IN	_	12	case	_	t_start=47|t_end=49
+12	others	other	NOUN	NNS	Number=Plur	9	obl	_	t_start=50|t_end=56
+13	for	for	SCONJ	IN	_	16	mark	_	t_start=57|t_end=60
+14	being	be	AUX	VBG	Tense=Pres|VerbForm=Part	16	cop	_	t_start=61|t_end=66
+15	too	too	ADV	RB	_	16	advmod	_	t_start=67|t_end=70
+16	long	long	ADJ	JJ	Degree=Pos	9	advcl	_	t_start=71|t_end=75
+17	.	.	PUNCT	.	_	3	punct	_	t_start=75|t_end=76
+
+# sent_id = 23
+# text = I sent Ed a letter on Monday and Sue a postcard on Friday.
+# lang = en
+1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=1
+2	sent	send	VERB	VBD	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=2|t_end=6
+3	Ed	Ed	PROPN	NNP	Number=Sing	2	iobj	_	t_start=7|t_end=9
+4	a	a	DET	DT	Definite=Ind|PronType=Art	5	det	_	t_start=10|t_end=11
+5	letter	letter	NOUN	NN	Number=Sing	2	obj	_	t_start=12|t_end=18
+6	on	on	ADP	IN	_	7	case	_	t_start=19|t_end=21
+7	Monday	Monday	PROPN	NNP	Number=Sing	2	obl	_	t_start=22|t_end=28
+8	and	and	CCONJ	CC	_	11	cc	_	t_start=29|t_end=32
+9	Sue	Sue	PROPN	NNP	Number=Sing	11	nsubj	_	t_start=33|t_end=36
+10	a	a	DET	DT	Definite=Ind|PronType=Art	11	det	_	t_start=37|t_end=38
+11	postcard	postcard	NOUN	NN	Number=Sing	5	conj	_	t_start=39|t_end=47
+12	on	on	ADP	IN	_	13	case	_	t_start=48|t_end=50
+13	Friday	Friday	PROPN	NNP	Number=Sing	11	nmod	_	t_start=51|t_end=57
+14	.	.	PUNCT	.	_	2	punct	_	t_start=57|t_end=58
+
+# sent_id = 24
+# text = I sent Ed a letter on Monday and Sue on Friday.
+# lang = en
+1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=1
+2	sent	send	VERB	VBD	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=2|t_end=6
+3	Ed	Ed	PROPN	NNP	Number=Sing	2	iobj	_	t_start=7|t_end=9
+4	a	a	DET	DT	Definite=Ind|PronType=Art	5	det	_	t_start=10|t_end=11
+5	letter	letter	NOUN	NN	Number=Sing	2	obj	_	t_start=12|t_end=18
+6	on	on	ADP	IN	_	7	case	_	t_start=19|t_end=21
+7	Monday	Monday	PROPN	NNP	Number=Sing	2	obl	_	t_start=22|t_end=28
+8	and	and	CCONJ	CC	_	9	cc	_	t_start=29|t_end=32
+9	Sue	Sue	PROPN	NNP	Number=Sing	5	conj	_	t_start=33|t_end=36
+10	on	on	ADP	IN	_	11	case	_	t_start=37|t_end=39
+11	Friday	Friday	PROPN	NNP	Number=Sing	2	obl	_	t_start=40|t_end=46
+12	.	.	PUNCT	.	_	2	punct	_	t_start=46|t_end=47
+
+# sent_id = 25
+# text = Jill bought Kim a t-shirt and Pat some shorts.
+# lang = en
+1	Jill	Jill	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	bought	buy	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=11
+3	Kim	Kim	PROPN	NNP	Number=Sing	2	obj	_	t_start=12|t_end=15
+4	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	t_start=16|t_end=17
+5	t	t	NOUN	NN	Number=Sing	7	compound	_	t_start=18|t_end=19
+6	-	-	PUNCT	HYPH	_	5	punct	_	t_start=19|t_end=20
+7	shirt	shirt	NOUN	NN	Number=Sing	2	obj	_	t_start=20|t_end=25
+8	and	and	CCONJ	CC	_	9	cc	_	t_start=26|t_end=29
+9	Pat	Pat	PROPN	NNP	Number=Sing	7	conj	_	t_start=30|t_end=33
+10	some	some	DET	DT	PronType=Ind	11	det	_	t_start=34|t_end=38
+11	shorts	short	NOUN	NNS	Number=Plur	7	conj	_	t_start=39|t_end=45
+12	.	.	PUNCT	.	_	2	punct	_	t_start=45|t_end=46
+
+# sent_id = 26
+# text = Jill bought Kim a t-shirt and she bought Pat some shorts.
+# lang = en
+1	Jill	Jill	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	bought	buy	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=11
+3	Kim	Kim	PROPN	NNP	Number=Sing	2	obj	_	t_start=12|t_end=15
+4	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	t_start=16|t_end=17
+5	t	t	NOUN	NN	Number=Sing	7	compound	_	t_start=18|t_end=19
+6	-	-	PUNCT	HYPH	_	5	punct	_	t_start=19|t_end=20
+7	shirt	shirt	NOUN	NN	Number=Sing	2	obj	_	t_start=20|t_end=25
+8	and	and	CCONJ	CC	_	10	cc	_	t_start=26|t_end=29
+9	she	she	PRON	PRP	Case=Nom|Gender=Fem|Number=Sing|Person=3|PronType=Prs	10	nsubj	_	t_start=30|t_end=33
+10	bought	buy	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	conj	_	t_start=34|t_end=40
+11	Pat	Pat	PROPN	NNP	Number=Sing	10	iobj	_	t_start=41|t_end=44
+12	some	some	DET	DT	PronType=Ind	13	det	_	t_start=45|t_end=49
+13	shorts	short	NOUN	NNS	Number=Plur	10	obj	_	t_start=50|t_end=56
+14	.	.	PUNCT	.	_	2	punct	_	t_start=56|t_end=57
+
+# sent_id = 27
+# text = Jill bought Kim a t-shirt and Pat bought Kim some shorts.
+# lang = en
+1	Jill	Jill	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	bought	buy	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=11
+3	Kim	Kim	PROPN	NNP	Number=Sing	2	obj	_	t_start=12|t_end=15
+4	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	t_start=16|t_end=17
+5	t	t	NOUN	NN	Number=Sing	7	compound	_	t_start=18|t_end=19
+6	-	-	PUNCT	HYPH	_	5	punct	_	t_start=19|t_end=20
+7	shirt	shirt	NOUN	NN	Number=Sing	2	obj	_	t_start=20|t_end=25
+8	and	and	CCONJ	CC	_	10	cc	_	t_start=26|t_end=29
+9	Pat	Pat	PROPN	NNP	Number=Sing	10	nsubj	_	t_start=30|t_end=33
+10	bought	buy	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	conj	_	t_start=34|t_end=40
+11	Kim	Kim	PROPN	NNP	Number=Sing	10	iobj	_	t_start=41|t_end=44
+12	some	some	DET	DT	PronType=Ind	13	det	_	t_start=45|t_end=49
+13	shorts	short	NOUN	NNS	Number=Plur	10	obj	_	t_start=50|t_end=56
+14	.	.	PUNCT	.	_	2	punct	_	t_start=56|t_end=57
+

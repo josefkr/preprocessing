@@ -1,0 +1,478 @@
+# sent_id = 1
+# text = Paul wollte einen Milchshake und Herr Leonard einen Kaffee.
+# lang = de
+1	Paul	Paul	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	wollte	wollen	VERB	VMFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=11
+3	einen	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Masc|NumType=Card|Number=Sing|PronType=Art	4	det	_	t_start=12|t_end=17
+4	Milchshake	Milchshake	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	2	obj	_	t_start=18|t_end=28
+5	und	und	CCONJ	KON	_	7	cc	_	t_start=29|t_end=32
+6	Herr	Herr	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	7	compound	_	t_start=33|t_end=37
+7	Leonard	Leonard	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	4	conj	_	t_start=38|t_end=45
+8	einen	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Masc|NumType=Card|Number=Sing|PronType=Art	9	det	_	t_start=46|t_end=51
+9	Kaffee	Kaffee	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	2	obj	_	t_start=52|t_end=58
+10	.	.	PUNCT	$.	_	2	punct	_	t_start=58|t_end=59
+
+# sent_id = 2
+# text = Welche Drinks hast du mitgebracht?
+# lang = de
+1	Welche	welcher	DET	PWAT	Case=Acc|Gender=Fem|Number=Plur|PronType=Int,Rel	2	det	_	t_start=0|t_end=6
+2	Drinks	Drink	NOUN	NN	Case=Acc|Gender=Masc|Number=Plur	5	obj	_	t_start=7|t_end=13
+3	hast	haben	AUX	VAFIN	Mood=Ind|Number=Sing|Person=2|Tense=Pres|VerbForm=Fin	5	aux	_	t_start=14|t_end=18
+4	du	du	PRON	PPER	Case=Nom|Number=Sing|Person=2|PronType=Prs	5	nsubj	_	t_start=19|t_end=21
+5	mitgebracht	mitbringen	VERB	VVPP	VerbForm=Part	0	root	_	t_start=22|t_end=33
+6	?	?	PUNCT	$.	_	5	punct	_	t_start=33|t_end=34
+
+# sent_id = 3
+# text = Ich kaufte Harry ein Wasser und Sue einen Mojito.
+# lang = de
+1	Ich	ich	PRON	PPER	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=3
+2	kaufte	kaufen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=4|t_end=10
+3	Harry	Harry	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	2	obl:arg	_	t_start=11|t_end=16
+4	ein	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Neut|NumType=Card|Number=Sing|PronType=Art	5	det	_	t_start=17|t_end=20
+5	Wasser	Wasser	NOUN	NN	Case=Acc|Gender=Neut|Number=Sing	2	obj	_	t_start=21|t_end=27
+6	und	und	CCONJ	KON	_	7	cc	_	t_start=28|t_end=31
+7	Sue	Sue	PROPN	NE	Case=Acc|Gender=Neut|Number=Sing	5	conj	_	t_start=32|t_end=35
+8	einen	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Masc|NumType=Card|Number=Sing|PronType=Art	9	det	_	t_start=36|t_end=41
+9	Mojito	Mojito	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	2	obj	_	t_start=42|t_end=48
+10	.	.	PUNCT	$.	_	2	punct	_	t_start=48|t_end=49
+
+# sent_id = 4
+# text = Paul trug Adidas und Herr Leonard Nike.
+# lang = de
+1	Paul	Paul	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	trug	tragen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=9
+3	Adidas	Adidas	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	2	obj	_	t_start=10|t_end=16
+4	und	und	CCONJ	KON	_	6	cc	_	t_start=17|t_end=20
+5	Herr	Herr	NOUN	NN	Case=Nom|Gender=Masc|Number=Sing	6	compound	_	t_start=21|t_end=25
+6	Leonard	Leonard	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	3	conj	_	t_start=26|t_end=33
+7	Nike	Nike	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	6	flat	_	t_start=34|t_end=38
+8	.	.	PUNCT	$.	_	2	punct	_	t_start=38|t_end=39
+
+# sent_id = 5
+# text = Ich gab Kim 100 Dollar und Pat 50 Dollar.
+# lang = de
+1	Ich	ich	PRON	PPER	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=3
+2	gab	geben	VERB	VVFIN	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=4|t_end=7
+3	Kim	Kim	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	2	obl:arg	_	t_start=8|t_end=11
+4	100	100	NUM	CARD	NumType=Card	5	nummod	_	t_start=12|t_end=15
+5	Dollar	Dollar	NOUN	NN	Case=Acc|Gender=Masc|Number=Plur	2	obj	_	t_start=16|t_end=22
+6	und	und	CCONJ	KON	_	7	cc	_	t_start=23|t_end=26
+7	Pat	Pat	PROPN	NN	Case=Nom|Gender=Masc|Number=Sing	2	conj	_	t_start=27|t_end=30
+8	50	50	NUM	CARD	NumType=Card	9	nummod	_	t_start=31|t_end=33
+9	Dollar	Dollar	PROPN	NN	Case=Acc|Gender=Masc|Number=Plur	7	nmod	_	t_start=34|t_end=40
+10	.	.	PUNCT	$.	_	2	punct	_	t_start=40|t_end=41
+
+# sent_id = 6
+# text = Kim ist Ingenieurin und Pat Rechtsanwältin.
+# lang = de
+1	Kim	Kim	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	3	nsubj	_	t_start=0|t_end=3
+2	ist	sein	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	3	cop	_	t_start=4|t_end=7
+3	Ingenieurin	Ingenieurin	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	0	root	_	t_start=8|t_end=19
+4	und	und	CCONJ	KON	_	5	cc	_	t_start=20|t_end=23
+5	Pat	Pat	PROPN	NN	Case=Nom|Gender=Masc|Number=Sing	6	nsubj	_	t_start=24|t_end=27
+6	Rechtsanwältin	Rechtsanwältin	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	3	conj	_	t_start=28|t_end=42
+7	.	.	PUNCT	$.	_	3	punct	_	t_start=42|t_end=43
+
+# sent_id = 7
+# text = Ihre Tochter studierte Jura, ihr Sohn Medizin.
+# lang = de
+1	Ihre	ihr	DET	PPOSAT	Case=Nom|Gender=Fem|Gender[psor]=Fem|Number=Sing|Number[psor]=Sing|Person=3|Poss=Yes|PronType=Prs	2	det:poss	_	t_start=0|t_end=4
+2	Tochter	Tochter	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	3	nsubj	_	t_start=5|t_end=12
+3	studierte	studieren	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=13|t_end=22
+4	Jura	Jura	PROPN	NE	Case=Acc|Gender=Fem|Number=Sing	3	obj	_	t_start=23|t_end=27
+5	,	,	PUNCT	$,	_	7	punct	_	t_start=27|t_end=28
+6	ihr	ihr	DET	PPOSAT	Case=Acc|Gender=Masc|Number=Sing|Person=3|Poss=Yes|PronType=Prs	7	det:poss	_	t_start=29|t_end=32
+7	Sohn	Sohn	NOUN	NN	Case=Nom|Gender=Masc|Number=Sing	4	conj	_	t_start=33|t_end=37
+8	Medizin	Medizin	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	7	appos	_	t_start=38|t_end=45
+9	.	.	PUNCT	$.	_	3	punct	_	t_start=45|t_end=46
+
+# sent_id = 8
+# text = Der Premierminister traf um sechs Uhr ein und die Königin eine Stunde später.
+# lang = de
+1	Der	der	DET	ART	Case=Nom|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	2	det	_	t_start=0|t_end=3
+2	Premierminister	Premierminister	NOUN	NN	Case=Nom|Gender=Masc|Number=Sing	3	nsubj	_	t_start=4|t_end=19
+3	traf	treffen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=20|t_end=24
+4	um	um	ADP	APPR	_	6	case	_	t_start=25|t_end=27
+5	sechs	sechs	NUM	CARD	NumType=Card	6	nummod	_	t_start=28|t_end=33
+6	Uhr	Uhr	NOUN	NN	Case=Acc|Gender=Fem|Number=Sing	3	obl	_	t_start=34|t_end=37
+7	ein	ein	ADV	PTKVZ	_	3	compound:prt	_	t_start=38|t_end=41
+8	und	und	CCONJ	KON	_	10	cc	_	t_start=42|t_end=45
+9	die	der	DET	ART	Case=Nom|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	10	det	_	t_start=46|t_end=49
+10	Königin	Königin	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	3	conj	_	t_start=50|t_end=57
+11	eine	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Fem|NumType=Card|Number=Sing|PronType=Art	12	det	_	t_start=58|t_end=62
+12	Stunde	Stunde	NOUN	NN	Case=Acc|Gender=Fem|Number=Sing	13	nmod	_	t_start=63|t_end=69
+13	später	spät	ADJ	ADJD	Degree=Cmp	10	amod	_	t_start=70|t_end=76
+14	.	.	PUNCT	$.	_	3	punct	_	t_start=76|t_end=77
+
+# sent_id = 9
+# text = Jill kam 1967 nach Fidschi, ihre Eltern im Jahr darauf.
+# lang = de
+1	Jill	Jill	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	kam	kommen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=8
+3	1967	1967	NUM	CARD	NumType=Card	2	obl	_	t_start=9|t_end=13
+4	nach	nach	ADP	APPR	_	5	case	_	t_start=14|t_end=18
+5	Fidschi	Fidschi	PROPN	NE	Case=Dat|Gender=Neut|Number=Sing	2	obl	_	t_start=19|t_end=26
+6	,	,	PUNCT	$,	_	8	punct	_	t_start=26|t_end=27
+7	ihre	ihr	DET	PPOSAT	Case=Acc|Number=Plur|Person=3|Poss=Yes|PronType=Prs	8	det:poss	_	t_start=28|t_end=32
+8	Eltern	Eltern	NOUN	NN	Case=Nom|Number=Plur	2	conj	_	t_start=33|t_end=39
+9-10	im	_	_	_	_	_	_	_	_
+9	in	in	ADP	APPR	_	11	case	_	t_start=39|t_end=41
+10	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Neut|Number=Sing|PronType=Art	11	det	_	t_start=41|t_end=44
+11	Jahr	Jahr	NOUN	NN	Case=Dat|Gender=Neut|Number=Sing	8	nmod	_	t_start=44|t_end=48
+12	darauf	darauf	ADV	PAV	PronType=Dem	11	advmod	_	t_start=48|t_end=54
+13	.	.	PUNCT	$.	_	2	punct	_	t_start=54|t_end=55
+
+# sent_id = 10
+# text = Sein Vater wollte, dass er Sue heiratet, seine Mutter Louise jedoch Mary.
+# lang = de
+1	Sein	sein	DET	PPOSAT	Case=Nom|Gender=Masc|Gender[psor]=Masc,Neut|Number=Sing|Number[psor]=Sing|Person=3|Poss=Yes|PronType=Prs	2	det:poss	_	t_start=0|t_end=4
+2	Vater	Vater	NOUN	NN	Case=Nom|Gender=Masc|Number=Sing	3	nsubj	_	t_start=5|t_end=10
+3	wollte	wollen	AUX	VMFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=11|t_end=17
+4	,	,	PUNCT	$,	_	8	punct	_	t_start=17|t_end=18
+5	dass	dass	SCONJ	KOUS	_	8	mark	_	t_start=19|t_end=23
+6	er	er	PRON	PPER	Case=Nom|Gender=Masc|Number=Sing|Person=3|PronType=Prs	8	nsubj	_	t_start=24|t_end=26
+7	Sue	Sue	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	8	obj	_	t_start=27|t_end=30
+8	heiratet	heiraten	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	3	ccomp	_	t_start=31|t_end=39
+9	,	,	PUNCT	$,	_	14	punct	_	t_start=39|t_end=40
+10	seine	sein	DET	PPOSAT	Case=Acc|Gender=Fem|Gender[psor]=Masc,Neut|Number=Sing|Number[psor]=Sing|Person=3|Poss=Yes|PronType=Prs	11	det:poss	_	t_start=41|t_end=46
+11	Mutter	Mutter	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	14	nsubj	_	t_start=47|t_end=53
+12	Louise	Louise	PROPN	NE	Case=Nom|Gender=Fem|Number=Sing	11	appos	_	t_start=54|t_end=60
+13	jedoch	jedoch	ADV	ADV	_	14	advmod	_	t_start=61|t_end=67
+14	Mary	Mary	PROPN	NE	Case=Nom|Gender=Fem|Number=Sing	8	conj	_	t_start=68|t_end=72
+15	.	.	PUNCT	$.	_	3	punct	_	t_start=72|t_end=73
+
+# sent_id = 11
+# text = Kim hoffte, studieren zu können, und Pat, in den Familienbetrieb einzusteigen.
+# lang = de
+1	Kim	Kim	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=3
+2	hoffte	hoffen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=4|t_end=10
+3	,	,	PUNCT	$,	_	4	punct	_	t_start=10|t_end=11
+4	studieren	studieren	VERB	VVINF	VerbForm=Inf	2	xcomp	_	t_start=12|t_end=21
+5	zu	zu	PART	PTKZU	_	4	mark	_	t_start=22|t_end=24
+6	können	können	AUX	VMINF	VerbForm=Inf	4	aux	_	t_start=25|t_end=31
+7	,	,	PUNCT	$,	_	14	punct	_	t_start=31|t_end=32
+8	und	und	CCONJ	KON	_	9	cc	_	t_start=33|t_end=36
+9	Pat	Pat	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	conj	_	t_start=37|t_end=40
+10	,	,	PUNCT	$,	_	14	punct	_	t_start=40|t_end=41
+11	in	in	ADP	APPR	_	13	case	_	t_start=42|t_end=44
+12	den	der	DET	ART	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	13	det	_	t_start=45|t_end=48
+13	Familienbetrieb	Familienbetrieb	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	14	obl	_	t_start=49|t_end=64
+14	einzusteigen	einsteigen	VERB	VVIZU	VerbForm=Inf	9	acl	_	t_start=65|t_end=77
+15	.	.	PUNCT	$.	_	2	punct	_	t_start=77|t_end=78
+
+# sent_id = 12
+# text = Eddie wollte wegen des Gehalts in die Firma, Willy, weil seine Freundin dort arbeitete.
+# lang = de
+1	Eddie	Eddie	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=5
+2	wollte	wollen	AUX	VMFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=6|t_end=12
+3	wegen	wegen	ADP	APPR	_	5	case	_	t_start=13|t_end=18
+4	des	der	DET	ART	Case=Gen|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	5	det	_	t_start=19|t_end=22
+5	Gehalts	Gehalt	NOUN	NN	Case=Gen|Gender=Masc|Number=Sing	2	obl	_	t_start=23|t_end=30
+6	in	in	ADP	APPR	_	8	case	_	t_start=31|t_end=33
+7	die	der	DET	ART	Case=Acc|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	8	det	_	t_start=34|t_end=37
+8	Firma	Firma	NOUN	NN	Case=Acc|Gender=Fem|Number=Sing	5	nmod	_	t_start=38|t_end=43
+9	,	,	PUNCT	$,	_	10	punct	_	t_start=43|t_end=44
+10	Willy	Willy	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	8	appos	_	t_start=45|t_end=50
+11	,	,	PUNCT	$,	_	16	punct	_	t_start=50|t_end=51
+12	weil	weil	SCONJ	KOUS	_	16	mark	_	t_start=52|t_end=56
+13	seine	sein	DET	PPOSAT	Case=Nom|Gender=Fem|Gender[psor]=Masc,Neut|Number=Sing|Number[psor]=Sing|Person=3|Poss=Yes|PronType=Prs	14	det:poss	_	t_start=57|t_end=62
+14	Freundin	Freundin	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	16	nsubj	_	t_start=63|t_end=71
+15	dort	dort	ADV	ADV	_	16	advmod	_	t_start=72|t_end=76
+16	arbeitete	arbeiten	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	advcl	_	t_start=77|t_end=86
+17	.	.	PUNCT	$.	_	2	punct	_	t_start=86|t_end=87
+
+# sent_id = 13
+# text = Am Montag war sie in Paris gewesen und am Dienstag in Bonn.
+# lang = de
+1-2	Am	_	_	_	_	_	_	_	_
+1	An	an	ADP	APPR	_	3	case	_	t_start=0|t_end=2
+2	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	3	det	_	t_start=2|t_end=5
+3	Montag	Montag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	8	obl	_	t_start=5|t_end=11
+4	war	sein	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	8	aux	_	t_start=11|t_end=14
+5	sie	sie	PRON	PPER	Case=Nom|Gender=Fem|Number=Sing|Person=3|PronType=Prs	8	nsubj	_	t_start=14|t_end=17
+6	in	in	ADP	APPR	_	7	case	_	t_start=18|t_end=20
+7	Paris	Paris	PROPN	NE	Case=Dat|Gender=Neut|Number=Sing	8	obl	_	t_start=21|t_end=26
+8	gewesen	sein	AUX	VAPP	VerbForm=Part	0	root	_	t_start=27|t_end=34
+9	und	und	CCONJ	KON	_	12	cc	_	t_start=35|t_end=38
+10-11	am	_	_	_	_	_	_	_	_
+10	an	an	ADP	APPR	_	12	case	_	t_start=38|t_end=40
+11	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	12	det	_	t_start=40|t_end=43
+12	Dienstag	Dienstag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	8	conj	_	t_start=43|t_end=51
+13	in	in	ADP	APPR	_	14	case	_	t_start=51|t_end=53
+14	Bonn	Bonn	PROPN	NE	Case=Dat|Gender=Neut|Number=Sing	12	nmod	_	t_start=54|t_end=58
+15	.	.	PUNCT	$.	_	8	punct	_	t_start=58|t_end=59
+
+# sent_id = 14
+# text = Mach es immer mit der linken Hand, niemals mit der rechten Hand.
+# lang = de
+1	Mach	Mach	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	t_start=0|t_end=4
+2	es	es	PRON	PPER	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	1	nsubj	_	t_start=5|t_end=7
+3	immer	immer	ADV	ADV	_	1	advmod	_	t_start=8|t_end=13
+4	mit	mit	ADP	APPR	_	7	case	_	t_start=14|t_end=17
+5	der	der	DET	ART	Case=Dat|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	7	det	_	t_start=18|t_end=21
+6	linken	link	ADJ	ADJA	Case=Dat|Degree=Pos|Gender=Fem|Number=Sing	7	amod	_	t_start=22|t_end=28
+7	Hand	Hand	NOUN	NN	Case=Dat|Gender=Fem|Number=Sing	1	obl	_	t_start=29|t_end=33
+8	,	,	PUNCT	$,	_	13	punct	_	t_start=33|t_end=34
+9	niemals	niemals	ADV	ADV	_	13	advmod	_	t_start=35|t_end=42
+10	mit	mit	ADP	APPR	_	13	case	_	t_start=43|t_end=46
+11	der	der	DET	ART	Case=Dat|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	13	det	_	t_start=47|t_end=50
+12	rechten	recht	ADJ	ADJA	Case=Dat|Degree=Pos|Gender=Fem|Number=Sing	13	amod	_	t_start=51|t_end=58
+13	Hand	Hand	NOUN	NN	Case=Dat|Gender=Fem|Number=Sing	7	conj	_	t_start=59|t_end=63
+14	.	.	PUNCT	$.	_	1	punct	_	t_start=63|t_end=64
+
+# sent_id = 15
+# text = Ed hatte mir zu Weihnachten Ohrringe geschenkt und Bob zum Geburtstag eine Halskette .
+# lang = de
+1	Ed	Ed	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	7	nsubj	_	t_start=0|t_end=2
+2	hatte	haben	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	7	aux	_	t_start=3|t_end=8
+3	mir	ich	PRON	PPER	Case=Dat|Number=Sing|Person=1|PronType=Prs	7	obl:arg	_	t_start=9|t_end=12
+4	zu	zu	ADP	APPR	_	5	case	_	t_start=13|t_end=15
+5	Weihnachten	Weihnacht|Weihnachten	NOUN	NN	Case=Dat|Gender=Fem|Number=Plur	7	obl	_	t_start=16|t_end=27
+6	Ohrringe	Ohrring	NOUN	NN	Case=Acc|Gender=Masc|Number=Plur	7	obj	_	t_start=28|t_end=36
+7	geschenkt	schenken	VERB	VVPP	VerbForm=Part	0	root	_	t_start=37|t_end=46
+8	und	und	CCONJ	KON	_	14	cc	_	t_start=47|t_end=50
+9	Bob	Bob	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	14	nsubj	_	t_start=51|t_end=54
+10-11	zum	_	_	_	_	_	_	_	_
+10	zu	zu	ADP	APPR	_	12	case	_	t_start=55|t_end=57
+11	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	12	det	_	t_start=57|t_end=60
+12	Geburtstag	Geburtstag	NOUN	NN	Case=Dat|Gender=Masc|Number=Sing	14	nmod	_	t_start=60|t_end=70
+13	eine	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Fem|NumType=Card|Number=Sing|PronType=Art	14	det	_	t_start=70|t_end=74
+14	Halskette	Halskette	NOUN	NN	Case=Acc|Gender=Fem|Number=Sing	7	conj	_	t_start=75|t_end=84
+15	.	.	PUNCT	$.	_	7	punct	_	t_start=85|t_end=86
+
+# sent_id = 16
+# text = Ich wollte, dass der Inder gewinnt, meine Frau der Italiener.
+# lang = de
+1	Ich	ich	PRON	PPER	Case=Nom|Number=Sing|Person=1|PronType=Prs	2	nsubj	_	t_start=0|t_end=3
+2	wollte	wollen	AUX	VMFIN	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	root	_	t_start=4|t_end=10
+3	,	,	PUNCT	$,	_	7	punct	_	t_start=10|t_end=11
+4	dass	dass	SCONJ	KOUS	_	7	mark	_	t_start=12|t_end=16
+5	der	der	DET	ART	Case=Nom|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	6	det	_	t_start=17|t_end=20
+6	Inder	Inder	NOUN	NN	Case=Nom|Gender=Masc|Number=Sing	7	nsubj	_	t_start=21|t_end=26
+7	gewinnt	gewinnen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	2	ccomp	_	t_start=27|t_end=34
+8	,	,	PUNCT	$,	_	10	punct	_	t_start=34|t_end=35
+9	meine	mein	DET	PPOSAT	Case=Acc|Gender=Fem|Number=Sing|Number[psor]=Sing|Person=1|Poss=Yes|PronType=Prs	10	det:poss	_	t_start=36|t_end=41
+10	Frau	Frau	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	7	appos	_	t_start=42|t_end=46
+11	der	der	DET	ART	Case=Gen|Definite=Def|Number=Plur|PronType=Art	12	det	_	t_start=47|t_end=50
+12	Italiener	Italiener	NOUN	NN	Case=Gen|Gender=Masc|Number=Plur	10	nmod	_	t_start=51|t_end=60
+13	.	.	PUNCT	$.	_	2	punct	_	t_start=60|t_end=61
+
+# sent_id = 17
+# text = Die Kritik an Kim war unzutreffend und die Kritik an Pat irrelevant.
+# lang = de
+1	Die	der	DET	ART	Case=Nom|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	2	det	_	t_start=0|t_end=3
+2	Kritik	Kritik	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	6	nsubj	_	t_start=4|t_end=10
+3	an	an	ADP	APPR	_	4	case	_	t_start=11|t_end=13
+4	Kim	Kim	PROPN	NE	Case=Dat|Gender=Masc|Number=Sing	2	nmod	_	t_start=14|t_end=17
+5	war	sein	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	6	cop	_	t_start=18|t_end=21
+6	unzutreffend	unzutreffend	ADJ	ADJD	Degree=Pos	0	root	_	t_start=22|t_end=34
+7	und	und	CCONJ	KON	_	12	cc	_	t_start=35|t_end=38
+8	die	der	DET	ART	Case=Nom|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	9	det	_	t_start=39|t_end=42
+9	Kritik	Kritik	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	12	nsubj	_	t_start=43|t_end=49
+10	an	an	ADP	APPR	_	11	case	_	t_start=50|t_end=52
+11	Pat	Pat	PROPN	NE	Case=Dat|Gender=Masc|Number=Sing	9	nmod	_	t_start=53|t_end=56
+12	irrelevant	irrelevant	ADJ	ADJD	Degree=Pos	6	conj	_	t_start=57|t_end=67
+13	.	.	PUNCT	$.	_	6	punct	_	t_start=67|t_end=68
+
+# sent_id = 18
+# text = Max hatte seine Aufgabe noch nicht beendet, Jill ihre auch noch nicht.
+# lang = de
+1	Max	Max	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	7	nsubj	_	t_start=0|t_end=3
+2	hatte	haben	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	7	aux	_	t_start=4|t_end=9
+3	seine	sein	DET	PPOSAT	Case=Acc|Gender=Fem|Gender[psor]=Masc,Neut|Number=Sing|Number[psor]=Sing|Person=3|Poss=Yes|PronType=Prs	4	det:poss	_	t_start=10|t_end=15
+4	Aufgabe	Aufgabe	NOUN	NN	Case=Acc|Gender=Fem|Number=Sing	7	obj	_	t_start=16|t_end=23
+5	noch	noch	ADV	ADV	_	6	advmod	_	t_start=24|t_end=28
+6	nicht	nicht	PART	PTKNEG	Polarity=Neg	7	advmod	_	t_start=29|t_end=34
+7	beendet	beenden	VERB	VVPP	VerbForm=Part	0	root	_	t_start=35|t_end=42
+8	,	,	PUNCT	$,	_	9	punct	_	t_start=42|t_end=43
+9	Jill	Jill	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	7	conj	_	t_start=44|t_end=48
+10	ihre	ihr	DET	PPOSAT	Case=Acc|Gender=Fem|Number=Sing|Person=3|Poss=Yes|PronType=Prs	13	det:poss	_	t_start=49|t_end=53
+11	auch	auch	ADV	ADV	_	12	advmod	_	t_start=54|t_end=58
+12	noch	noch	ADV	ADV	_	13	advmod	_	t_start=59|t_end=63
+13	nicht	nicht	PART	PTKNEG	Polarity=Neg	9	advmod	_	t_start=64|t_end=69
+14	.	.	PUNCT	$.	_	7	punct	_	t_start=69|t_end=70
+
+# sent_id = 19
+# text = Kim kann doch kein neues Fahrrad bekommen und Pat nur ein T-Shirt.
+# lang = de
+1	Kim	Kim	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	7	nsubj	_	t_start=0|t_end=3
+2	kann	können	AUX	VMFIN	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	aux	_	t_start=4|t_end=8
+3	doch	doch	ADV	ADV	_	7	advmod	_	t_start=9|t_end=13
+4	kein	kein	DET	PIAT	Case=Acc|Gender=Neut|Number=Sing|PronType=Neg	6	det	_	t_start=14|t_end=18
+5	neues	neu	ADJ	ADJA	Case=Acc|Degree=Pos|Gender=Neut|Number=Sing	6	amod	_	t_start=19|t_end=24
+6	Fahrrad	Fahrrad	NOUN	NN	Case=Acc|Gender=Neut|Number=Sing	7	obj	_	t_start=25|t_end=32
+7	bekommen	bekommen	VERB	VVINF	VerbForm=Inf	0	root	_	t_start=33|t_end=41
+8	und	und	CCONJ	KON	_	9	cc	_	t_start=42|t_end=45
+9	Pat	Pat	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	7	conj	_	t_start=46|t_end=49
+10	nur	nur	ADV	ADV	_	13	advmod	_	t_start=50|t_end=53
+11	ein	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Neut|NumType=Card|Number=Sing|PronType=Art	13	det	_	t_start=54|t_end=57
+12	T-	T-	PUNCT	$(	_	13	punct	_	t_start=58|t_end=60
+13	Shirt	Shirt	NOUN	NN	Case=Acc|Gender=Neut|Number=Sing	9	nmod	_	t_start=60|t_end=65
+14	.	.	PUNCT	$.	_	7	punct	_	t_start=65|t_end=66
+
+# sent_id = 20
+# text = Kim war am Montag nicht auf der Arbeit und Pat am Dienstag nicht.
+# lang = de
+1	Kim	Kim	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=3
+2	war	sein	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=4|t_end=7
+3-4	am	_	_	_	_	_	_	_	_
+3	an	an	ADP	APPR	_	5	case	_	t_start=7|t_end=9
+4	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	5	det	_	t_start=9|t_end=12
+5	Montag	Montag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	2	obl	_	t_start=12|t_end=18
+6	nicht	nicht	PART	PTKNEG	Polarity=Neg	2	advmod	_	t_start=18|t_end=23
+7	auf	auf	ADP	APPR	_	9	case	_	t_start=24|t_end=27
+8	der	der	DET	ART	Case=Dat|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	9	det	_	t_start=28|t_end=31
+9	Arbeit	Arbeit	NOUN	NN	Case=Dat|Gender=Fem|Number=Sing	2	obl	_	t_start=32|t_end=38
+10	und	und	CCONJ	KON	_	11	cc	_	t_start=39|t_end=42
+11	Pat	Pat	PROPN	NE	Case=Dat|Gender=Masc|Number=Sing	9	conj	_	t_start=43|t_end=46
+12-13	am	_	_	_	_	_	_	_	_
+12	an	an	ADP	APPR	_	14	case	_	t_start=46|t_end=48
+13	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	14	det	_	t_start=48|t_end=51
+14	Dienstag	Dienstag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	2	obl	_	t_start=51|t_end=59
+15	nicht	nicht	PART	PTKNEG	Polarity=Neg	2	advmod	_	t_start=59|t_end=64
+16	.	.	PUNCT	$.	_	2	punct	_	t_start=64|t_end=65
+
+# sent_id = 21
+# text = Wir haben einen von ihnen überredet, mit dem Fahrrad zu fahren, und die anderen, den Bus zu nehmen.
+# lang = de
+1	Wir	wir	PRON	PPER	Case=Nom|Number=Plur|Person=1|PronType=Prs	6	nsubj	_	t_start=0|t_end=3
+2	haben	haben	AUX	VAFIN	Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin	6	aux	_	t_start=4|t_end=9
+3	einen	ein	DET	PIS	Case=Acc|Definite=Ind|Gender=Masc|NumType=Card|Number=Sing|PronType=Art	6	obj	_	t_start=10|t_end=15
+4	von	von	ADP	APPR	_	5	case	_	t_start=16|t_end=19
+5	ihnen	sie	PRON	PPER	Case=Dat|Number=Plur|Person=3|PronType=Prs	6	obl	_	t_start=20|t_end=25
+6	überredet	überreden	VERB	VVPP	VerbForm=Part	0	root	_	t_start=26|t_end=35
+7	,	,	PUNCT	$,	_	12	punct	_	t_start=35|t_end=36
+8	mit	mit	ADP	APPR	_	10	case	_	t_start=37|t_end=40
+9	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Neut|Number=Sing|PronType=Art	10	det	_	t_start=41|t_end=44
+10	Fahrrad	Fahrrad	NOUN	NN	Case=Dat|Gender=Neut|Number=Sing	12	obl	_	t_start=45|t_end=52
+11	zu	zu	PART	PTKZU	_	12	mark	_	t_start=53|t_end=55
+12	fahren	fahren	VERB	VVINF	VerbForm=Inf	6	xcomp	_	t_start=56|t_end=62
+13	,	,	PUNCT	$,	_	21	punct	_	t_start=62|t_end=63
+14	und	und	CCONJ	KON	_	21	cc	_	t_start=64|t_end=67
+15	die	der	DET	ART	Case=Nom|Definite=Def|Number=Plur|PronType=Art	16	det	_	t_start=68|t_end=71
+16	anderen	anderer	DET	PIS	Case=Nom|Number=Plur|PronType=Ind	21	obj	_	t_start=72|t_end=79
+17	,	,	PUNCT	$,	_	16	punct	_	t_start=79|t_end=80
+18	den	der	DET	ART	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	19	det	_	t_start=81|t_end=84
+19	Bus	Bus	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	21	obj	_	t_start=85|t_end=88
+20	zu	zu	PART	PTKZU	_	21	mark	_	t_start=89|t_end=91
+21	nehmen	nehmen	VERB	VVINF	VerbForm=Inf	12	conj	_	t_start=92|t_end=98
+22	.	.	PUNCT	$.	_	6	punct	_	t_start=98|t_end=99
+
+# sent_id = 22
+# text = Es wurde von einigen kritisiert, weil es zu kurz war, von anderen, weil es zu lang war.
+# lang = de
+1	Es	es	PRON	PPER	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	5	nsubj:pass	_	t_start=0|t_end=2
+2	wurde	werden	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin|Voice=Pass	5	aux:pass	_	t_start=3|t_end=8
+3	von	von	ADP	APPR	_	4	case	_	t_start=9|t_end=12
+4	einigen	einige	DET	PIS	Case=Dat|Number=Plur|PronType=Ind	5	obl:agent	_	t_start=13|t_end=20
+5	kritisiert	kritisieren	VERB	VVPP	VerbForm=Part	0	root	_	t_start=21|t_end=31
+6	,	,	PUNCT	$,	_	10	punct	_	t_start=31|t_end=32
+7	weil	weil	SCONJ	KOUS	_	10	mark	_	t_start=33|t_end=37
+8	es	es	PRON	PPER	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	10	nsubj	_	t_start=38|t_end=40
+9	zu	zu	ADV	PTKA	_	10	advmod	_	t_start=41|t_end=43
+10	kurz	kurz	ADJ	ADJD	Degree=Pos	5	advcl	_	t_start=44|t_end=48
+11	war	sein	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	10	cop	_	t_start=49|t_end=52
+12	,	,	PUNCT	$,	_	19	punct	_	t_start=52|t_end=53
+13	von	von	ADP	APPR	_	14	case	_	t_start=54|t_end=57
+14	anderen	anderer	DET	PIS	Case=Dat|Number=Plur|PronType=Ind	19	nmod	_	t_start=58|t_end=65
+15	,	,	PUNCT	$,	_	19	punct	_	t_start=65|t_end=66
+16	weil	weil	SCONJ	KOUS	_	19	mark	_	t_start=67|t_end=71
+17	es	es	PRON	PPER	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	19	nsubj	_	t_start=72|t_end=74
+18	zu	zu	ADV	PTKA	_	19	advmod	_	t_start=75|t_end=77
+19	lang	lang	ADJ	ADJD	Degree=Pos	10	advcl	_	t_start=78|t_end=82
+20	war	sein	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	19	cop	_	t_start=83|t_end=86
+21	.	.	PUNCT	$.	_	5	punct	_	t_start=86|t_end=87
+
+# sent_id = 23
+# text = Ich habe Ed am Montag einen Brief geschickt und Sue am Freitag eine Postkarte.
+# lang = de
+1	Ich	ich	PRON	PPER	Case=Nom|Number=Sing|Person=1|PronType=Prs	9	nsubj	_	t_start=0|t_end=3
+2	habe	haben	AUX	VAFIN	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	9	aux	_	t_start=4|t_end=8
+3	Ed	Ed	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	9	obj	_	t_start=9|t_end=11
+4-5	am	_	_	_	_	_	_	_	_
+4	an	an	ADP	APPR	_	6	case	_	t_start=11|t_end=13
+5	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	6	det	_	t_start=13|t_end=16
+6	Montag	Montag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	9	obl	_	t_start=16|t_end=22
+7	einen	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Masc|NumType=Card|Number=Sing|PronType=Art	8	det	_	t_start=22|t_end=27
+8	Brief	Brief	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	9	obj	_	t_start=28|t_end=33
+9	geschickt	schicken	VERB	VVPP	VerbForm=Part	0	root	_	t_start=34|t_end=43
+10	und	und	CCONJ	KON	_	16	cc	_	t_start=44|t_end=47
+11	Sue	Sue	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	16	nsubj	_	t_start=48|t_end=51
+12-13	am	_	_	_	_	_	_	_	_
+12	an	an	ADP	APPR	_	14	case	_	t_start=51|t_end=53
+13	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	14	det	_	t_start=53|t_end=56
+14	Freitag	Freitag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	11	nmod	_	t_start=56|t_end=63
+15	eine	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Fem|NumType=Card|Number=Sing|PronType=Art	16	det	_	t_start=63|t_end=67
+16	Postkarte	Postkarte	NOUN	NN	Case=Acc|Gender=Fem|Number=Sing	9	conj	_	t_start=68|t_end=77
+17	.	.	PUNCT	$.	_	9	punct	_	t_start=77|t_end=78
+
+# sent_id = 24
+# text = Ich habe Ed am Montag einen Brief geschickt und Sue am Freitag einen Brief.
+# lang = de
+1	Ich	ich	PRON	PPER	Case=Nom|Number=Sing|Person=1|PronType=Prs	9	nsubj	_	t_start=0|t_end=3
+2	habe	haben	AUX	VAFIN	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	9	aux	_	t_start=4|t_end=8
+3	Ed	Ed	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	9	obj	_	t_start=9|t_end=11
+4-5	am	_	_	_	_	_	_	_	_
+4	an	an	ADP	APPR	_	6	case	_	t_start=11|t_end=13
+5	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	6	det	_	t_start=13|t_end=16
+6	Montag	Montag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	9	obl	_	t_start=16|t_end=22
+7	einen	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Masc|NumType=Card|Number=Sing|PronType=Art	8	det	_	t_start=22|t_end=27
+8	Brief	Brief	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	9	obj	_	t_start=28|t_end=33
+9	geschickt	schicken	VERB	VVPP	VerbForm=Part	0	root	_	t_start=34|t_end=43
+10	und	und	CCONJ	KON	_	11	cc	_	t_start=44|t_end=47
+11	Sue	Sue	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	9	conj	_	t_start=48|t_end=51
+12-13	am	_	_	_	_	_	_	_	_
+12	an	an	ADP	APPR	_	14	case	_	t_start=51|t_end=53
+13	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	14	det	_	t_start=53|t_end=56
+14	Freitag	Freitag	PROPN	NN	Case=Dat|Gender=Masc|Number=Sing	11	nmod	_	t_start=56|t_end=63
+15	einen	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Masc|NumType=Card|Number=Sing|PronType=Art	16	det	_	t_start=63|t_end=68
+16	Brief	Brief	NOUN	NN	Case=Acc|Gender=Masc|Number=Sing	11	nmod	_	t_start=69|t_end=74
+17	.	.	PUNCT	$.	_	9	punct	_	t_start=74|t_end=75
+
+# sent_id = 25
+# text = Welche Geschenke hatte Jill mitgebracht?
+# lang = de
+1	Welche	welcher	DET	PWAT	Case=Acc|Gender=Fem|Number=Plur|PronType=Int,Rel	2	det	_	t_start=0|t_end=6
+2	Geschenke	Geschenk	NOUN	NN	Case=Acc|Gender=Neut|Number=Plur	5	obj	_	t_start=7|t_end=16
+3	hatte	haben	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	5	aux	_	t_start=17|t_end=22
+4	Jill	Jill	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	5	nsubj	_	t_start=23|t_end=27
+5	mitgebracht	mitbringen	VERB	VVPP	VerbForm=Part	0	root	_	t_start=28|t_end=39
+6	?	?	PUNCT	$.	_	5	punct	_	t_start=39|t_end=40
+
+# sent_id = 26
+# text = Jill kaufte Max ein Shirt und Pat Shorts
+# lang = de
+1	Jill	Jill	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	kaufte	kaufen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=11
+3	Max	Max	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	2	obl:arg	_	t_start=12|t_end=15
+4	ein	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Neut|NumType=Card|Number=Sing|PronType=Art	5	det	_	t_start=16|t_end=19
+5	Shirt	Shirt	NOUN	NN	Case=Acc|Gender=Neut|Number=Sing	2	obj	_	t_start=20|t_end=25
+6	und	und	CCONJ	KON	_	7	cc	_	t_start=26|t_end=29
+7	Pat	Pat	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	5	conj	_	t_start=30|t_end=33
+8	Shorts	Shorts	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	7	flat	_	t_start=34|t_end=40
+
+# sent_id = 27
+# text = Was hat Max zum Geburtstag bekommen?
+# lang = de
+1	Was	was	PRON	PWS	Case=Acc|Gender=Neut|Number=Sing|PronType=Int,Rel	7	obj	_	t_start=0|t_end=3
+2	hat	haben	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	aux	_	t_start=4|t_end=7
+3	Max	Max	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	7	nsubj	_	t_start=8|t_end=11
+4-5	zum	_	_	_	_	_	_	_	_
+4	zu	zu	ADP	APPR	_	6	case	_	t_start=12|t_end=14
+5	dem	der	DET	ART	Case=Dat|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	6	det	_	t_start=14|t_end=17
+6	Geburtstag	Geburtstag	NOUN	NN	Case=Dat|Gender=Masc|Number=Sing	7	obl	_	t_start=17|t_end=27
+7	bekommen	bekommen	VERB	VVPP	VerbForm=Part	0	root	_	t_start=27|t_end=35
+8	?	?	PUNCT	$.	_	7	punct	_	t_start=35|t_end=36
+
+# sent_id = 28
+# text = Jill kaufte ihm ein Shirt und Pat Shorts
+# lang = de
+1	Jill	Jill	PROPN	NE	Case=Nom|Gender=Masc|Number=Sing	2	nsubj	_	t_start=0|t_end=4
+2	kaufte	kaufen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=5|t_end=11
+3	ihm	er	PRON	PPER	Case=Dat|Gender=Masc|Number=Sing|Person=3|PronType=Prs	2	obl:arg	_	t_start=12|t_end=15
+4	ein	ein	DET	ART	Case=Acc|Definite=Ind|Gender=Neut|NumType=Card|Number=Sing|PronType=Art	5	det	_	t_start=16|t_end=19
+5	Shirt	Shirt	NOUN	NN	Case=Acc|Gender=Neut|Number=Sing	2	obj	_	t_start=20|t_end=25
+6	und	und	CCONJ	KON	_	7	cc	_	t_start=26|t_end=29
+7	Pat	Pat	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	5	conj	_	t_start=30|t_end=33
+8	Shorts	Shorts	PROPN	NE	Case=Acc|Gender=Masc|Number=Sing	7	flat	_	t_start=34|t_end=40
+

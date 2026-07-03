@@ -13,22 +13,23 @@ Two kinds of passive are detected:
     {obl, obl:agent} whose ``case`` child is an agent preposition
     (by / von / durch / ...). This is the "agentful" passive that the
     normalizer rewrites to active; it is the common case in the target
-    data ("Der Motor wird *vom Mechaniker* repariert."). Agent extraction
-    needs the language's lexicon, so it is skipped (agent stays ``None``)
-    for sentences with no ``# lang =`` tag or an unsupported language.
+    data ("Der Motor wird *vom Mechaniker* repariert."). 
+    Agent extraction needs the language's lexicon, 
+    so it is skipped (agent stays ``None``) for sentences 
+    with no ``# lang =`` tag or an unsupported language.
 
 **Short** (``kind="short"``):
-  - V is a passive participle (per-language XPOS set, with a fallback
-    to ``VerbForm=Part``).
+  - V is specifically a passive participle (per-language XPOS set, 
+    with a fallback to ``VerbForm=Part``).
   - V has no aux child of any kind (rules out canonical passives,
     active perfects, modals, etc.).
   - V has an ``obl`` / ``obl:agent`` child A whose ``case`` child P
-    has a form in the language's agent-preposition set
+    has a form in the relevant language's agent-preposition set
     (e.g. "by" / "von" / "durch" / "par" / "por").
 
 Each tree's ``# lang =`` comment is honored. Sentences whose language
 has no passive lexicon are skipped for the short-passive path with a
-debug log; canonical detection still runs (it is purely structural).
+debug log message; canonical detection still runs (it is purely structural).
 """
 
 from __future__ import annotations
@@ -53,9 +54,9 @@ def _agent_preps_or_empty(lang) -> frozenset[str]:
     """Agent-preposition lexicon for ``lang``, or empty if unavailable.
 
     Canonical-passive detection is purely structural and runs even for
-    languages with no passive lexicon (or no ``# lang =`` tag); in that
-    case we simply can't recognise an agent, so return an empty set
-    rather than raising.
+    languages that lack a passive lexicon (or have no ``# lang =`` tag).
+    However, in that case we simply can't recognise an agent, 
+    and so we return an empty set rather than raising.
     """
     if lang is None:
         return frozenset()
@@ -66,37 +67,37 @@ def _agent_preps_or_empty(lang) -> frozenset[str]:
         return frozenset()
 
 
-def _find_agent(v, agent_preps: frozenset[str]):
+def _find_agent(verb, agent_preps: frozenset[str]):
     """Return ``(agent_node, marker_node)`` for V's by/von/durch agent PP.
 
     The agent is an ``obl`` / ``obl:agent`` child of the (participle) verb
-    ``v`` whose own ``case`` child is one of the language's agent
+    ``verb`` whose own ``case`` child is one of the language's agent
     prepositions. Returns ``(None, None)`` when there is no such child
     (e.g. an agentless passive, or no lexicon for the language).
     """
     if not agent_preps:
         return None, None
-    for c in v.children:
-        if c.deprel not in AGENT_OBL_RELS:
+    for child in verb.children:
+        if child.deprel not in AGENT_OBL_RELS:
             continue
         mk = next(
-            (gc for gc in c.children
-             if gc.deprel == "case" and _is_agent_prep(gc, agent_preps)),
+            (grandchild for grandchild in child.children
+             if grandchild.deprel == "case" and _is_agent_prep(grandchild, agent_preps)),
             None,
         )
         if mk is not None:
-            return c, mk
+            return child, mk
     return None, None
 
 
 def _is_agent_prep(node, agent_preps: frozenset[str]) -> bool:
     """Whether a ``case`` node is an agent preposition.
 
-    Matches on lemma OR surface form, lowercased. The lemma check is what
-    catches German contractions: Stanza expands ``vom`` into two tokens that
-    both keep the surface form ``vom`` but carry the lemma ``von`` (the
-    expected ``von dem``), so a form-only test would miss ``vom``/``zum``-style
-    contracted agents."""
+    Matches on lemma OR surface form, lower-cased. 
+    The lemma check is what catches German contractions: 
+    Stanza expands ``vom`` into two tokens that both keep the surface form 
+    ``vom`` but carry the lemma ``von`` (the expected ``von dem``), 
+    so a form-only test would miss ``vom``/``zum``-style contracted agents."""
     for attr in (node.lemma, node.form):
         if attr and attr.lower() in agent_preps:
             return True
@@ -108,7 +109,6 @@ class PassiveRole:
     begin: int
     end: int
     text: str
-
 
 @dataclass(frozen=True)
 class PassiveFinding:
@@ -147,20 +147,20 @@ def _detect_canonical(tree, lang) -> list[PassiveFinding]:
     for node in tree.descendants:
         if node.deprel != "aux:pass":
             continue
-        v = node.parent
-        if v is None or v.is_root():
+        verb = node.parent
+        if verb is None or verb.is_root():
             continue
 
         subj_node = next(
-            (c for c in v.children if c.deprel in PASSIVE_SUBJ_RELS),
+            (child for child in verb.children if child.deprel in PASSIVE_SUBJ_RELS),
             None,
         )
-        agent_node, marker_node = _find_agent(v, agent_preps)
+        agent_node, marker_node = _find_agent(verb, agent_preps)
 
         findings.append(
             PassiveFinding(
                 kind="canonical",
-                verb=_role(v),
+                verb=_role(verb),
                 aux=_role(node),
                 subject=_role(subj_node) if subj_node is not None else None,
                 agent=_role(agent_node) if agent_node is not None else None,
@@ -177,7 +177,7 @@ def _detect_canonical(tree, lang) -> list[PassiveFinding]:
             )
         )
         logger.debug(
-            f"Passive[canonical,{lang}]: aux={node.form!r} verb={v.form!r} "
+            f"Passive[canonical,{lang}]: aux={node.form!r} verb={verb.form!r} "
             f"subject={subj_node.form if subj_node else None!r} "
             f"agent={agent_node.form if agent_node else None!r}"
         )
@@ -194,21 +194,21 @@ def _detect_short(tree, lang) -> list[PassiveFinding]:
         return []
 
     findings: list[PassiveFinding] = []
-    for v in tree.descendants:
-        if not is_passive_participle(v, lang):
+    for passive_verb_cand in tree.descendants:
+        if not is_passive_participle(passive_verb_cand, lang):
             continue
         # Skip if V has any aux child (canonical passive, perfect, modal, ...).
-        if any(c.udeprel == "aux" for c in v.children):
+        if any(child.udeprel == "aux" for child in passive_verb_cand.children):
             continue
 
-        agent_node, marker_node = _find_agent(v, agent_preps)
+        agent_node, marker_node = _find_agent(passive_verb_cand, agent_preps)
         if agent_node is None:
             continue
 
         findings.append(
             PassiveFinding(
                 kind="short",
-                verb=_role(v),
+                verb=_role(passive_verb_cand),
                 aux=None,
                 subject=None,
                 agent=_role(agent_node),
@@ -219,7 +219,7 @@ def _detect_short(tree, lang) -> list[PassiveFinding]:
             )
         )
         logger.debug(
-            f"Passive[short,{lang}]: verb={v.form!r} "
+            f"Passive[short,{lang}]: verb={passive_verb_cand.form!r} "
             f"marker={marker_node.form!r} agent={agent_node.form!r}"
         )
     return findings

@@ -1,0 +1,7 @@
+# sent_id = 1
+# text = Welcher Mann ?
+# lang = de
+1	Welcher	welcher	DET	PWAT	_	2	det	_	t_start=0|t_end=7
+2	Mann	Mann	NOUN	NN	_	0	root	_	t_start=8|t_end=12
+3	?	?	PUNCT	$.	_	2	punct	_	t_start=13|t_end=14
+

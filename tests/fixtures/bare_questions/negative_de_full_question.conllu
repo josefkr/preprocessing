@@ -1,0 +1,10 @@
+# sent_id = 1
+# text = Warum hat er es getan ?
+# lang = de
+1	Warum	warum	ADV	PWAV	_	5	advmod	_	t_start=0|t_end=5
+2	hat	haben	AUX	VAFIN	_	5	aux	_	t_start=6|t_end=9
+3	er	er	PRON	PPER	_	5	nsubj	_	t_start=10|t_end=12
+4	es	es	PRON	PPER	_	5	obj	_	t_start=13|t_end=15
+5	getan	tun	VERB	VVPP	_	0	root	_	t_start=16|t_end=21
+6	?	?	PUNCT	$.	_	5	punct	_	t_start=22|t_end=23
+
