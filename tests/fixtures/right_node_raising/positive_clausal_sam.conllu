@@ -1,0 +1,11 @@
+# sent_id = 1
+# text = Sam likes but Sue dislikes opera.
+# lang = en
+1	Sam	Sam	PROPN	NNP	Number=Sing	2	nsubj	_	t_start=0|t_end=3
+2	likes	like	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	t_start=4|t_end=9
+3	but	but	CCONJ	CC	_	5	cc	_	t_start=10|t_end=13
+4	Sue	Sue	PROPN	NNP	Number=Sing	5	nsubj	_	t_start=14|t_end=17
+5	dislikes	dislike	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	2	conj	_	t_start=18|t_end=26
+6	opera	opera	NOUN	NN	Number=Sing	5	obj	_	t_start=27|t_end=32
+7	.	.	PUNCT	.	_	2	punct	_	t_start=32|t_end=33
+

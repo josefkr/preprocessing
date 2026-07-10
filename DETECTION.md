@@ -2,9 +2,9 @@
 
 This document describes the suite of annotators that detect linguistic
 phenomena (sluicing, subject sharing, verbal ellipsis, passive,
-nominal-head ellipsis, clefts, bare wh-questions, gapped coordination)
-in CAS XMI files, how they are organized, and how to extend them with
-new phenomena or new languages.
+nominal-head ellipsis, clefts, bare wh-questions, gapped coordination,
+right node raising) in CAS XMI files, how they are organized, and how to
+extend them with new phenomena or new languages.
 
 ## Overview
 
@@ -58,6 +58,13 @@ preprocessing/detection/
                        clause whose main predicate is missing must
                        borrow it from the antecedent ("Paul wanted a
                        milk shake and Mr Leonard a coffee").
+  right_node_raising.py
+                       Pure right-node-raising detector (coordination
+                       subset only). Two coordinated predicates share a
+                       right-edge constituent elided from the non-final
+                       conjunct ("Sam likes but Sue dislikes opera").
+                       Lexicon-free / structural. Comparative &
+                       subordinate RNR are left to the LLM normalizer.
   lexicons/
     sluicing_wh.py        Wh-words, question-embedding predicates
                           (verbal), and question-embedding nouns per
@@ -75,6 +82,7 @@ add_nominal_ellipsis.py
 add_clefts.py
 add_bare_questions.py
 add_gapped_coordination.py
+add_right_node_raising.py
 ```
 
 `add_spelling_errors.py`, `add_coreference.py`, and `add_edus.py`
@@ -132,6 +140,7 @@ the writer creates.
 | Clefts | `detection/clefts.py` | Three `LexicalPhrase`s per finding — `Cleft_focus` over the focused phrase, `Cleft_presupposition` over the relative clause, plus the cleft pronoun (`Cleft_it` for it-clefts, `Cleft_wh` for wh-clefts). |
 | Bare wh-questions | `detection/bare_questions.py` | `GrammarAnomaly(description="Ellipsis", category="bare_wh")` on the wh-phrase span. No second annotation — bare wh-questions have no governor. |
 | Gapped coordination | `detection/gapped_coordination.py` | `GrammarAnomaly(description="Ellipsis", category="gapped_coordination")` on the gapped clause span, plus `LexicalPhrase(text="GappedAntecedent")` on the antecedent verb whose predicate the gap borrows. |
+| Right node raising | `detection/right_node_raising.py` | `GrammarAnomaly(description="Ellipsis", category="right_node_raising")` spanning the construction (non-final predicate through the shared constituent), plus three `LexicalPhrase`s: `RNR_left_predicate` (non-final predicate), `RNR_right_predicate` (final predicate), `RNR_shared_arg` (the shared right-edge constituent). |
 
 ### Detection rules (concise)
 
@@ -235,6 +244,26 @@ the writer creates.
   (Signal A + B + C): ~half of the parser-recoverable English cases
   and roughly the same on German. See `tests/test_gapped_coordination.py`
   for the per-sentence EN/DE EXPECTED_HITS tables.
+- **Right node raising (coordination subset).** A `conj` links two
+  predicates (UPOS in `{VERB, AUX, ADJ}`): V1 (non-final, earlier) and V2
+  (final). V2 has a core-argument child (`obj`/`iobj`/`obl`/`xcomp`/
+  `ccomp`) whose subtree reaches the sentence's right edge — the candidate
+  shared constituent — and V1 lacks a *filled* core argument of that class
+  (the gap). To separate genuine RNR from ordinary VP-coordination that
+  merely looks like a gap ("John went and bought a fridge"), one of two
+  further conditions must hold:
+  - **clausal** — both conjuncts carry their own overt subject (distinct
+    subjects ⇒ each conjunct is a clause), reported as trigger
+    `distinct_subjects`; or
+  - **stranded preposition** — V1 carries a stranded preposition (an
+    `obl`/`obj` child that is a bare `ADP` with no nominal of its own,
+    "knew of __"), reported as trigger `stranded_prep`.
+
+  Lexicon-free / language-agnostic. **Only the coordination subset** is
+  detected structurally; comparative RNR ("more X than Y") and subordinate
+  RNR ("those who voted against … outnumbered those who voted for …") have
+  no `conj` and are handled by the LLM normalizer instead
+  (`aslan_normalization/right_node_raising.py`).
 - **Nominal-head ellipsis (German).** German Stanza emits STTS XPOS
   (which carries no degree) and tags quantifiers `DET`/`PIS`, so the
   English XPOS-based rules do not transfer; German has its own rule
@@ -345,7 +374,8 @@ Run the detector test suite with:
 poetry run pytest tests/test_sluicing.py tests/test_subject_sharing.py \
                   tests/test_verbal_ellipsis.py tests/test_passive.py \
                   tests/test_nominal_ellipsis.py tests/test_clefts.py \
-                  tests/test_bare_questions.py tests/test_gapped_coordination.py
+                  tests/test_bare_questions.py tests/test_gapped_coordination.py \
+                  tests/test_right_node_raising.py
 ```
 
 ## Adding a new phenomenon

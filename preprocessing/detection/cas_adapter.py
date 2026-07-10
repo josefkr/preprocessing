@@ -42,6 +42,10 @@ from preprocessing.detection.nominal_ellipsis import (
     detect_nominal_ellipsis,
 )
 from preprocessing.detection.passive import PassiveFinding, detect_passive
+from preprocessing.detection.right_node_raising import (
+    RNRFinding,
+    detect_right_node_raising,
+)
 from preprocessing.detection.sluicing import SluicingFinding, detect_sluicing
 from preprocessing.detection.subject_sharing import (
     SubjectSharingFinding,
@@ -252,6 +256,21 @@ def find_and_annotate_gapped_coordination(
     return len(findings)
 
 
+def find_and_annotate_right_node_raising(
+    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
+) -> int:
+    """Detect (coordination-subset) right node raising on ``view`` and add
+    CAS annotations."""
+    doc, restrict = _build_doc(
+        view, phenomenon="right-node-raising", lang=lang, mixed=mixed
+    )
+    if doc is None:
+        return 0
+    findings = detect_right_node_raising(doc, restrict_to_lang=restrict)
+    _write_right_node_raising(view, ts, findings)
+    return len(findings)
+
+
 def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
     GA = ts.get_type(T_GRAMMAR_ANOMALY)
     LP = ts.get_type(T_LEXICAL_PHRASE)
@@ -346,6 +365,33 @@ def _write_nominal_ellipsis(
             begin=f.begin, end=f.end,
             description="Ellipsis",
             category=f"nominal_head_{f.subtype}",
+        ))
+
+
+def _write_right_node_raising(
+    view, ts, findings: list[RNRFinding]
+) -> None:
+    """A ``GrammarAnomaly`` spanning the RNR construction (non-final predicate
+    through the shared right-edge constituent) plus a ``LexicalPhrase`` on each
+    role (the two predicates and the shared constituent)."""
+    GA = ts.get_type(T_GRAMMAR_ANOMALY)
+    LP = ts.get_type(T_LEXICAL_PHRASE)
+    for f in findings:
+        view.add(GA(
+            begin=f.left_predicate.begin, end=f.shared_arg.end,
+            description="Ellipsis", category="right_node_raising",
+        ))
+        view.add(LP(
+            begin=f.left_predicate.begin, end=f.left_predicate.end,
+            text="RNR_left_predicate",
+        ))
+        view.add(LP(
+            begin=f.right_predicate.begin, end=f.right_predicate.end,
+            text="RNR_right_predicate",
+        ))
+        view.add(LP(
+            begin=f.shared_arg.begin, end=f.shared_arg.end,
+            text="RNR_shared_arg",
         ))
 
 

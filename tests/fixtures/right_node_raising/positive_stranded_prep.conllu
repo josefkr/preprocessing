@@ -1,0 +1,14 @@
+# sent_id = 1
+# text = She knew of but never mentioned my other work.
+# lang = en
+1	She	she	PRON	PRP	Case=Nom|Gender=Fem|Number=Sing|Person=3|PronType=Prs	2	nsubj	_	t_start=0|t_end=3
+2	knew	know	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=4|t_end=8
+3	of	of	ADP	IN	_	2	obl	_	t_start=9|t_end=11
+4	but	but	CCONJ	CC	_	6	cc	_	t_start=12|t_end=15
+5	never	never	ADV	RB	PronType=Neg	6	advmod	_	t_start=16|t_end=21
+6	mentioned	mention	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	conj	_	t_start=22|t_end=31
+7	my	my	PRON	PRP$	Case=Gen|Number=Sing|Person=1|Poss=Yes|PronType=Prs	9	nmod:poss	_	t_start=32|t_end=34
+8	other	other	ADJ	JJ	Degree=Pos	9	amod	_	t_start=35|t_end=40
+9	work	work	NOUN	NN	Number=Sing	6	obj	_	t_start=41|t_end=45
+10	.	.	PUNCT	.	_	2	punct	_	t_start=45|t_end=46
+

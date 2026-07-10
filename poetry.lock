@@ -330,21 +330,19 @@ name = "cas-visualizer"
 version = "0.2.0"
 description = "Visualize CAS (Common Annotation System) annotations in multiple formats: spaCy-style HTML spans, dependency trees, tables, heatmaps, and DOCX with colored annotations."
 optional = false
-python-versions = ">=3.11,<3.15"
+python-versions = "<3.14,>=3.11"
 groups = ["main"]
-files = []
-develop = true
+files = [
+    {file = "cas_visualizer-0.2.0-py3-none-any.whl", hash = "sha256:652d01be62f264ce27b5ccaeb5fdbcd6ecc33aa05aa09722cc465cb8da336da2"},
+    {file = "cas_visualizer-0.2.0.tar.gz", hash = "sha256:6334db0f425bc285f77887dccb65480ea9b52edd9a64f6ed4bd9b8b062fb0f17"},
+]
 
 [package.dependencies]
 dkpro-cassis = ">=0.10.0"
 pandas = ">=1.3.0"
-python-docx = "^1.2.0"
+python-docx = ">=1.2.0,<2.0.0"
 spacy = ">=3.2.0"
-udapi = "^0.5.1"
-
-[package.source]
-type = "directory"
-url = "../cas-visualizer"
+udapi = ">=0.5.1,<0.6.0"
 
 [[package]]
 name = "catalogue"
@@ -3559,7 +3557,7 @@ files = []
 develop = false
 
 [package.dependencies]
-cas-visualizer = {path = "../../cas-visualizer", develop = true}
+cas-visualizer = "^0.2.0"
 de-core-news-lg = {url = "https://github.com/explosion/spacy-models/releases/download/de_core_news_lg-3.8.0/de_core_news_lg-3.8.0-py3-none-any.whl"}
 Deprecated = "^1.2.18"
 dkpro-cassis = "^0.10.1"
@@ -3587,7 +3585,7 @@ wordfreq = "^3.1.1"
 
 [package.source]
 type = "directory"
-url = "../../../../../../home/ruppenhofer/.cache/pypoetry/virtualenvs/preprocessing-cmlifn-K-py3.12/src/linguistic-features-in-text/py_lift"
+url = "../../../pypoetry/virtualenvs/preprocessing-cmlifn-K-py3.12/src/linguistic-features-in-text/py_lift"
 
 [[package]]
 name = "pyarrow"
