@@ -47,7 +47,12 @@ PREPROCESSING_DIR = Path(__file__).resolve().parent
 
 @dataclass(frozen=True)
 class Annotator:
-    """One ``add_*.py`` annotator and how to invoke it.
+    """One annotator step and how to invoke it.
+
+    Structural detectors run through the generic ``annotate.py`` (``script`` =
+    ``"annotate.py"``, ``phenomenon`` = a ``DETECTOR_REGISTRY`` key); the
+    external-tool annotators keep their own ``add_*.py`` script (``phenomenon``
+    empty).
 
     ``normalized_view`` is the CAS view at which this annotator's phenomenon
     gets normalized (a normalizer's OUTPUT_VIEW_NAME); ``None`` means no
@@ -61,6 +66,7 @@ class Annotator:
     normalized_view: str | None
     lang_flag: str | None = "--lang"
     note: str = ""
+    phenomenon: str = ""
 
 
 # Single source of truth. Order = emission order; stanza parses must come
@@ -75,20 +81,25 @@ ANNOTATORS: list[Annotator] = [
         "OOV spelling errors", "add_spelling_errors.py", "spelling_normalized",
         "--language", note="needs tokenization, so after parsing",
     ),
-    Annotator("nominal ellipsis", "add_nominal_ellipsis.py",
-              "nominal_ellipsis_resolved", "--lang"),
-    Annotator("verbal ellipsis (VPE)", "add_verbal_ellipsis.py",
-              "vpe_resolved", "--lang"),
-    Annotator("shared subject / coordination ellipsis",
-              "add_subject_sharing.py", "coord_subjects_explicated", "--lang"),
-    Annotator("gapped coordination", "add_gapped_coordination.py",
-              "gapped_coordination_resolved", "--lang"),
-    Annotator("bare wh-questions", "add_bare_questions.py",
-              "bare_questions_resolved", "--lang"),
-    Annotator("sluicing", "add_sluicing.py", "sluicing_resolved", "--lang"),
-    Annotator("passive", "add_passive.py", None, "--lang",
+    # Structural detectors — all run through the generic annotate.py CLI.
+    Annotator("nominal ellipsis", "annotate.py", "nominal_ellipsis_resolved",
+              "--lang", phenomenon="nominal_ellipsis"),
+    Annotator("verbal ellipsis (VPE)", "annotate.py", "vpe_resolved",
+              "--lang", phenomenon="verbal_ellipsis"),
+    Annotator("shared subject / coordination ellipsis", "annotate.py",
+              "coord_subjects_explicated", "--lang", phenomenon="subject_sharing"),
+    Annotator("gapped coordination", "annotate.py",
+              "gapped_coordination_resolved", "--lang",
+              phenomenon="gapped_coordination"),
+    Annotator("bare wh-questions", "annotate.py", "bare_questions_resolved",
+              "--lang", phenomenon="bare_questions"),
+    Annotator("sluicing", "annotate.py", "sluicing_resolved", "--lang",
+              phenomenon="sluicing"),
+    Annotator("passive", "annotate.py", None, "--lang", phenomenon="passive",
               note="no normalizer yet — give it a normalized_view to gate it"),
-    Annotator("clefts", "add_clefts.py", None, "--lang"),
+    Annotator("clefts", "annotate.py", None, "--lang", phenomenon="clefts"),
+    Annotator("right node raising", "annotate.py", "right_node_raising_normalized",
+              "--lang", phenomenon="right_node_raising"),
     Annotator("EDUs", "add_edus.py", None, None),
     Annotator("coreference", "add_coreference.py", "coref_normalized",
               "--language"),
@@ -118,6 +129,8 @@ def views_for(annotator: Annotator, view_ids: list[str]) -> list[str]:
 
 def _command(annotator: Annotator, views: list[str], runner: str) -> str:
     parts = [runner, annotator.script]
+    if annotator.phenomenon:
+        parts += ["--phenomenon", annotator.phenomenon]
     if annotator.lang_flag is not None:
         parts += [annotator.lang_flag, '"$LANG_CODE"']
     parts += ["--view", *views, "--", '"$XMIDIR"']

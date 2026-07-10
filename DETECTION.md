@@ -15,9 +15,14 @@ Each phenomenon is implemented as three layers:
    directly testable with `.conllu` fixtures.
 2. A **CAS adapter** entry point that converts a CAS view into a
    CoNLL-U document, runs the detector, and writes the resulting
-   findings back into the view as UIMA annotations.
-3. A **CLI script** (`add_<phenomenon>.py`) that loads XMI files,
-   calls the adapter on each requested view, and saves the result.
+   findings back into the view as UIMA annotations. Each phenomenon is
+   registered in `cas_adapter.DETECTOR_REGISTRY` (its detector, writer,
+   and annotation signature).
+3. A **single generic CLI** (`annotate.py --phenomenon <name>`) that loads
+   XMI files, calls the adapter on each requested view, and saves the result.
+   (There is no longer a per-phenomenon `add_<phenomenon>.py`; the external-tool
+   annotators — coreference, RWSE, Stanza parses, EDUs, spelling — keep their
+   own `add_*.py` scripts because they are not structural detectors.)
 
 This split means detection logic can be developed and verified
 without touching XMI/CAS at all, while CAS I/O is centralized in one
@@ -74,15 +79,10 @@ preprocessing/detection/
                           definite articles, comparative/JJ XPOS.
     clefts.py             Cleft-pronoun forms etc. per language.
 
-add_sluicing.py            Thin CLIs (one per phenomenon).
-add_subject_sharing.py
-add_verbal_ellipsis.py
-add_passive.py
-add_nominal_ellipsis.py
-add_clefts.py
-add_bare_questions.py
-add_gapped_coordination.py
-add_right_node_raising.py
+annotate.py                One generic CLI for all structural detectors:
+                           `annotate.py --phenomenon <name>` (choices come from
+                           cas_adapter.DETECTOR_REGISTRY). Replaces the former
+                           per-phenomenon add_<phenomenon>.py scripts.
 ```
 
 `add_spelling_errors.py`, `add_coreference.py`, and `add_edus.py`
@@ -321,10 +321,10 @@ be filtered consistently.
 
 ## CLI conventions
 
-All `add_<phenomenon>.py` scripts share the same surface:
+All structural detectors run through the one generic CLI:
 
 ```bash
-python add_<phenomenon>.py INPUT \
+python annotate.py --phenomenon <name> INPUT \
     [--view _InitialView spelling_normalized ...] \
     [--output OUTPUT_DIR] \
     [--lang {en,de,fr,es}] \
@@ -332,19 +332,24 @@ python add_<phenomenon>.py INPUT \
     [--replace]
 ```
 
+- `--phenomenon` is required; choices are the keys of
+  `cas_adapter.DETECTOR_REGISTRY`.
 - `INPUT` is a single XMI file or a directory of XMI files.
 - `--output` writes annotated copies; omitted, the input files are
   overwritten in place.
-- Each script is **idempotent by default**: views that already contain
-  the target annotation type are skipped (the skip-key is per script —
+- It is **idempotent by default**: views that already contain the chosen
+  phenomenon's annotations are skipped. The skip signature comes from the
+  registry entry (its `ga_categories` / `ga_category_prefixes` / `lp_texts`) —
   e.g. `category == "sluicing"` for sluicing,
   `text in {Passive_verb, Passive_aux, …}` for passive,
-  `category == "bare_wh"` for bare wh-questions).
-- `--replace` overrides the skip: the script removes all annotations
-  this detector would have created (signature-matched) and re-runs.
-  Useful when iterating on a detector or lexicon and re-annotating an
-  existing corpus in place. The same flag exists on
-  `add_spelling_errors.py`, `add_coreference.py`, and `add_edus.py`.
+  `category == "bare_wh"` for bare wh-questions — via
+  `cas_adapter.existing_annotations(view, phenomenon)`.
+- `--replace` overrides the skip: it removes all annotations this detector
+  would have created (signature-matched) and re-runs. Useful when iterating on a
+  detector or lexicon and re-annotating an existing corpus in place. The
+  external-tool annotators (`add_spelling_errors.py`, `add_coreference.py`,
+  `add_edus.py`, `add_rwse.py`) keep their own scripts and share the same
+  `--replace` flag.
 
 A typical run order on a corpus is documented in
 [`CALL_SEQUENCING.md`](./CALL_SEQUENCING.md).
@@ -389,14 +394,19 @@ poetry run pytest tests/test_sluicing.py tests/test_subject_sharing.py \
    `preprocessing/detection/lexicons/<phenomenon>.py` with a
    `<…>_BY_LANG` table and a lookup function that raises
    `UnsupportedLanguage` on misses.
-3. Add `find_and_annotate_<phenomenon>(view, ts, *, lang, mixed)` and
-   `_write_<phenomenon>(view, ts, findings)` to
-   `preprocessing/detection/cas_adapter.py`. The writer emits the
-   appropriate UIMA annotations. Reuse `_build_doc` for the
-   converter+udapi step.
-4. Add `add_<phenomenon>.py` at the project root following the
-   existing template (it should be a thin wrapper around the adapter
-   plus `add_language_args`).
+3. Add a `_write_<phenomenon>(view, ts, findings)` writer to
+   `preprocessing/detection/cas_adapter.py` (it emits the appropriate UIMA
+   annotations), then register the phenomenon in `DETECTOR_REGISTRY` with a
+   `DetectorSpec` (its `detect_<phenomenon>`, the writer, and the annotation
+   signature it produces: `ga_categories` / `ga_category_prefixes` / `lp_texts`).
+   That's it — the generic `find_and_annotate`, `existing_annotations`, and the
+   `annotate.py` CLI all pick it up automatically. (A thin
+   `find_and_annotate_<phenomenon>` delegation is optional, only if some caller
+   wants the named function.)
+4. **No new CLI script needed** — `annotate.py --phenomenon <name>` works as soon
+   as the registry entry exists. (Optionally add a row to
+   `gen_annotation_script.py`'s `ANNOTATORS` table so it's included in generated
+   annotation scripts.)
 5. Add `tests/test_<phenomenon>.py` and `tests/fixtures/<phenomenon>/`
    with at least one positive and one negative `.conllu` fixture.
 

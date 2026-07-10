@@ -207,3 +207,10 @@ marimo/_lsp/
 __marimo__/
 
 .mygitignore
+
+# --- ASLAN run artifacts ---
+*.xmi
+results_*.json
+
+# Parked lexicon (not wired into any detector yet; keep local for now)
+clause_embedding_preds_zas_ids_table.tsv

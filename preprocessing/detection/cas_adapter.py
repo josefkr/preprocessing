@@ -18,6 +18,8 @@ identically:
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
+from typing import Callable
 
 import cassis
 from py_lift.dkpro import T_SENT
@@ -134,141 +136,52 @@ def _build_doc(
     return doc, restrict
 
 
-def find_and_annotate_sluicing(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
+# Named per-phenomenon entry points. These are thin back-compat delegations to
+# the generic :func:`find_and_annotate` (driven by :data:`DETECTOR_REGISTRY`,
+# defined at the bottom of this module). Several normalizers import them by name.
+def find_and_annotate_sluicing(view, ts, *, lang=None, mixed=False) -> int:
     """Detect sluicing on ``view`` and add CAS annotations for each finding."""
-    doc, restrict = _build_doc(
-        view, phenomenon="sluicing", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_sluicing(doc, restrict_to_lang=restrict)
-    _write_sluicing(view, ts, findings)
-    return len(findings)
+    return find_and_annotate(view, ts, phenomenon="sluicing", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_subject_sharing(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
+def find_and_annotate_subject_sharing(view, ts, *, lang=None, mixed=False) -> int:
     """Detect subject-sharing conjuncts on ``view`` and add annotations."""
-    doc, restrict = _build_doc(
-        view, phenomenon="subject-sharing", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_subject_sharing(doc, restrict_to_lang=restrict)
-    _write_subject_sharing(view, ts, findings)
-    return len(findings)
+    return find_and_annotate(view, ts, phenomenon="subject_sharing", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_verbal_ellipsis(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
+def find_and_annotate_verbal_ellipsis(view, ts, *, lang=None, mixed=False) -> int:
     """Detect verbal ellipsis on ``view`` and add CAS annotations."""
-    doc, restrict = _build_doc(
-        view, phenomenon="verbal-ellipsis", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_verbal_ellipsis(doc, restrict_to_lang=restrict)
-    _write_verbal_ellipsis(view, ts, findings)
-    return len(findings)
+    return find_and_annotate(view, ts, phenomenon="verbal_ellipsis", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_passive(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
+def find_and_annotate_passive(view, ts, *, lang=None, mixed=False) -> int:
     """Detect passive constructions on ``view`` and add CAS annotations."""
-    doc, restrict = _build_doc(
-        view, phenomenon="passive", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_passive(doc, restrict_to_lang=restrict)
-    _write_passive(view, ts, findings)
-    return len(findings)
+    return find_and_annotate(view, ts, phenomenon="passive", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_nominal_ellipsis(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
+def find_and_annotate_nominal_ellipsis(view, ts, *, lang=None, mixed=False) -> int:
     """Detect nominal-head ellipsis on ``view`` and add CAS annotations."""
-    doc, restrict = _build_doc(
-        view, phenomenon="nominal-ellipsis", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_nominal_ellipsis(doc, restrict_to_lang=restrict)
-    _write_nominal_ellipsis(view, ts, findings)
-    return len(findings)
+    return find_and_annotate(view, ts, phenomenon="nominal_ellipsis", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_clefts(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
+def find_and_annotate_clefts(view, ts, *, lang=None, mixed=False) -> int:
     """Detect cleft constructions on ``view`` and add CAS annotations."""
-    doc, restrict = _build_doc(
-        view, phenomenon="clefts", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_clefts(doc, restrict_to_lang=restrict)
-    _write_clefts(view, ts, findings)
-    return len(findings)
+    return find_and_annotate(view, ts, phenomenon="clefts", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_bare_questions(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
-    """Detect bare wh-question sentences on ``view`` and add CAS annotations.
-
-    Unlike sluicing, bare wh-questions have no embedding governor, so a
-    single GrammarAnomaly is emitted per finding (no QEmbedder
-    LexicalPhrase).
-    """
-    doc, restrict = _build_doc(
-        view, phenomenon="bare-questions", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_bare_questions(doc, restrict_to_lang=restrict)
-    _write_bare_questions(view, ts, findings)
-    return len(findings)
+def find_and_annotate_bare_questions(view, ts, *, lang=None, mixed=False) -> int:
+    """Detect bare wh-question sentences on ``view`` and add CAS annotations."""
+    return find_and_annotate(view, ts, phenomenon="bare_questions", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_gapped_coordination(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
-    """Detect gapped-coordination clauses on ``view`` and add CAS annotations.
-
-    Mirrors the sluicing writer's two-annotation pattern: a
-    ``GrammarAnomaly`` on the gapped clause and a ``LexicalPhrase`` on
-    the antecedent verb whose predicate the gap is borrowing.
-    """
-    doc, restrict = _build_doc(
-        view, phenomenon="gapped-coordination", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_gapped_coordination(doc, restrict_to_lang=restrict)
-    _write_gapped_coordination(view, ts, findings)
-    return len(findings)
+def find_and_annotate_gapped_coordination(view, ts, *, lang=None, mixed=False) -> int:
+    """Detect gapped-coordination clauses on ``view`` and add CAS annotations."""
+    return find_and_annotate(view, ts, phenomenon="gapped_coordination", lang=lang, mixed=mixed)
 
 
-def find_and_annotate_right_node_raising(
-    view, ts: cassis.TypeSystem, *, lang: str | None = None, mixed: bool = False
-) -> int:
-    """Detect (coordination-subset) right node raising on ``view`` and add
-    CAS annotations."""
-    doc, restrict = _build_doc(
-        view, phenomenon="right-node-raising", lang=lang, mixed=mixed
-    )
-    if doc is None:
-        return 0
-    findings = detect_right_node_raising(doc, restrict_to_lang=restrict)
-    _write_right_node_raising(view, ts, findings)
-    return len(findings)
+def find_and_annotate_right_node_raising(view, ts, *, lang=None, mixed=False) -> int:
+    """Detect (coordination-subset) right node raising and add CAS annotations."""
+    return find_and_annotate(view, ts, phenomenon="right_node_raising", lang=lang, mixed=mixed)
 
 
 def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
@@ -416,3 +329,134 @@ def _write_passive(view, ts, findings: list[PassiveFinding]) -> None:
                 begin=f.agent_marker.begin, end=f.agent_marker.end,
                 text="Passive_agent_marker",
             ))
+
+
+# --- detector registry -----------------------------------------------------
+#
+# Single source of truth mapping a phenomenon name to its pure detector, its CAS
+# writer, and the annotation signature it produces (used to skip/replace on
+# re-runs). The generic `annotate.py` CLI and :func:`find_and_annotate` /
+# :func:`existing_annotations` are all driven by this table, so adding a new
+# structural detector is one entry here plus a `detect_X` + `_write_X` — no new
+# `add_X.py` script.
+
+
+@dataclass(frozen=True)
+class DetectorSpec:
+    """How to run and identify one structural detector.
+
+    ``detect`` is a pure ``detect_X(doc, *, restrict_to_lang=…)``; ``write`` is
+    ``_write_X(view, ts, findings)``. The remaining fields describe the
+    annotations the writer emits, so a re-run can find (and, with ``--replace``,
+    remove) what a previous run created:
+    ``ga_categories`` — exact ``GrammarAnomaly.category`` values;
+    ``ga_category_prefixes`` — category prefixes (e.g. ``nominal_head_``);
+    ``lp_texts`` — ``LexicalPhrase.text`` role labels.
+    """
+
+    name: str
+    detect: Callable
+    write: Callable
+    label: str  # human-readable, for logging / language warnings
+    ga_categories: frozenset[str] = frozenset()
+    ga_category_prefixes: tuple[str, ...] = ()
+    lp_texts: frozenset[str] = frozenset()
+
+
+DETECTOR_REGISTRY: dict[str, DetectorSpec] = {
+    "sluicing": DetectorSpec(
+        "sluicing", detect_sluicing, _write_sluicing, "sluicing",
+        ga_categories=frozenset({"sluicing"}), lp_texts=frozenset({"QEmbedder"}),
+    ),
+    "subject_sharing": DetectorSpec(
+        "subject_sharing", detect_subject_sharing, _write_subject_sharing,
+        "subject-sharing",
+        ga_categories=frozenset({"right_conj_subject"}),
+        lp_texts=frozenset({"Shared_subject"}),
+    ),
+    "verbal_ellipsis": DetectorSpec(
+        "verbal_ellipsis", detect_verbal_ellipsis, _write_verbal_ellipsis,
+        "verbal-ellipsis", ga_categories=frozenset({"auxiliary"}),
+    ),
+    "passive": DetectorSpec(
+        "passive", detect_passive, _write_passive, "passive",
+        lp_texts=frozenset({
+            "Passive_verb", "Passive_aux", "Passive_subject",
+            "Passive_agent", "Passive_agent_marker",
+        }),
+    ),
+    "nominal_ellipsis": DetectorSpec(
+        "nominal_ellipsis", detect_nominal_ellipsis, _write_nominal_ellipsis,
+        "nominal-ellipsis", ga_category_prefixes=("nominal_head_",),
+    ),
+    "clefts": DetectorSpec(
+        "clefts", detect_clefts, _write_clefts, "clefts",
+        lp_texts=frozenset({
+            "Cleft_focus", "Cleft_presupposition", "Cleft_it", "Cleft_wh",
+        }),
+    ),
+    "bare_questions": DetectorSpec(
+        "bare_questions", detect_bare_questions, _write_bare_questions,
+        "bare-questions", ga_categories=frozenset({"bare_wh"}),
+    ),
+    "gapped_coordination": DetectorSpec(
+        "gapped_coordination", detect_gapped_coordination,
+        _write_gapped_coordination, "gapped-coordination",
+        ga_categories=frozenset({"gapped_coordination"}),
+        lp_texts=frozenset({"GappedAntecedent"}),
+    ),
+    "right_node_raising": DetectorSpec(
+        "right_node_raising", detect_right_node_raising,
+        _write_right_node_raising, "right-node-raising",
+        ga_categories=frozenset({"right_node_raising"}),
+        lp_texts=frozenset({
+            "RNR_left_predicate", "RNR_right_predicate", "RNR_shared_arg",
+        }),
+    ),
+}
+
+
+def find_and_annotate(
+    view, ts: cassis.TypeSystem, *, phenomenon: str,
+    lang: str | None = None, mixed: bool = False,
+) -> int:
+    """Detect ``phenomenon`` on ``view`` and write its CAS annotations.
+
+    Generic replacement for the per-phenomenon ``find_and_annotate_X``
+    functions (which now delegate here). Returns the number of findings.
+    """
+    try:
+        spec = DETECTOR_REGISTRY[phenomenon]
+    except KeyError:
+        raise ValueError(
+            f"unknown phenomenon {phenomenon!r}; known: "
+            f"{', '.join(sorted(DETECTOR_REGISTRY))}"
+        ) from None
+    doc, restrict = _build_doc(
+        view, phenomenon=spec.label, lang=lang, mixed=mixed
+    )
+    if doc is None:
+        return 0
+    findings = spec.detect(doc, restrict_to_lang=restrict)
+    spec.write(view, ts, findings)
+    return len(findings)
+
+
+def existing_annotations(view, phenomenon: str) -> list:
+    """Annotations a previous run of ``phenomenon``'s detector would have
+    created on ``view`` — used to skip already-annotated views and, with
+    ``--replace``, to remove them before re-running."""
+    spec = DETECTOR_REGISTRY[phenomenon]
+    out: list = []
+    if spec.ga_categories or spec.ga_category_prefixes:
+        for a in view.select(T_GRAMMAR_ANOMALY):
+            cat = getattr(a, "category", None) or ""
+            if cat in spec.ga_categories or any(
+                cat.startswith(p) for p in spec.ga_category_prefixes
+            ):
+                out.append(a)
+    if spec.lp_texts:
+        for lp in view.select(T_LEXICAL_PHRASE):
+            if getattr(lp, "text", None) in spec.lp_texts:
+                out.append(lp)
+    return out
