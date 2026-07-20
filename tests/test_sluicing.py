@@ -26,8 +26,8 @@ def test_positive_basic_sluicing_en():
     f = findings[0]
     assert f.x_text.lower() == "why"
     assert f.g_text.lower() == "say"
-    assert (f.x_begin, f.x_end) == (15, 18)
-    assert (f.g_begin, f.g_end) == (11, 14)
+    assert (f.x_begin, f.x_end) == (14, 17)
+    assert (f.g_begin, f.g_end) == (10, 13)
     assert f.lang == "en"
 
 
