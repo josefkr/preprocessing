@@ -3,8 +3,8 @@
 This document describes the suite of annotators that detect linguistic
 phenomena (sluicing, subject sharing, verbal ellipsis, passive,
 nominal-head ellipsis, clefts, bare wh-questions, gapped coordination,
-right node raising) in CAS XMI files, how they are organized, and how to
-extend them with new phenomena or new languages.
+right node raising, contractions) in CAS XMI files, how they are
+organized, and how to extend them with new phenomena or new languages.
 
 ## Overview
 
@@ -70,6 +70,18 @@ preprocessing/detection/
                        conjunct ("Sam likes but Sue dislikes opera").
                        Lexicon-free / structural. Comparative &
                        subordinate RNR are left to the LLM normalizer.
+  contractions.py      Pure contraction / clitic detector (English +
+                       German). Three mechanisms: (1) a clitic token
+                       ("n't", "'s", …) written *adjacent* to its host
+                       ("wouldn't", "mir's"), whose (form, lemma) pair
+                       has an expansion — English possessive "'s" is
+                       absent and never fires; (2) German prep+article
+                       multiword tokens ("vom" = von+dem), read from the
+                       tree's MWTs (ADP+DET shape), with the parser's own
+                       expansion; (3) German clipped indefinite articles
+                       ("nen"/"nem"/"ner"/"ne"/"n"), standalone tokens
+                       recognised by surface form — "ne" needs a following
+                       NP, bare "n" is inferred from the noun's morphology.
   lexicons/
     sluicing_wh.py        Wh-words, question-embedding predicates
                           (verbal), and question-embedding nouns per
@@ -78,6 +90,12 @@ preprocessing/detection/
     nominal_ellipsis.py   English quantifier forms, idiomatic patterns,
                           definite articles, comparative/JJ XPOS.
     clefts.py             Cleft-pronoun forms etc. per language.
+    contractions.py       Per-language clitic expansions keyed by
+                          (form, lemma) (EN + DE), the irregular English
+                          hosts ("ca" -> "can", "wo" -> "will"), the
+                          German prep+article lexicalised-exception list,
+                          and the German clipped-article table + indefinite
+                          paradigm (for inferring bare "n").
 
 annotate.py                One generic CLI for all structural detectors:
                            `annotate.py --phenomenon <name>` (choices come from
@@ -133,7 +151,7 @@ the writer creates.
 | Phenomenon | Module | CAS annotations (UIMA types) |
 |---|---|---|
 | Sluicing | `detection/sluicing.py` | `GrammarAnomaly(description="Ellipsis", category="sluicing")` on the wh-word, plus `LexicalPhrase(text="QEmbedder")` on the embedding predicate (verb or noun). |
-| Subject sharing | `detection/subject_sharing.py` | `GrammarAnomaly(description="Ellipsis", category="right_conj_subject")` on the subjectless right conjunct, plus one `LexicalPhrase(text="Shared_subject")` per shared subject of the left conjunct. |
+| Subject sharing | `detection/subject_sharing.py` | `GrammarAnomaly(description="Ellipsis", category="right_conj_subject")` on the subjectless right conjunct, plus one `LexicalPhrase(text="Shared_subject")` per shared subject of the left conjunct (spanning the whole subject phrase — the head token and its subtree). |
 | Verbal ellipsis | `detection/verbal_ellipsis.py` | `GrammarAnomaly(description="Ellipsis", category="auxiliary")` on the AUX token. |
 | Passive | `detection/passive.py` | Up to five `LexicalPhrase`s per finding: `Passive_verb`, `Passive_aux`, `Passive_subject`, `Passive_agent`, `Passive_agent_marker`. Aux+subject for canonical passives; agent+marker for short passives; verb is always emitted. |
 | Nominal-head ellipsis | `detection/nominal_ellipsis.py` (+ `nominal_ellipsis_de.py` for German) | `GrammarAnomaly(description="Ellipsis", category="nominal_head_<subtype>")`. English subtypes: `quantifier`, `none`, `numeral`, `every_one`, `comparative`, `elder`, `adjective`. German subtypes: `quantifier`, `cardinal`, `ordinal`, `comparative`, `superlative`, `adjective`, `possessive_pronoun`, `demonstrative_pronoun`. |
@@ -141,6 +159,7 @@ the writer creates.
 | Bare wh-questions | `detection/bare_questions.py` | `GrammarAnomaly(description="Ellipsis", category="bare_wh")` on the wh-phrase span. No second annotation — bare wh-questions have no governor. |
 | Gapped coordination | `detection/gapped_coordination.py` | `GrammarAnomaly(description="Ellipsis", category="gapped_coordination")` on the gapped clause span, plus `LexicalPhrase(text="GappedAntecedent")` on the antecedent verb whose predicate the gap borrows. |
 | Right node raising | `detection/right_node_raising.py` | `GrammarAnomaly(description="Ellipsis", category="right_node_raising")` spanning the construction (non-final predicate through the shared constituent), plus three `LexicalPhrase`s: `RNR_left_predicate` (non-final predicate), `RNR_right_predicate` (final predicate), `RNR_shared_arg` (the shared right-edge constituent). |
+| Contractions (EN/DE) | `detection/contractions.py` | `GrammarAnomaly(description="Contraction", category="contraction")` over the whole contraction ("wouldn't", "mir's", "vom", "nen"), carrying the expansion as a `SuggestedAction` in `suggestions` ("would not", "mir es", "von dem", "einen"). **Clitic** findings also add `LexicalPhrase(text="Contraction_host")` + `LexicalPhrase(text="Contraction_clitic")` on the two parts; **prep+article** and **clipped-article** findings are a single surface token, so they carry no host/clitic phrases. |
 
 ### Detection rules (concise)
 
@@ -264,6 +283,54 @@ the writer creates.
   RNR ("those who voted against … outnumbered those who voted for …") have
   no `conj` and are handled by the LLM normalizer instead
   (`aslan_normalization/right_node_raising.py`).
+- **Contractions / clitics (English + German).** Three mechanisms, because
+  parsers represent the families differently:
+
+  1. **Clitics** (English `n't`/`'s`/`'re`/`'m`/`'ve`/`'ll`/`'d`; German `'s`).
+     A clitic token **adjacent** to the preceding token — the host's end offset
+     equals the clitic's begin offset, i.e. the two were written as one word.
+     Adjacency is the defining signal: it separates a real contraction from an
+     already-expanded "would not" or a stray apostrophe token. The
+     `(form, lemma)` pair must have an expansion in `lexicons/contractions.py`;
+     the lemma disambiguates English `'s` (*be* → "is", *have* → "has", *we/us*
+     → "us" in "let's") and `'d` (*would* → "would", *have* → "had"), and German
+     `'s` (*es* → "es", as in "mir's" → "mir es", "geht's" → "geht es").
+     **Possessive `'s` is absent from that table, so it never fires** — it is not
+     a contraction of two words. The host may change: UD splits "can't" into
+     "ca" + "n't", so the finding reports "can not" rather than "*ca not*".
+     Clitics are **not** UD multiword tokens — each part has real char offsets.
+
+  2. **Preposition+article** (German `vom` = von+dem, `im` = in+dem, `zum`,
+     `zur`, `beim`, `ins`, …). These *are* UD multiword tokens, so the detector
+     reads them from the tree's multiword tokens, keeps the two-word `ADP+DET`
+     shape, and takes the expansion the parser already produced (persisted via
+     `preprocessing/mwt.py`) — no expansion lexicon. The sub-words share the
+     multiword token's character span.
+
+  3. **Clipped indefinite articles** (German `nen`/`nem`/`ner`/`ne`/`n`). The
+     colloquial indefinite article written with the leading "ei" dropped
+     ("nen Krampf" = "einen Krampf") — a **standalone token**, neither clitic
+     nor MWT. Stanza does not lemmatise these to *ein* (it guesses junk lemmas),
+     so the detector keys on the **surface form** and transfers the token's own
+     casing to the expansion ("Nen" → "Einen"). Three sub-cases by how
+     determined the full form is: `nen`/`nem`/`ner` are distinctive and fully
+     determined, so they fire unconditionally; `ne` is ambiguous with the tag
+     question "ne?" and fires only when a **noun phrase follows** (a NOUN/PROPN
+     head reached across premodifiers — "ne alte Karre" → "eine alte Karre";
+     "…, ne?" is left alone); bare `n` has no surface-determined form
+     ("n bisschen" → *ein* vs "n Kleinwagen" → *einen*), so its form is
+     **inferred from the head noun's Gender+Case** via the indefinite paradigm
+     (`inflect_indefinite_article`), and the finding is marked `inferred=True`.
+
+  All three are always detected/annotated. Whether prep+article contractions
+  are *expanded* is a normalizer-side policy (opt-in, with a lexicalised
+  exception list), because expanding them is not reliably meaning-preserving
+  (weak article vs demonstrative: "im Haus" vs "in dem Haus"). Clipped-article
+  expansion is likewise gated: the surface-determined forms
+  (`nen`/`nem`/`ner`, and `ne` with a following NP) expand by default, but the
+  morphology-inferred bare `n` is **opt-in** (`expand_clipped_n`), because
+  German case is often mis-parsed (accusative/dative syncretism) and the
+  inferred article can be wrong.
 - **Nominal-head ellipsis (German).** German Stanza emits STTS XPOS
   (which carries no degree) and tags quantifiers `DET`/`PIS`, so the
   English XPOS-based rules do not transfer; German has its own rule
@@ -421,6 +488,7 @@ means adding a row to a per-phenomenon lexicon module:
 | `lexicons/passive.py` | `PASSIVE_AGENT_PREPS_BY_LANG` and `PARTICIPLE_XPOS_BY_LANG` (or rely on the `VerbForm=Part` fallback). |
 | `lexicons/nominal_ellipsis.py` | `LEXICONS_BY_LANG` with a complete `NominalEllipsisLexicon` — for languages whose Stanza output uses Penn-Treebank-like XPOS. German does **not** use this lexicon: its rules live in `detection/nominal_ellipsis_de.py` (see the German rule above). A language whose tagging resembles German's (STTS-style XPOS, no degree in the tag) likely needs a similar dedicated rule module rather than a lexicon row. |
 | `lexicons/clefts.py` | Cleft-pronoun forms and copula lemmas per language. |
+| `lexicons/contractions.py` | Per-language clitic forms and their `(form, lemma) -> expansion` tables (`CLITICS_BY_LANG`, `CLITIC_EXPANSIONS_BY_LANG`), irregular host forms, the German prep+article `PREP_ARTICLE_EXCEPTIONS_BY_LANG` list, and the German clipped-article table (`CLIPPED_ARTICLES_BY_LANG` = nen/nem/ner/ne) plus the indefinite paradigm (`EIN_PARADIGM` + `inflect_indefinite_article`) used to infer bare `n`. Prep+article contractions themselves are multiword tokens (parser-supplied expansion), so they need no expansion entries — only the exception list. |
 
 Also add the new ISO code to `SUPPORTED_LANGS` in
 `preprocessing/detection/language.py` so the CLI's `--lang` choices
