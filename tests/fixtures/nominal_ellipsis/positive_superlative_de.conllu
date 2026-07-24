@@ -1,0 +1,9 @@
+# sent_id = 1
+# text = Das älteste ist verkauft.
+# lang = de
+1	Das	der	DET	ART	Case=Nom|Definite=Def|Gender=Neut|Number=Sing|PronType=Art	2	det	_	t_start=0|t_end=3
+2	älteste	alt	NOUN	ADJA	Case=Nom|Gender=Neut|Number=Sing	4	nsubj	_	t_start=4|t_end=11
+3	ist	sein	AUX	VAFIN	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	cop	_	t_start=12|t_end=15
+4	verkauft	verkauft	ADJ	VVPP	Degree=Pos|VerbForm=Part	0	root	_	SpaceAfter=No|t_start=16|t_end=24
+5	.	.	PUNCT	$.	_	4	punct	_	t_start=24|t_end=25
+

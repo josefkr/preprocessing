@@ -47,7 +47,7 @@ def test_positive_no_subject_de():
 
 
 def test_negative_active():
-    findings = detect_passive(_load("negative_active.conllu"))
+    findings = detect_passive(_load("negative_active_en.conllu"))
     assert findings == []
 
 
@@ -72,10 +72,32 @@ def test_canonical_passive_en_agent():
     assert f.agent_phrase is not None and f.agent_phrase.text == "by John"
 
 
+def test_canonical_passive_de_agent_mwt():
+    # Same sentence in the representation freshly ingested data now produces:
+    # a real UD multiword token whose sub-words carry their true forms. The
+    # agent marker surfaces as the proper preposition "von" (not the
+    # contraction), i.e. without needing the "vom" lexicon workaround.
+    findings = detect_passive(_load("positive_canonical_agent_de_mwt.conllu"))
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.kind == "canonical"
+    assert f.lang == "de"
+    assert f.aux is not None and f.aux.text.lower() == "wird"
+    assert f.verb.text.lower() == "repariert"
+    assert f.subject is not None and f.subject.text.lower() == "motor"
+    assert f.agent is not None and f.agent.text.lower() == "mechaniker"
+    assert f.agent_marker is not None and f.agent_marker.text.lower() == "von"
+    # The span still covers the contraction in the sofa (15:29), since the
+    # sub-words share the parent multiword token's offsets.
+    assert f.agent_phrase is not None
+    assert (f.agent_phrase.begin, f.agent_phrase.end) == (15, 29)
+
+
 def test_canonical_passive_de_agent():
-    # "Der Motor wird vom Mechaniker repariert." — Stanza keeps the surface
-    # "vom" on both expanded tokens but lemmatises them to "von", so the agent
-    # is recognised by LEMMA (a form-only check would miss the contraction).
+    # LEGACY shape: data ingested before MWTPart existed, where both expanded
+    # sub-words surface as "vom" (see the fixture's note). Kept so the
+    # already-processed corpus stays covered; the agent is recognised via the
+    # contracted form in PASSIVE_AGENT_PREPS_BY_LANG.
     findings = detect_passive(_load("positive_canonical_agent_de.conllu"))
     assert len(findings) == 1
     f = findings[0]

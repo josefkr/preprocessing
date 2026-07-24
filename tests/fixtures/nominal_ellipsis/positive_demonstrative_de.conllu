@@ -1,0 +1,10 @@
+# sent_id = 1
+# text = Die aus Berlin kamen zuerst.
+# lang = de
+1	Die	der	DET	ART	Case=Nom|Definite=Def|Number=Plur|PronType=Art	4	nsubj	_	t_start=0|t_end=3
+2	aus	aus	ADP	APPR	_	3	case	_	t_start=4|t_end=7
+3	Berlin	Berlin	PROPN	NE	Case=Dat|Gender=Neut|Number=Sing	4	obl	_	t_start=8|t_end=14
+4	kamen	kommen	VERB	VVFIN	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=15|t_end=20
+5	zuerst	zuerst	ADV	ADV	_	4	advmod	_	SpaceAfter=No|t_start=21|t_end=27
+6	.	.	PUNCT	$.	_	4	punct	_	t_start=27|t_end=28
+

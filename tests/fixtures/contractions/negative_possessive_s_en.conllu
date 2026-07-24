@@ -1,0 +1,10 @@
+# sent_id = 1
+# text = John's car is new.
+# lang = en
+1	John	John	PROPN	NNP	_	3	nmod:poss	_	SpaceAfter=No|t_start=0|t_end=4
+2	's	's	PART	POS	_	1	case	_	t_start=4|t_end=6
+3	car	car	NOUN	NN	_	5	nsubj	_	t_start=7|t_end=10
+4	is	be	AUX	VBZ	_	5	cop	_	t_start=11|t_end=13
+5	new	new	ADJ	JJ	_	0	root	_	SpaceAfter=No|t_start=14|t_end=17
+6	.	.	PUNCT	.	_	5	punct	_	t_start=17|t_end=18
+

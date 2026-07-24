@@ -22,7 +22,7 @@ def _load(name: str) -> Document:
 
 def test_clausal_rnr_distinct_subjects():
     # "Sam likes but Sue dislikes opera." — shared object "opera".
-    findings = detect_right_node_raising(_load("positive_clausal_sam.conllu"))
+    findings = detect_right_node_raising(_load("positive_clausal_sam_en.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.kind == "coordination" and f.trigger == "distinct_subjects"
@@ -33,7 +33,7 @@ def test_clausal_rnr_distinct_subjects():
 
 def test_clausal_rnr_multiword_shared_arg():
     # "Fred prepares and Susan eats the food." — shared object "the food".
-    findings = detect_right_node_raising(_load("positive_clausal_fred.conllu"))
+    findings = detect_right_node_raising(_load("positive_clausal_fred_en.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.left_predicate.text.lower() == "prepares"
@@ -44,7 +44,7 @@ def test_clausal_rnr_multiword_shared_arg():
 def test_stranded_preposition_rnr():
     # "She knew of but never mentioned my other work." — shared subject, but
     # "knew of __" strands a preposition -> RNR.
-    findings = detect_right_node_raising(_load("positive_stranded_prep.conllu"))
+    findings = detect_right_node_raising(_load("positive_stranded_prep_en.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.trigger == "stranded_prep"
@@ -56,12 +56,12 @@ def test_stranded_preposition_rnr():
 def test_vp_coordination_not_rnr():
     # "John went and bought a fridge." — shared subject, "went" intransitive,
     # no stranded prep -> ordinary VP-coordination, NOT RNR.
-    findings = detect_right_node_raising(_load("negative_vp_coord.conllu"))
+    findings = detect_right_node_raising(_load("negative_vp_coord_en.conllu"))
     assert findings == []
 
 
 def test_restrict_to_lang_filters():
     findings = detect_right_node_raising(
-        _load("positive_clausal_sam.conllu"), restrict_to_lang="de"
+        _load("positive_clausal_sam_en.conllu"), restrict_to_lang="de"
     )
     assert findings == []

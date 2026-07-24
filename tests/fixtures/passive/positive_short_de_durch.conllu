@@ -6,6 +6,6 @@
 3	sich	sich	PRON	PRF	_	2	obj	_	t_start=11|t_end=15
 4	durch	durch	ADP	APPR	_	5	case	_	t_start=16|t_end=21
 5	Lärm	Lärm	NOUN	NN	_	6	obl:agent	_	t_start=22|t_end=26
-6	bedrängt	bedrängen	VERB	VVPP	VerbForm=Part	2	xcomp	_	t_start=27|t_end=35
+6	bedrängt	bedrängen	VERB	VVPP	VerbForm=Part	2	xcomp	_	SpaceAfter=No|t_start=27|t_end=35
 7	.	.	PUNCT	$.	_	2	punct	_	t_start=35|t_end=36
 

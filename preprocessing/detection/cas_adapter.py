@@ -35,6 +35,10 @@ from preprocessing.detection.bare_questions import (
     detect_bare_questions,
 )
 from preprocessing.detection.clefts import CleftFinding, detect_clefts
+from preprocessing.detection.contractions import (
+    ContractionFinding,
+    detect_contractions,
+)
 from preprocessing.detection.gapped_coordination import (
     GappedCoordinationFinding,
     detect_gapped_coordination,
@@ -62,6 +66,7 @@ logger = logging.getLogger(__name__)
 
 T_GRAMMAR_ANOMALY = "de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.GrammarAnomaly"
 T_LEXICAL_PHRASE = "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.LexicalPhrase"
+T_SUGGESTED_ACTION = "de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.SuggestedAction"
 
 
 def _resolve_sentence_langs(view, lang: str | None, mixed: bool) -> list[str | None] | None:
@@ -308,6 +313,35 @@ def _write_right_node_raising(
         ))
 
 
+def _write_contractions(view, ts, findings: list[ContractionFinding]) -> None:
+    """A ``GrammarAnomaly`` over the whole contraction ("wouldn't") plus a
+    ``LexicalPhrase`` on each part. The expansion ("would not") is carried as a
+    DKPro ``SuggestedAction`` in the anomaly's ``suggestions``, so consumers can
+    read it without re-running the lexicon.
+
+    ``suggestions`` is an ``FSArray`` (of ``SuggestedAction``), not a string —
+    assigning a bare string only fails later, when the CAS is serialised to XMI.
+    """
+    GA = ts.get_type(T_GRAMMAR_ANOMALY)
+    LP = ts.get_type(T_LEXICAL_PHRASE)
+    SA = ts.get_type(T_SUGGESTED_ACTION)
+    FSArray = ts.get_type("uima.cas.FSArray")
+    for f in findings:
+        action = SA(begin=f.begin, end=f.end, replacement=f.expansion, certainty=1.0)
+        view.add(action)
+        view.add(GA(
+            begin=f.begin, end=f.end,
+            description="Contraction", category="contraction",
+            suggestions=FSArray(elements=[action]),
+        ))
+        # Clitic findings mark the two surface parts; prep+article findings are
+        # a single multiword surface token, so they carry no host/clitic parts.
+        if f.host is not None:
+            view.add(LP(begin=f.host.begin, end=f.host.end, text="Contraction_host"))
+        if f.clitic is not None:
+            view.add(LP(begin=f.clitic.begin, end=f.clitic.end, text="Contraction_clitic"))
+
+
 def _write_passive(view, ts, findings: list[PassiveFinding]) -> None:
     LP = ts.get_type(T_LEXICAL_PHRASE)
     for f in findings:
@@ -404,6 +438,11 @@ DETECTOR_REGISTRY: dict[str, DetectorSpec] = {
         _write_gapped_coordination, "gapped-coordination",
         ga_categories=frozenset({"gapped_coordination"}),
         lp_texts=frozenset({"GappedAntecedent"}),
+    ),
+    "contraction": DetectorSpec(
+        "contraction", detect_contractions, _write_contractions, "contraction",
+        ga_categories=frozenset({"contraction"}),
+        lp_texts=frozenset({"Contraction_host", "Contraction_clitic"}),
     ),
     "right_node_raising": DetectorSpec(
         "right_node_raising", detect_right_node_raising,

@@ -1,10 +1,25 @@
 # sent_id = 1
 # text = Der Motor wird vom Mechaniker repariert.
 # lang = de
-# note: "vom" is a multiword token; Stanza expands it to two tokens that keep
-# note: the SURFACE form "vom" and inherit the parent "vom" span (15:18). Their
-# note: lemma is assigned inconsistently across runs ("von" or, as here, "der"),
-# note: so the agent is recognised by the contracted surface form "vom".
+# note: "vom" is a multiword token. Stanza itself expands it correctly to the
+# note: two words "von" (ADP, case) + "dem" (DET, det) -- the duplication below
+# note: came from OUR round-trip, not from Stanza:
+# note:   * MWT sub-words have start_char/end_char == None, so they inherit the
+# note:     PARENT span (15:18);
+# note:   * cas_conllu then re-derives FORM from get_covered_text() -> "vom"
+# note:     twice, and looks up POS/LEMMA in dicts keyed by (begin,end), so the
+# note:     two sub-words collide and one tag/lemma wins (hence the "varies
+# note:     across runs" impression -- it is a dict collision, not randomness).
+# note: HISTORICAL SHAPE ONLY. Both live parse paths now record each sub-word's
+# note: true form as an MWTPart annotation -- preprocessing.stanza and (since
+# note: the consistency fix) aslan_normalization._stanza_annotate -- and
+# note: cas_conllu reads those back, so freshly parsed data yields von/dem as
+# note: in positive_canonical_agent_de_mwt.conllu. This fixture is kept as the
+# note: regression guard for data ingested BEFORE MWTPart existed, which still
+# note: surfaces the contracted form, and is why the passive lexicon keeps
+# note: "vom" in its agent-preposition set. It is a deliberate UD level-2
+# note: exception (text-form-mismatch): the tokens cannot align to the text
+# note: while both carry the surface form "vom".
 1	Der	der	DET	ART	_	2	det	_	t_start=0|t_end=3
 2	Motor	Motor	NOUN	NN	_	7	nsubj:pass	_	t_start=4|t_end=9
 3	wird	werden	AUX	VAFIN	_	7	aux:pass	_	t_start=10|t_end=14

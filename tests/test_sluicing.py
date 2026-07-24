@@ -21,7 +21,7 @@ def _load(name: str) -> Document:
 
 
 def test_positive_basic_sluicing_en():
-    findings = detect_sluicing(_load("positive_basic.conllu"))
+    findings = detect_sluicing(_load("positive_en_basic.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.x_text.lower() == "why"
@@ -32,7 +32,7 @@ def test_positive_basic_sluicing_en():
 
 
 def test_negative_full_embedded_question():
-    findings = detect_sluicing(_load("negative_full_question.conllu"))
+    findings = detect_sluicing(_load("negative_en_full_question.conllu"))
     assert findings == []
 
 

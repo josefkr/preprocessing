@@ -134,6 +134,17 @@ def add_stanza_annotations(preprocessor: Stanza_Preprocessor, view) -> bool:
                     )
                     continue
 
+                # This sub-word has no span of its own (it inherited the parent
+                # MWT's), so its surface form would be lost — a CAS token's form
+                # is its covered text. Record it.
+                if word.start_char is None and len(token.words) > 1:
+                    from preprocessing.mwt import add_mwt_part
+
+                    add_mwt_part(
+                        view, ts, begin=begin, end=end,
+                        form=word.text, index=word_idx,
+                    )
+
                 # DKPro convention: PosValue=xpos (fine), coarseValue=upos (UD).
                 cas_pos = P(
                     begin=begin,

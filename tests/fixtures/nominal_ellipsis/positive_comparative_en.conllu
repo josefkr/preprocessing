@@ -4,6 +4,6 @@
 1	Kim	Kim	PROPN	NNP	_	2	nsubj	_	t_start=0|t_end=3
 2	chose	choose	VERB	VBD	_	0	root	_	t_start=4|t_end=9
 3	the	the	DET	DT	_	4	det	_	t_start=10|t_end=13
-4	larger	large	ADJ	JJR	_	2	obj	_	t_start=14|t_end=20
+4	larger	large	ADJ	JJR	_	2	obj	_	SpaceAfter=No|t_start=14|t_end=20
 5	.	.	PUNCT	.	_	2	punct	_	t_start=20|t_end=21
 

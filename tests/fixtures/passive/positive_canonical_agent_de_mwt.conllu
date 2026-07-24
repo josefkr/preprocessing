@@ -1,0 +1,17 @@
+# sent_id = 1
+# text = Der Motor wird vom Mechaniker repariert.
+# lang = de
+# note: the SAME sentence as positive_canonical_agent_de.conllu, but in the
+# note: representation freshly ingested data now produces: a real UD multiword
+# note: token (4-5 vom) whose sub-words carry their true forms von/dem. The
+# note: legacy fixture keeps the pre-MWTPart shape (both sub-words 'vom').
+1	Der	der	DET	DET	_	2	det	_	t_start=0|t_end=3
+2	Motor	Motor	NOUN	NOUN	_	7	nsubj:pass	_	t_start=4|t_end=9
+3	wird	werden	AUX	AUX	_	7	aux:pass	_	t_start=10|t_end=14
+4-5	vom	_	_	_	_	_	_	_	t_start=15|t_end=18
+4	von	von	ADP	ADP	_	6	case	_	t_start=15|t_end=18
+5	dem	der	DET	DET	_	6	det	_	t_start=15|t_end=18
+6	Mechaniker	Mechaniker	NOUN	NOUN	_	7	obl:agent	_	t_start=19|t_end=29
+7	repariert	reparieren	VERB	VERB	_	0	root	_	SpaceAfter=No|t_start=30|t_end=39
+8	.	.	PUNCT	PUNCT	_	7	punct	_	t_start=39|t_end=40
+

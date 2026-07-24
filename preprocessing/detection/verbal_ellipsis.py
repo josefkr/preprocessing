@@ -6,6 +6,13 @@ Detection rule:
   - Token has POS=AUX (in either UPOS or XPOS column; see note below).
   - Its dependency relation to its head is NOT one of {aux, aux:pass, cop}.
 
+Plus two lexicon-gated extensions for elements that parsers routinely tag
+VERB instead of AUX, which the rule above would then miss: German stranded
+modals (:data:`DE_MODAL_LEMMAS`) and English stranded pro-verbs
+(:data:`EN_PROVERB_LEMMAS`). Both require no overt verbal complement and no
+direct object, so lexical uses ("kann Französisch", "do my homework") are
+excluded.
+
 Note on POS columns: the detector matches AUX in either UPOS or XPOS so
 both DKPro CAS input (UD ``coarseValue`` -> UPOS, Penn-Treebank
 ``PosValue`` -> XPOS, where AUX appears in UPOS) and hand-written
@@ -46,11 +53,26 @@ DE_MODAL_LEMMAS = frozenset(
 _OBJECT_DEPRELS = {"obj", "obja"}
 
 
-def _is_stranded_modal(node) -> bool:
-    """True for a German modal lemma tagged VERB/AUX that stands in for a
-    missing main verb: not itself an auxiliary of another verb, with no
-    overt verbal complement and no direct object."""
-    if (node.lemma or "").lower() not in DE_MODAL_LEMMAS:
+# English pro-verb lemmas. Same problem as DE_MODAL_LEMMAS in the other
+# direction: a stranded pro-verb ("So do I", "I do as well", "Yes, I have")
+# is frequently tagged UPOS=VERB rather than AUX, so the AUX-only rule misses
+# it. "be" is deliberately excluded — copular/existential uses tagged VERB
+# ("I think, therefore I am") are not ellipsis; genuine stranded "be" is
+# reliably tagged AUX and already caught by Rule 1. Modals likewise stay AUX
+# in English, unlike German.
+EN_PROVERB_LEMMAS = frozenset({"do", "have"})
+
+
+def _is_stranded_proform(node, lemmas: frozenset[str]) -> bool:
+    """True for a lemma from ``lemmas`` tagged VERB/AUX that stands in for a
+    missing main verb: not itself an auxiliary of another verb, with no overt
+    verbal complement and no direct object.
+
+    Shared by the two lexicon-gated extensions (German modals, English
+    pro-verbs); each lexicon self-gates by language, so neither fires on the
+    other's data.
+    """
+    if (node.lemma or "").lower() not in lemmas:
         return False
     if node.upos not in ("VERB", "AUX"):
         return False
@@ -60,8 +82,18 @@ def _is_stranded_modal(node) -> bool:
         if child.upos in ("VERB", "AUX"):
             return False  # overt main verb present — not ellipsis
         if child.deprel in _OBJECT_DEPRELS:
-            return False  # lexical modal use ("kann Französisch")
+            return False  # lexical use ("kann Französisch", "do my homework")
     return True
+
+
+def _is_stranded_modal(node) -> bool:
+    """German modal standing in for an elided main verb."""
+    return _is_stranded_proform(node, DE_MODAL_LEMMAS)
+
+
+def _is_stranded_proverb(node) -> bool:
+    """English pro-verb standing in for an elided main verb."""
+    return _is_stranded_proform(node, EN_PROVERB_LEMMAS)
 
 
 @dataclass(frozen=True)
@@ -93,7 +125,13 @@ def detect_verbal_ellipsis(
             # Rule 2: a German modal lemma tagged VERB (the AUX-only rule
             # misses these in passage context) standing in for a missing
             # main verb.
-            if not (is_stranded_aux or _is_stranded_modal(node)):
+            # Rule 3: the English counterpart — a stranded pro-verb
+            # ("I do as well") that parsers tag VERB rather than AUX.
+            if not (
+                is_stranded_aux
+                or _is_stranded_modal(node)
+                or _is_stranded_proverb(node)
+            ):
                 continue
 
             begin, end = token_offsets(node)

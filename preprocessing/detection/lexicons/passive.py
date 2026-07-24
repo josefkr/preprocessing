@@ -14,10 +14,15 @@ from preprocessing.detection.language import UnsupportedLanguage
 
 PASSIVE_AGENT_PREPS_BY_LANG: dict[str, frozenset[str]] = {
     "en": frozenset({"by"}),
-    # "vom" is the contraction "von dem". Stanza expands it to two sub-words
-    # but (a) keeps the surface form "vom" on both and (b) lemmatises them
-    # inconsistently across runs ("von" or "der"), so the contracted surface
-    # form is listed here to recognise it by form, not just lemma. "vom" can
+    # "vom" is the contraction "von dem". Stanza expands it correctly to the
+    # words "von" + "dem"; the duplicated surface form was OUR round-trip
+    # (sub-words have no character span, so they inherited the parent's, and
+    # FORM was re-derived from the covered text). Ingestion now records the
+    # sub-word forms (preprocessing.mwt) and cas_conllu emits a real multiword
+    # token, so freshly ingested data yields "von" and this entry is redundant
+    # for it. KEEP "vom" anyway: data ingested before that change has no
+    # MWTPart annotations and still surfaces the contracted form, and dropping
+    # it would silently break German agent detection on that data. "vom" can
     # only mean "von + dem", so it never causes a false agent.
     "de": frozenset({"von", "durch", "vom"}),
     "fr": frozenset({"par"}),

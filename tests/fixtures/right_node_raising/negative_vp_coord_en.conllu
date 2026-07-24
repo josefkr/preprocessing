@@ -6,6 +6,6 @@
 3	and	and	CCONJ	CC	_	4	cc	_	t_start=10|t_end=13
 4	bought	buy	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	conj	_	t_start=14|t_end=20
 5	a	a	DET	DT	Definite=Ind|PronType=Art	6	det	_	t_start=21|t_end=22
-6	fridge	fridge	NOUN	NN	Number=Sing	4	obj	_	t_start=23|t_end=29
+6	fridge	fridge	NOUN	NN	Number=Sing	4	obj	_	SpaceAfter=No|t_start=23|t_end=29
 7	.	.	PUNCT	.	_	2	punct	_	t_start=29|t_end=30
 

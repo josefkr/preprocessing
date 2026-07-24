@@ -6,6 +6,6 @@
 3	was	be	AUX	VBD	_	4	aux:pass	_	t_start=9|t_end=12
 4	eaten	eat	VERB	VBN	_	0	root	_	t_start=13|t_end=18
 5	by	by	ADP	IN	_	6	case	_	t_start=19|t_end=21
-6	John	John	PROPN	NNP	_	4	obl:agent	_	t_start=22|t_end=26
+6	John	John	PROPN	NNP	_	4	obl:agent	_	SpaceAfter=No|t_start=22|t_end=26
 7	.	.	PUNCT	.	_	4	punct	_	t_start=26|t_end=27
 

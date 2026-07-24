@@ -6,6 +6,6 @@
 3	me	I	PRON	PRP	_	2	obj	_	t_start=15|t_end=17
 4	was	be	AUX	VBD	_	6	cop	_	t_start=18|t_end=21
 5	the	the	DET	DT	_	6	det	_	t_start=22|t_end=25
-6	answer	answer	NOUN	NN	_	0	root	_	t_start=26|t_end=32
+6	answer	answer	NOUN	NN	_	0	root	_	SpaceAfter=No|t_start=26|t_end=32
 7	.	.	PUNCT	.	_	6	punct	_	t_start=32|t_end=33
 

@@ -17,7 +17,7 @@ def _load(name: str) -> Document:
 
 def test_positive_aux_as_root():
     # "He did." — 'did' is AUX but attached as root, not aux/aux:pass/cop.
-    findings = detect_verbal_ellipsis(_load("positive_aux_as_root.conllu"))
+    findings = detect_verbal_ellipsis(_load("positive_aux_as_root_en.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.text.lower() == "did"
@@ -29,7 +29,7 @@ def test_positive_do_as_root():
     # "I do as well." — 'do' may be AUX or VERB and attached as root, not aux/aux:pass/cop.
     # This is a tricky case: in theory this should be detected as AUX 
     # but in practice parsers often go with VERB here.
-    findings = detect_verbal_ellipsis(_load("positive_do_as_root.conllu"))
+    findings = detect_verbal_ellipsis(_load("positive_do_as_root_en.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.text.lower() == "do"
@@ -40,11 +40,11 @@ def test_positive_do_as_root():
 
 def test_negative_normal_aux():
     # "He is running." — 'is' is AUX and attached as 'aux'.
-    findings = detect_verbal_ellipsis(_load("negative_normal_aux.conllu"))
+    findings = detect_verbal_ellipsis(_load("negative_normal_aux_en.conllu"))
     assert findings == []
 
 
 def test_negative_copula():
     # "He is happy." — 'is' is AUX and attached as 'cop'.
-    findings = detect_verbal_ellipsis(_load("negative_copula.conllu"))
+    findings = detect_verbal_ellipsis(_load("negative_copula_en.conllu"))
     assert findings == []

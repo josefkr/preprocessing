@@ -1,0 +1,9 @@
+# sent_id = 1
+# text = He wouldn't say.
+# lang = en
+1	He	he	PRON	PRP	_	3	nsubj	_	t_start=0|t_end=2
+2	would	would	AUX	MD	_	3	aux	_	SpaceAfter=No|t_start=3|t_end=8
+3	n't	not	PART	RB	_	4	advmod	_	t_start=8|t_end=11
+4	say	say	VERB	VB	_	0	root	_	SpaceAfter=No|t_start=12|t_end=15
+5	.	.	PUNCT	.	_	4	punct	_	t_start=15|t_end=16
+

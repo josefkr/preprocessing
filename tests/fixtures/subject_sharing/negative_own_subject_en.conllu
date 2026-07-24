@@ -5,6 +5,6 @@
 2	sang	sing	VERB	VBD	_	0	root	_	t_start=4|t_end=8
 3	and	and	CCONJ	CC	_	5	cc	_	t_start=9|t_end=12
 4	he	he	PRON	PRP	_	5	nsubj	_	t_start=13|t_end=15
-5	danced	dance	VERB	VBD	_	2	conj	_	t_start=16|t_end=22
+5	danced	dance	VERB	VBD	_	2	conj	_	SpaceAfter=No|t_start=16|t_end=22
 6	.	.	PUNCT	.	_	2	punct	_	t_start=22|t_end=23
 

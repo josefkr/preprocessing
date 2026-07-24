@@ -2,6 +2,6 @@
 # text = He did.
 # lang = en
 1	He	he	PRON	PRP	_	2	nsubj	_	t_start=0|t_end=2
-2	did	do	AUX	AUX	_	0	root	_	t_start=3|t_end=6
+2	did	do	AUX	AUX	_	0	root	_	SpaceAfter=No|t_start=3|t_end=6
 3	.	.	PUNCT	.	_	2	punct	_	t_start=6|t_end=7
 

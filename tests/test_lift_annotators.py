@@ -48,23 +48,23 @@ T_LEXICAL_PHRASE = "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.LexicalP
 # One positive fixture per phenomenon; gapped-coordination is multi-sentence.
 CASES = [
     ("sluicing", la.SE_SluicingAnnotator, find_and_annotate_sluicing,
-     "sluicing/positive_basic.conllu", "en"),
+     "sluicing/positive_en_basic.conllu", "en"),
     ("bare_questions", la.SE_BareQuestionsAnnotator, find_and_annotate_bare_questions,
      "bare_questions/positive_de_an_wen.conllu", "de"),
     ("nominal_ellipsis", la.SE_NominalEllipsisAnnotator, find_and_annotate_nominal_ellipsis,
-     "nominal_ellipsis/positive_adjective.conllu", "en"),
+     "nominal_ellipsis/positive_adjective_en.conllu", "en"),
     ("verbal_ellipsis", la.SE_VerbalEllipsisAnnotator, find_and_annotate_verbal_ellipsis,
-     "verbal_ellipsis/positive_aux_as_root.conllu", "en"),
+     "verbal_ellipsis/positive_aux_as_root_en.conllu", "en"),
     ("gapped_coordination", la.SE_GappedCoordinationAnnotator, find_and_annotate_gapped_coordination,
      "gapped_coordination/en_examples.conllu", "en"),
     ("passive", la.SE_PassiveAnnotator, find_and_annotate_passive,
      "passive/positive_canonical_agent_de.conllu", "de"),
     ("subject_sharing", la.SE_SubjectSharingAnnotator, find_and_annotate_subject_sharing,
-     "subject_sharing/positive_basic.conllu", "en"),
+     "subject_sharing/positive_basic_en.conllu", "en"),
     ("clefts", la.SE_CleftsAnnotator, find_and_annotate_clefts,
      "clefts/positive_simple_en.conllu", "en"),
     ("right_node_raising", la.SE_RightNodeRaisingAnnotator, find_and_annotate_right_node_raising,
-     "right_node_raising/positive_clausal_fred.conllu", "en"),
+     "right_node_raising/positive_clausal_fred_en.conllu", "en"),
 ]
 
 

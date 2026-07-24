@@ -6,6 +6,6 @@
 3	Kurden	Kurde	NOUN	NN	_	4	obl:agent	_	t_start=8|t_end=14
 4	angeführten	anführen	VERB	VVPP	VerbForm=Part	5	acl	_	t_start=15|t_end=26
 5	Kräfte	Kraft	NOUN	NN	_	6	nsubj	_	t_start=27|t_end=33
-6	gewannen	gewinnen	VERB	VVFIN	_	0	root	_	t_start=34|t_end=42
+6	gewannen	gewinnen	VERB	VVFIN	_	0	root	_	SpaceAfter=No|t_start=34|t_end=42
 7	.	.	PUNCT	$.	_	6	punct	_	t_start=42|t_end=43
 

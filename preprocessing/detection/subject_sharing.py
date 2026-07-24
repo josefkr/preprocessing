@@ -18,7 +18,7 @@ import logging
 from dataclasses import dataclass
 
 from preprocessing.detection.language import tree_lang
-from preprocessing.detection.offsets import token_offsets
+from preprocessing.detection.offsets import span_offsets, token_offsets
 
 logger = logging.getLogger(__name__)
 
@@ -71,10 +71,16 @@ def detect_subject_sharing(
 
             x_begin, x_end = token_offsets(x)
             y_begin, y_end = token_offsets(y)
+            # Mark the whole subject phrase (head + its subtree), so the span
+            # matches the material the normalizer copies into the right conjunct.
             shared = tuple(
-                SharedSubject(begin=b, end=e, text=s.form)
+                SharedSubject(
+                    begin=b, end=e,
+                    text=" ".join(n.form for n in nodes),
+                )
                 for s in y_subjects
-                for (b, e) in [token_offsets(s)]
+                for nodes in [list(s.descendants(add_self=True))]
+                for (b, e) in [span_offsets(nodes)]
             )
 
             findings.append(

@@ -6,6 +6,6 @@
 3	the	the	DET	DT	_	4	det	_	t_start=9|t_end=12
 4	man	man	NOUN	NN	_	0	root	_	t_start=13|t_end=16
 5	who	who	PRON	WP	_	6	nsubj	_	t_start=17|t_end=20
-6	left	leave	VERB	VBD	_	4	acl:relcl	_	t_start=21|t_end=25
+6	left	leave	VERB	VBD	_	4	acl:relcl	_	SpaceAfter=No|t_start=21|t_end=25
 7	.	.	PUNCT	.	_	4	punct	_	t_start=25|t_end=26
 

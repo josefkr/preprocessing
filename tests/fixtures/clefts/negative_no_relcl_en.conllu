@@ -3,6 +3,6 @@
 # lang = en
 1	It	it	PRON	PRP	_	3	expl	_	t_start=0|t_end=2
 2	was	be	AUX	VBD	_	3	cop	_	t_start=3|t_end=6
-3	John	John	PROPN	NNP	_	0	root	_	t_start=7|t_end=11
+3	John	John	PROPN	NNP	_	0	root	_	SpaceAfter=No|t_start=7|t_end=11
 4	.	.	PUNCT	.	_	3	punct	_	t_start=11|t_end=12
 

@@ -1,0 +1,9 @@
+# sent_id = 1
+# text = She can't swim.
+# lang = en
+1	She	she	PRON	PRP	_	4	nsubj	_	t_start=0|t_end=3
+2	ca	can	AUX	MD	_	4	aux	_	SpaceAfter=No|t_start=4|t_end=6
+3	n't	not	PART	RB	_	4	advmod	_	t_start=6|t_end=9
+4	swim	swim	VERB	VB	_	0	root	_	SpaceAfter=No|t_start=10|t_end=14
+5	.	.	PUNCT	.	_	4	punct	_	t_start=14|t_end=15
+

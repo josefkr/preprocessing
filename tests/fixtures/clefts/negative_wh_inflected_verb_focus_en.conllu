@@ -5,6 +5,6 @@
 2	he	he	PRON	PRP	_	3	nsubj	_	t_start=5|t_end=7
 3	wanted	want	VERB	VBD	_	1	acl:relcl	_	t_start=8|t_end=14
 4	was	be	AUX	VBD	_	6	cop	_	t_start=15|t_end=18
-5	leaving	leave	VERB	VBG	_	0	root	_	t_start=19|t_end=26
+5	leaving	leave	VERB	VBG	_	0	root	_	SpaceAfter=No|t_start=19|t_end=26
 6	.	.	PUNCT	.	_	5	punct	_	t_start=26|t_end=27
 

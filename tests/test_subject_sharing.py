@@ -16,7 +16,7 @@ def _load(name: str) -> Document:
 
 
 def test_positive_basic_subject_sharing():
-    findings = detect_subject_sharing(_load("positive_basic.conllu"))
+    findings = detect_subject_sharing(_load("positive_basic_en.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.x_text.lower() == "danced"
@@ -31,5 +31,5 @@ def test_positive_basic_subject_sharing():
 
 def test_negative_right_conjunct_has_own_subject():
     # "She sang and he danced." — the right conjunct has its own subject.
-    findings = detect_subject_sharing(_load("negative_own_subject.conllu"))
+    findings = detect_subject_sharing(_load("negative_own_subject_en.conllu"))
     assert findings == []

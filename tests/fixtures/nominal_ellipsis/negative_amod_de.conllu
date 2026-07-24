@@ -1,0 +1,9 @@
+# sent_id = 1
+# text = Der große Mann gewann.
+# lang = de
+1	Der	der	DET	ART	Case=Nom|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	3	det	_	t_start=0|t_end=3
+2	große	groß	ADJ	ADJA	Case=Nom|Degree=Pos|Gender=Masc|Number=Sing	3	amod	_	t_start=4|t_end=9
+3	Mann	Mann	NOUN	NN	Case=Nom|Gender=Masc|Number=Sing	4	nsubj	_	t_start=10|t_end=14
+4	gewann	gewinnen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	SpaceAfter=No|t_start=15|t_end=21
+5	.	.	PUNCT	$.	_	4	punct	_	t_start=21|t_end=22
+

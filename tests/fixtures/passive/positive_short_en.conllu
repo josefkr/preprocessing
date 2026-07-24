@@ -1,5 +1,5 @@
 # sent_id = 1
-# text = The book read by John was good.
+# text = The book read by John was really good.
 # lang = en
 1	The	the	DET	DT	_	2	det	_	t_start=0|t_end=3
 2	book	book	NOUN	NN	_	8	nsubj	_	t_start=4|t_end=8
@@ -8,6 +8,6 @@
 5	John	John	PROPN	NNP	_	3	obl:agent	_	t_start=17|t_end=21
 6	was	be	AUX	VBD	_	8	cop	_	t_start=22|t_end=25
 7	really	really	ADV	RB	_	8	advmod	_	t_start=26|t_end=32
-8	good	good	ADJ	JJ	_	0	root	_	t_start=33|t_end=37
+8	good	good	ADJ	JJ	_	0	root	_	SpaceAfter=No|t_start=33|t_end=37
 9	.	.	PUNCT	.	_	8	punct	_	t_start=37|t_end=38
 

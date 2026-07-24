@@ -1,0 +1,9 @@
+# sent_id = 1
+# text = Er nahm den zweiten.
+# lang = de
+1	Er	er	PRON	PPER	Case=Nom|Gender=Masc|Number=Sing|Person=3|PronType=Prs	2	nsubj	_	t_start=0|t_end=2
+2	nahm	nehmen	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=3|t_end=7
+3	den	der	DET	ART	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Art	4	det	_	t_start=8|t_end=11
+4	zweiten	zweit	ADJ	ADJA	Case=Acc|Degree=Pos|Gender=Masc|Number=Sing|NumType=Ord	2	obj	_	SpaceAfter=No|t_start=12|t_end=19
+5	.	.	PUNCT	$.	_	2	punct	_	t_start=19|t_end=20
+

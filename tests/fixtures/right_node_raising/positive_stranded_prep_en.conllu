@@ -9,6 +9,6 @@
 6	mentioned	mention	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	conj	_	t_start=22|t_end=31
 7	my	my	PRON	PRP$	Case=Gen|Number=Sing|Person=1|Poss=Yes|PronType=Prs	9	nmod:poss	_	t_start=32|t_end=34
 8	other	other	ADJ	JJ	Degree=Pos	9	amod	_	t_start=35|t_end=40
-9	work	work	NOUN	NN	Number=Sing	6	obj	_	t_start=41|t_end=45
+9	work	work	NOUN	NN	Number=Sing	6	obj	_	SpaceAfter=No|t_start=41|t_end=45
 10	.	.	PUNCT	.	_	2	punct	_	t_start=45|t_end=46
 

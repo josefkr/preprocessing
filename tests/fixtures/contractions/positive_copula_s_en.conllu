@@ -1,0 +1,8 @@
+# sent_id = 1
+# text = He's happy.
+# lang = en
+1	He	he	PRON	PRP	_	3	nsubj	_	SpaceAfter=No|t_start=0|t_end=2
+2	's	be	AUX	VBZ	_	3	cop	_	t_start=2|t_end=4
+3	happy	happy	ADJ	JJ	_	0	root	_	SpaceAfter=No|t_start=5|t_end=10
+4	.	.	PUNCT	.	_	3	punct	_	t_start=10|t_end=11
+
