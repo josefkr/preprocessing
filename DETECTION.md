@@ -3,7 +3,8 @@
 This document describes the suite of annotators that detect linguistic
 phenomena (sluicing, subject sharing, verbal ellipsis, passive,
 nominal-head ellipsis, clefts, bare wh-questions, gapped coordination,
-right node raising, contractions) in CAS XMI files, how they are
+right node raising, contractions, abbreviations, suspended composition) in CAS
+XMI files, how they are
 organized, and how to extend them with new phenomena or new languages.
 
 ## Overview
@@ -43,6 +44,14 @@ preprocessing/detection/
   cli.py               Shared argparse plumbing (`--lang`, `--mixed`).
   cas_adapter.py       `find_and_annotate_*` entry points + writers.
                        Plumbs `lang`/`mixed` through to detectors.
+  lift_annotators.py   py_lift-style `SE_<Phenom>Annotator` wrappers around
+                       the adapters above (Option 1 of
+                       ../PYLIFT_INTEGRATION.md). One shared base declares
+                       requires_types once — every structural detector needs
+                       the same Token/POS/Dependency/Sentence set — so a
+                       subclass only names its adapter and its
+                       supported_languages. `ANNOTATORS` maps the same
+                       phenomenon keys `annotate.py --phenomenon` uses.
   sluicing.py          Pure sluicing detector.
   subject_sharing.py   Pure subject-sharing detector.
   verbal_ellipsis.py   Pure verbal-ellipsis detector.
@@ -70,8 +79,33 @@ preprocessing/detection/
                        conjunct ("Sam likes but Sue dislikes opera").
                        Lexicon-free / structural. Comparative &
                        subordinate RNR are left to the LLM normalizer.
+  suspended_composition.py
+                       Pure suspended-composition detector (German
+                       Ergänzungsstrich). Two directions, told apart by
+                       where the hyphen sits: trailing means the *head*
+                       is shared and the donor follows ("Sonn- und
+                       Feiertagen"); leading means the *modifier* is
+                       shared and the donor precedes ("Energieerzeugung
+                       und -verteilung"). Both can occur in one sentence,
+                       so neither pattern assumes it is alone. Works on the sentence
+                       *surface* and maps back to sofa offsets through the
+                       overlapping tokens, because Stanza tags the stub
+                       PUNCT and splits it or not depending on the word.
+                       Takes an optional `resolver` hook to attach the
+                       completion; reports the site either way.
+  abbreviations.py     Pure abbreviation detector (German, English).
+                       All-caps runs of 2-6 letters, gated four ways: not a
+                       function word in caps ("Test VOR dem Lernen" is
+                       emphasis), not part of a punctuation-separated
+                       enumeration ("ADE - BEC - CBA"), not in
+                       mostly-capitalised text, and occurrences beside
+                       their own long form ("Konditionierter Reiz (CS)")
+                       flagged rather than dropped. Which long form an
+                       abbreviation stands for is decided corpus-wide, so
+                       the detector takes an optional `expansions` map and
+                       reports candidates with or without it.
   contractions.py      Pure contraction / clitic detector (English +
-                       German). Three mechanisms: (1) a clitic token
+                       German). Four mechanisms: (1) a clitic token
                        ("n't", "'s", …) written *adjacent* to its host
                        ("wouldn't", "mir's"), whose (form, lemma) pair
                        has an expansion — English possessive "'s" is
@@ -81,7 +115,12 @@ preprocessing/detection/
                        expansion; (3) German clipped indefinite articles
                        ("nen"/"nem"/"ner"/"ne"/"n"), standalone tokens
                        recognised by surface form — "ne" needs a following
-                       NP, bare "n" is inferred from the noun's morphology.
+                       NP, bare "n" is inferred from the noun's morphology;
+                       (4) English colloquial clipped forms ("gonna",
+                       "lemme", "'em"), matched as whole written words
+                       (one token or an adjacent run, since the tokenizer
+                       splits some of them), plus a productive g-dropping
+                       rule for "talkin'" -> "talking".
   lexicons/
     sluicing_wh.py        Wh-words, question-embedding predicates
                           (verbal), and question-embedding nouns per
@@ -90,12 +129,29 @@ preprocessing/detection/
     nominal_ellipsis.py   English quantifier forms, idiomatic patterns,
                           definite articles, comparative/JJ XPOS.
     clefts.py             Cleft-pronoun forms etc. per language.
+    abbreviations.py      Candidate shape, the per-language function-word
+                          veto list, the English dictionary-based emphasis
+                          veto with its two evidence strengths, the closed
+                          list of lexicalised forms (i.e./e.g./w/ -- a
+                          second candidate shape the all-caps rule cannot
+                          see, and the most frequent abbreviation class in
+                          English prose), enumeration-run parameters, the gloss
+                          context pattern, the substitutability filter for
+                          scraped long forms (~a quarter of Wiktionary's
+                          German all-caps rows are glosses, not
+                          expansions), and the mostly-caps rule with its
+                          minimum-token guard.
     contractions.py       Per-language clitic expansions keyed by
                           (form, lemma) (EN + DE), the irregular English
                           hosts ("ca" -> "can", "wo" -> "will"), the
                           German prep+article lexicalised-exception list,
-                          and the German clipped-article table + indefinite
-                          paradigm (for inferring bare "n").
+                          the German clipped-article table + indefinite
+                          paradigm (for inferring bare "n"), the English
+                          clipped-forms table, the whole-contraction
+                          overrides ("can't" -> "cannot"), and the
+                          context-aware helpers that disambiguate
+                          "'s"/"'d" before a participle and inflect
+                          "ain't" for subject agreement.
 
 annotate.py                One generic CLI for all structural detectors:
                            `annotate.py --phenomenon <name>` (choices come from
@@ -159,6 +215,8 @@ the writer creates.
 | Bare wh-questions | `detection/bare_questions.py` | `GrammarAnomaly(description="Ellipsis", category="bare_wh")` on the wh-phrase span. No second annotation — bare wh-questions have no governor. |
 | Gapped coordination | `detection/gapped_coordination.py` | `GrammarAnomaly(description="Ellipsis", category="gapped_coordination")` on the gapped clause span, plus `LexicalPhrase(text="GappedAntecedent")` on the antecedent verb whose predicate the gap borrows. |
 | Right node raising | `detection/right_node_raising.py` | `GrammarAnomaly(description="Ellipsis", category="right_node_raising")` spanning the construction (non-final predicate through the shared constituent), plus three `LexicalPhrase`s: `RNR_left_predicate` (non-final predicate), `RNR_right_predicate` (final predicate), `RNR_shared_arg` (the shared right-edge constituent). |
+| Suspended composition (DE) | `detection/suspended_composition.py` | `GrammarAnomaly(description="Suspended composition (shared head|shared modifier)", category="suspended_composition")` over the truncated conjunct, with the completion as a `SuggestedAction` (`certainty` 1.0 for a deduced split, 0.7 for a preferred one); `category="suspended_composition_unresolved"` when the split could not be settled or the resources were absent — recorded rather than dropped, since a missing annotation is indistinguishable from a clean sentence. Plus `LexicalPhrase(text="Suspension_donor")` over the conjunct the material comes from, which is often several tokens away (six, in real data). |
+| Abbreviations (DE/EN) | `detection/abbreviations.py` | `GrammarAnomaly(description="Abbreviation", category="abbreviation")` over the short form, or `category="abbreviation_defined"` when the long form accompanies it (present, but must not be normalized). **Every** candidate expansion is written as a `SuggestedAction` in `suggestions`, with `certainty` carrying the corpus harvest's confidence — the first writer to use that FSArray for genuine ambiguity rather than a single rewrite, since a German short form routinely has many readings. |
 | Contractions (EN/DE) | `detection/contractions.py` | `GrammarAnomaly(description="Contraction", category="contraction")` over the whole contraction ("wouldn't", "mir's", "vom", "nen"), carrying the expansion as a `SuggestedAction` in `suggestions` ("would not", "mir es", "von dem", "einen"). **Clitic** findings also add `LexicalPhrase(text="Contraction_host")` + `LexicalPhrase(text="Contraction_clitic")` on the two parts; **prep+article** and **clipped-article** findings are a single surface token, so they carry no host/clitic phrases. |
 
 ### Detection rules (concise)
@@ -297,7 +355,9 @@ the writer creates.
      `'s` (*es* → "es", as in "mir's" → "mir es", "geht's" → "geht es").
      **Possessive `'s` is absent from that table, so it never fires** — it is not
      a contraction of two words. The host may change: UD splits "can't" into
-     "ca" + "n't", so the finding reports "can not" rather than "*ca not*".
+     "ca" + "n't", so the finding reports "cannot" rather than "*ca not*" —
+     English writes *can*+*not* solid, via the lexicon's whole-contraction
+     overrides; the other negated modals stay two words ("will not").
      Clitics are **not** UD multiword tokens — each part has real char offsets.
 
   2. **Preposition+article** (German `vom` = von+dem, `im` = in+dem, `zum`,
@@ -331,6 +391,48 @@ the writer creates.
   morphology-inferred bare `n` is **opt-in** (`expand_clipped_n`), because
   German case is often mis-parsed (accusative/dative syncretism) and the
   inferred article can be wrong.
+- **Abbreviations.** An all-caps letter run of 2–6 characters, then three
+  vetoes. Two-letter forms are included on purpose: a general lexicon is hopeless
+  for them (636 German all-caps forms carry ~17k senses) but corpus evidence
+  resolves them well (`KG`, `IT`, `ID`, `IR` in the Hagen exam data).
+
+  Each veto answers a false-positive class actually observed, not a hypothetical
+  one:
+
+  1. **Function word in caps** — "Test *VOR* dem Lernen", "*NACH* einem Test" are
+     emphasis. The general lexicons do not even list *vor*/*nach*, so membership
+     screens most of these already; the explicit list earns its keep on the ~139
+     German all-caps abbreviations that *do* collide with a real word (`AN`, `AM`,
+     `ALS`, `AB`, `ALL`).
+  2. **Enumeration run** — three or more adjacent all-caps tokens separated by
+     nothing but punctuation ("bsp.: ADE - BEC - CBA - D") is a list of learning
+     materials, not of abbreviations. This one *must* be structural: asked whether
+     `ADE` is an abbreviation, an LLM answered yes and invented
+     *Aufmerksamkeitsdefizit-Hyperaktivitätsstörung* while its own stated reason
+     described the surrounding context as a sequence of learning materials. What
+     distinguishes an enumeration from a genuine series ("test (IT)/rehearsal
+     (IR)/distraction (ID)") is that the latter's members have intervening words.
+  3. **Mostly-capitalised text** — above 30 % all-caps word tokens,
+     capitalisation carries no signal. This needs a **minimum-token guard**
+     (10 tokens): student answers are short, so "Die VP kamen." is already 33 %
+     all-caps and is obviously not shouted. Without the guard the gate suppressed
+     legitimate detections.
+
+  A fourth condition *flags rather than rejects*: an occurrence sitting beside its
+  own long form ("Konditionierter Reiz (CS)", Schwartz & Hearst-style) is real —
+  the phenomenon is present — but expanding it would be wrong, so it is written
+  with `category="abbreviation_defined"`. The gloss pattern deliberately does not
+  require the initials to match, since "Konditionierter Reiz" is *conditioned
+  stimulus* and its German initials are K+R; missing a gloss is worse than missing
+  an expansion, because it lets a wrong expansion through.
+
+  Detection is separate from *expansion*. Which long form an abbreviation stands
+  for is a corpus-level decision — a definition in one answer resolves a bare use
+  in another — made by `resolution/abbreviations/harvest.py`. The detector
+  therefore reports candidates whether or not an expansion is known, and takes an
+  optional `expansions` map to attach ranked `SuggestedAction`s when one is. This
+  is why standalone annotation is still useful: it records the candidates and the
+  gate decisions with no corpus at all.
 - **Nominal-head ellipsis (German).** German Stanza emits STTS XPOS
   (which carries no degree) and tags quantifiers `DET`/`PIS`, so the
   English XPOS-based rules do not transfer; German has its own rule
@@ -447,8 +549,14 @@ poetry run pytest tests/test_sluicing.py tests/test_subject_sharing.py \
                   tests/test_verbal_ellipsis.py tests/test_passive.py \
                   tests/test_nominal_ellipsis.py tests/test_clefts.py \
                   tests/test_bare_questions.py tests/test_gapped_coordination.py \
-                  tests/test_right_node_raising.py
+                  tests/test_right_node_raising.py tests/test_abbreviations.py \
+                  tests/test_suspended_composition.py
 ```
+
+The py_lift annotator wrappers (`detection/lift_annotators.py`, see
+[`PYLIFT_INTEGRATION.md`](../PYLIFT_INTEGRATION.md) §4) have their own suite,
+`tests/test_lift_annotators.py`, which also asserts that the `ANNOTATORS` and
+`DETECTOR_REGISTRY` tables do not drift apart.
 
 ## Adding a new phenomenon
 
@@ -474,7 +582,13 @@ poetry run pytest tests/test_sluicing.py tests/test_subject_sharing.py \
    as the registry entry exists. (Optionally add a row to
    `gen_annotation_script.py`'s `ANNOTATORS` table so it's included in generated
    annotation scripts.)
-5. Add `tests/test_<phenomenon>.py` and `tests/fixtures/<phenomenon>/`
+5. Add a wrapper to `preprocessing/detection/lift_annotators.py`: a
+   `SE_<Phenom>Annotator(_DetectorAnnotator)` with `_adapter` set to the
+   adapter and `@supported_languages(...)` declared, plus its entry in
+   `ANNOTATORS`. `requires_types` is inherited, so this really is two lines —
+   and `tests/test_lift_annotators.py` fails if the entry is missing, so the
+   two registries cannot drift.
+6. Add `tests/test_<phenomenon>.py` and `tests/fixtures/<phenomenon>/`
    with at least one positive and one negative `.conllu` fixture.
 
 ## Adding a new language
@@ -488,6 +602,8 @@ means adding a row to a per-phenomenon lexicon module:
 | `lexicons/passive.py` | `PASSIVE_AGENT_PREPS_BY_LANG` and `PARTICIPLE_XPOS_BY_LANG` (or rely on the `VerbForm=Part` fallback). |
 | `lexicons/nominal_ellipsis.py` | `LEXICONS_BY_LANG` with a complete `NominalEllipsisLexicon` — for languages whose Stanza output uses Penn-Treebank-like XPOS. German does **not** use this lexicon: its rules live in `detection/nominal_ellipsis_de.py` (see the German rule above). A language whose tagging resembles German's (STTS-style XPOS, no degree in the tag) likely needs a similar dedicated rule module rather than a lexicon row. |
 | `lexicons/clefts.py` | Cleft-pronoun forms and copula lemmas per language. |
+| `lexicons/suspended_composition.py` | `COORDINATORS_BY_LANG` (what may join the conjuncts — `oder` and bare commas matter as much as `und`) and `VERB_PARTICLES_BY_LANG`. The stub pattern itself is orthographic, not language-specific. English needs only the coordinator row to be *detected*; resolving it would additionally need a morphology and an attestation lexicon for that language. |
+| `lexicons/abbreviations.py` | `FUNCTION_WORDS_BY_LANG` (the closed-class words whose all-caps spelling is emphasis rather than an abbreviation) and, if the language needs different ones, the gloss/enumeration patterns. The candidate shape itself (`CANDIDATE_RE`) is script-based, not language-based, so a language using the Latin alphabet needs only the function-word row. `GLOSS_RE` and `MAX_EXPANSION_WORDS` filter *scraped lexicon* long forms rather than text, so they belong to whichever lexicon is being harvested. |
 | `lexicons/contractions.py` | Per-language clitic forms and their `(form, lemma) -> expansion` tables (`CLITICS_BY_LANG`, `CLITIC_EXPANSIONS_BY_LANG`), irregular host forms, the German prep+article `PREP_ARTICLE_EXCEPTIONS_BY_LANG` list, and the German clipped-article table (`CLIPPED_ARTICLES_BY_LANG` = nen/nem/ner/ne) plus the indefinite paradigm (`EIN_PARADIGM` + `inflect_indefinite_article`) used to infer bare `n`. Prep+article contractions themselves are multiword tokens (parser-supplied expansion), so they need no expansion entries — only the exception list. |
 
 Also add the new ISO code to `SUPPORTED_LANGS` in

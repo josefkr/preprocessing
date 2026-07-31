@@ -1,0 +1,11 @@
+# sent_id = susp-de-neg-1
+# lang = de
+# text = Die Horror-Videos aus Sachsen-Anhalt waren zerschlagen .
+1	Die	die	DET	ART	_	2	det	_	t_start=0|t_end=3
+2	Horror-Videos	Horror-Video	NOUN	NN	_	5	nsubj	_	t_start=4|t_end=17
+3	aus	aus	ADP	APPR	_	4	case	_	t_start=18|t_end=21
+4	Sachsen-Anhalt	Sachsen-Anhalt	PROPN	NE	_	2	nmod	_	t_start=22|t_end=36
+5	waren	sein	AUX	VAFIN	_	0	root	_	t_start=37|t_end=42
+6	zerschlagen	zerschlagen	VERB	VVPP	_	5	xcomp	_	t_start=43|t_end=54
+7	.	.	PUNCT	$.	_	5	punct	_	t_start=55|t_end=56
+

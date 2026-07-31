@@ -1,6 +1,6 @@
 """Pure contraction / clitic detector (English + German).
 
-Operates on a udapi document and returns findings; no CAS dependency. Three
+Operates on a udapi document and returns findings; no CAS dependency. Four
 mechanisms, because the families surface differently in the parse:
 
 1. **Clitics** (English ``n't``/``'s``/…; German ``'s``). A clitic token
@@ -8,7 +8,8 @@ mechanisms, because the families surface differently in the parse:
    one written word "wouldn't"/"mir's"), whose ``(form, lemma)`` pair has an
    expansion in the lexicon. The lemma disambiguates (EN ``'s`` → is/has/us;
    DE ``'s`` → es); possessive ``'s`` is absent and never fires. The host may
-   change too ("can't" = "ca"+"n't" → "can not"). Not UD multiword tokens.
+   change too ("can't" = "ca"+"n't" → "cannot", written solid via the
+   lexicon's whole-contraction overrides). Not UD multiword tokens.
 
 2. **Prep+article** (German ``vom`` = ``von dem``). Genuine UD multiword
    tokens — read from the tree's MWTs (ADP+DET shape), expansion parser-supplied.
@@ -19,8 +20,21 @@ mechanisms, because the families surface differently in the parse:
    ambiguous with the tag question "ne?", so it counts as an article only when a
    noun phrase follows ("ne Karre" → "eine Karre"; "…, ne?" is left alone).
 
+4. **Clipped forms** (English ``gonna``/``lemme``/``'em``). Colloquial single
+   written words standing for a multi-word sequence. Matched by **surface**, but
+   the tokenizer is inconsistent about them — some stay one token ("kinda"),
+   others are split ("gonna" → gon+na) — so the match is on the whole *written
+   word*: one token or an adjacent run. Keying on the full word is what keeps
+   this safe; registering "na"/"a" as bare clitics would fire on ordinary words.
+
+Clitic expansion is also **context-sensitive** where the lemma is ambiguous:
+``'s``/``'d`` before a participle are the perfect auxiliaries (*has*/*had*, not
+*is*/*would*), and the host of ``ain't`` agrees with the subject
+(*am*/*is*/*are*) — see the lexicon's ``*_in_context`` helpers.
+
 Every finding carries a ``kind`` so the normalizer can apply its per-kind
-policy (clitics + clipped articles always expand; prep+article is opt-in).
+policy (clitics, clipped articles and clipped forms always expand; prep+article
+is opt-in).
 """
 
 from __future__ import annotations
@@ -30,12 +44,16 @@ from dataclasses import dataclass
 
 from preprocessing.detection.language import UnsupportedLanguage, tree_lang
 from preprocessing.detection.lexicons.contractions import (
+    CLIPPED_FORM_MAX_TOKENS,
     clipped_article_expansion,
     clipped_article_is_inferred,
     clipped_article_needs_np,
-    clitic_expansion,
+    clipped_form_expansion,
+    clitic_expansion_in_context,
     contraction_clitics,
-    host_expansion,
+    contraction_override,
+    gdropped_expansion,
+    host_expansion_in_context,
     inflect_indefinite_article,
 )
 from preprocessing.detection.offsets import token_offsets
@@ -92,6 +110,10 @@ def detect_contractions(
         # tokens; recognised by surface form (Stanza's lemma is unreliable).
         findings.extend(_clipped_article_findings(tree, lang))
 
+        # Colloquial clipped forms (English "gonna", "lemme", "'em"): matched as
+        # whole written words, which may be one token or an adjacent pair.
+        findings.extend(_clipped_form_findings(tree, lang))
+
         try:
             clitics = contraction_clitics(lang)
         except UnsupportedLanguage as e:
@@ -111,18 +133,42 @@ def detect_contractions(
             if h_end != c_begin:
                 continue  # not written as one word — not a contraction
 
-            expansion = clitic_expansion(lang, node.form, node.lemma or "")
+            nxt = _next_content(nodes, i)
+            expansion = clitic_expansion_in_context(
+                lang,
+                node.form,
+                node.lemma or "",
+                next_xpos=nxt.xpos if nxt is not None else None,
+                next_lemma=nxt.lemma if nxt is not None else None,
+            )
             if expansion is None:
                 # e.g. possessive "'s" — not a two-word contraction.
                 continue
-            host_form = host_expansion(lang, host.form) or host.form
+            subj = _clause_subject(host)
+            host_form = (
+                host_expansion_in_context(
+                    lang,
+                    host.form,
+                    subject_lemma=subj.lemma if subj is not None else None,
+                    subject_number=(
+                        subj.feats.get("Number") if subj is not None else None
+                    ),
+                )
+                or host.form
+            )
+
+            # Most contractions expand to "host clitic"; a few are written solid
+            # ("can't" -> "cannot").
+            whole = contraction_override(lang, host.form, node.form)
+            if whole is not None and host.form[:1].isupper():
+                whole = whole[:1].upper() + whole[1:]
 
             findings.append(
                 ContractionFinding(
                     begin=h_begin,
                     end=c_end,
                     text=f"{host.form}{node.form}",
-                    expansion=f"{host_form} {expansion}",
+                    expansion=whole if whole is not None else f"{host_form} {expansion}",
                     lang=lang,
                     kind="clitic",
                     host=ContractionPart(h_begin, h_end, host.form),
@@ -134,6 +180,37 @@ def detect_contractions(
                 f"[{h_begin}:{c_end}] -> {findings[-1].expansion!r}"
             )
     return findings
+
+
+# Tokens that may sit between a clitic and the participle that disambiguates it
+# ("he's *not* been well", "he's *already* been here"), so they are skipped when
+# looking for the following content word.
+_CLITIC_CONTEXT_SKIP_UPOS = frozenset({"ADV", "PART"})
+
+
+def _clause_subject(host):
+    """The subject of the clause ``host`` is an auxiliary of, or ``None``.
+
+    Used to inflect "ain't" ("ai" + "n't") for agreement. Looks for an ``nsubj``
+    sibling under the host's head, which is where the subject sits for an
+    auxiliary ("that" in "that ain't funny").
+    """
+    parent = getattr(host, "parent", None)
+    if parent is None:
+        return None
+    for child in parent.children:
+        if child.udeprel in ("nsubj", "expl"):
+            return child
+    return None
+
+
+def _next_content(nodes: list, idx: int):
+    """First token after ``nodes[idx]`` that is not an adverb/particle, else None."""
+    for node in nodes[idx + 1:]:
+        if node.upos in _CLITIC_CONTEXT_SKIP_UPOS:
+            continue
+        return node
+    return None
 
 
 # Preposition + definite-article contraction shape (German "vom" = von[ADP] +
@@ -180,6 +257,96 @@ def _prep_article_findings(tree, lang: str | None) -> list[ContractionFinding]:
             f"Contraction[{lang}]: prep+article {mwt.form!r} "
             f"[{begin}:{end}] -> {out[-1].expansion!r}"
         )
+    return out
+
+
+def _gdropping_candidate(span: list, width: int) -> bool:
+    """Whether the g-dropping rule may be applied to this token span.
+
+    The tokenizer is inconsistent about the elision apostrophe: "talkin'" can
+    come through as one token, but "stayin'" is sometimes split into
+    ``stayin`` + ``'``. Both must be reachable, so joined spans are allowed —
+    but a joined span could equally be an ordinary word followed by a **closing
+    quote** ("the cabin'" → tokens ``cabin`` + ``'``), and expanding that would
+    produce "cabing". A single token is unambiguous (quotes are always split
+    off); a joined span is only trusted when the parser calls the stem a verb,
+    which excludes cabin/thin/sin and friends.
+    """
+    if width == 1:
+        return True
+    return (
+        (span[-1].form or "") == "'"
+        and span[0].upos in ("VERB", "AUX")
+    )
+
+
+def _clipped_form_findings(tree, lang: str | None) -> list[ContractionFinding]:
+    """Colloquial clipped forms in ``tree`` (English "gonna", "lemme", "'em").
+
+    Matches the whole **written word**: either a single token, or a run of
+    adjacent tokens (the tokenizer splits some of these — "gonna" into
+    "gon"+"na"). Longest match wins, and matched tokens are not reused, so
+    "gonna" is never also read as a bare "na".
+    """
+    nodes = list(tree.descendants)
+    out: list[ContractionFinding] = []
+    i = 0
+    while i < len(nodes):
+        matched = None
+        # Longest match first, so a 2-token "gon"+"na" beats any 1-token read.
+        for width in range(min(CLIPPED_FORM_MAX_TOKENS, len(nodes) - i), 0, -1):
+            span = nodes[i:i + width]
+            try:
+                offsets = [token_offsets(n) for n in span]
+            except ValueError:
+                continue
+            # The tokens must be written as one word (no whitespace between).
+            if any(offsets[k][1] != offsets[k + 1][0] for k in range(len(span) - 1)):
+                continue
+            surface = "".join(n.form or "" for n in span)
+            expansion = clipped_form_expansion(lang, surface)
+            if expansion is None and _gdropping_candidate(span, width):
+                # Productive rule rather than a table entry: g-dropping
+                # ("talkin'" -> "talking").
+                expansion = gdropped_expansion(lang, surface)
+            if expansion is not None:
+                matched = (span, offsets, surface, expansion)
+                break
+        if matched is None:
+            i += 1
+            continue
+
+        span, offsets, surface, expansion = matched
+        begin, end = offsets[0][0], offsets[-1][1]
+        first_alpha = next((c for c in surface if c.isalpha()), "")
+        # Capitalise when the source word is capitalised, or when the form opens
+        # the sentence ("twas someone ..." -> "It was someone ...").
+        if first_alpha.isupper() or i == 0:
+            expansion = expansion[:1].upper() + expansion[1:]
+        # A clipped form can be written glued to the previous word
+        # ("Take'em"); the expansion then needs a separating space so the
+        # rewrite doesn't run the words together ("Takethem").
+        if i > 0:
+            try:
+                if token_offsets(nodes[i - 1])[1] == begin:
+                    expansion = " " + expansion
+            except ValueError:
+                pass
+        out.append(
+            ContractionFinding(
+                begin=begin,
+                end=end,
+                text=surface,
+                expansion=expansion,
+                lang=lang,
+                kind="clipped_form",
+            )
+        )
+        logger.debug(
+            f"Contraction[{lang}]: clipped form {surface!r} "
+            f"[{begin}:{end}] -> {expansion!r}"
+        )
+        i += len(span)
     return out
 
 

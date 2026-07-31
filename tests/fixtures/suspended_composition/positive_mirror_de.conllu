@@ -1,0 +1,28 @@
+# sent_id = susp-mirror-de-1
+# lang = de
+# text = Sie erhielten den Zuschlag für die Energieerzeugung und -verteilung .
+1	Sie	sie	PRON	PPER	_	2	nsubj	_	t_start=0|t_end=3
+2	erhielten	erhalten	VERB	VVFIN	_	0	root	_	t_start=4|t_end=13
+3	den	der	DET	ART	_	4	det	_	t_start=14|t_end=17
+4	Zuschlag	Zuschlag	NOUN	NN	_	2	obj	_	t_start=18|t_end=26
+5	für	für	ADP	APPR	_	7	case	_	t_start=27|t_end=30
+6	die	die	DET	ART	_	7	det	_	t_start=31|t_end=34
+7	Energieerzeugung	Energieerzeugung	NOUN	NN	_	4	nmod	_	t_start=35|t_end=51
+8	und	und	CCONJ	KON	_	9	cc	_	t_start=52|t_end=55
+9	-verteilung	-verteilung	NOUN	NN	_	7	conj	_	t_start=56|t_end=67
+10	.	.	PUNCT	$.	_	2	punct	_	t_start=68|t_end=69
+
+# sent_id = susp-mirror-de-2
+# lang = de
+# text = Frauen- und Kinderhandel , Drogenhandel und -konsum sind verboten .
+1	Frauen-	Frauen-	PUNCT	$(	_	3	punct	_	t_start=70|t_end=77
+2	und	und	CCONJ	KON	_	3	cc	_	t_start=78|t_end=81
+3	Kinderhandel	Kinderhandel	NOUN	NN	_	9	nsubj	_	t_start=82|t_end=94
+4	,	,	PUNCT	$,	_	5	punct	_	t_start=95|t_end=96
+5	Drogenhandel	Drogenhandel	NOUN	NN	_	3	conj	_	t_start=97|t_end=109
+6	und	und	CCONJ	KON	_	7	cc	_	t_start=110|t_end=113
+7	-konsum	-konsum	NOUN	NN	_	5	conj	_	t_start=114|t_end=121
+8	sind	sein	AUX	VAFIN	_	9	cop	_	t_start=122|t_end=126
+9	verboten	verboten	ADJ	ADJD	_	0	root	_	t_start=127|t_end=135
+10	.	.	PUNCT	$.	_	9	punct	_	t_start=136|t_end=137
+

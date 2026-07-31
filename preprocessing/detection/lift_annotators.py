@@ -35,6 +35,7 @@ from py_lift.decorators import requires_types, supported_languages
 from py_lift.dkpro import T_DEP, T_POS, T_SENT, T_TOKEN
 
 from preprocessing.detection.cas_adapter import (
+    find_and_annotate_abbreviations,
     find_and_annotate_bare_questions,
     find_and_annotate_clefts,
     find_and_annotate_gapped_coordination,
@@ -43,6 +44,7 @@ from preprocessing.detection.cas_adapter import (
     find_and_annotate_right_node_raising,
     find_and_annotate_sluicing,
     find_and_annotate_subject_sharing,
+    find_and_annotate_suspended_composition,
     find_and_annotate_verbal_ellipsis,
 )
 
@@ -135,9 +137,43 @@ class SE_RightNodeRaisingAnnotator(_DetectorAnnotator):
     _adapter = staticmethod(find_and_annotate_right_node_raising)
 
 
+@supported_languages("de", "en")
+class SE_AbbreviationAnnotator(_DetectorAnnotator):
+    """Abbreviation detector as a py_lift annotator (DE, EN).
+
+    Writes ``GrammarAnomaly(category="abbreviation")`` — or
+    ``"abbreviation_defined"`` where the long form accompanies the occurrence —
+    with every ranked expansion carried as a ``SuggestedAction``. Standalone
+    detection is useful even without a corpus: the candidates and their gate
+    decisions are recorded, and expansions are attached later by the
+    corpus-level harvest.
+    """
+
+    _adapter = staticmethod(find_and_annotate_abbreviations)
+
+
+@supported_languages("de")
+class SE_SuspendedCompositionAnnotator(_DetectorAnnotator):
+    """Suspended-composition detector as a py_lift annotator (DE).
+
+    Writes ``GrammarAnomaly(category="suspended_composition")`` — or
+    ``"…_unresolved"`` where the split could not be settled — with the completion
+    carried as a ``SuggestedAction``, plus ``LexicalPhrase(text="Suspension_donor")``
+    over the conjunct the material was borrowed from.
+
+    German-only for now: resolution leans on German morphology and a German
+    attestation lexicon. English has the same construction ("pre- and post-war"),
+    but nothing equivalent to SMOR to resolve it with.
+    """
+
+    _adapter = staticmethod(find_and_annotate_suspended_composition)
+
+
 #: Phenomenon key (as in ``DETECTOR_REGISTRY`` / ``annotate.py --phenomenon``)
 #: → its py_lift annotator wrapper. Keep in sync when a detector is added.
 ANNOTATORS: dict[str, type[_DetectorAnnotator]] = {
+    "abbreviation": SE_AbbreviationAnnotator,
+    "suspended_composition": SE_SuspendedCompositionAnnotator,
     "sluicing": SE_SluicingAnnotator,
     "bare_questions": SE_BareQuestionsAnnotator,
     "nominal_ellipsis": SE_NominalEllipsisAnnotator,

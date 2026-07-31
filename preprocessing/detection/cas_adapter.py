@@ -35,6 +35,10 @@ from preprocessing.detection.bare_questions import (
     detect_bare_questions,
 )
 from preprocessing.detection.clefts import CleftFinding, detect_clefts
+from preprocessing.detection.abbreviations import (
+    AbbreviationFinding,
+    detect_abbreviations,
+)
 from preprocessing.detection.contractions import (
     ContractionFinding,
     detect_contractions,
@@ -48,6 +52,10 @@ from preprocessing.detection.nominal_ellipsis import (
     detect_nominal_ellipsis,
 )
 from preprocessing.detection.passive import PassiveFinding, detect_passive
+from preprocessing.detection.suspended_composition import (
+    SuspensionFinding,
+    detect_suspended_composition,
+)
 from preprocessing.detection.right_node_raising import (
     RNRFinding,
     detect_right_node_raising,
@@ -141,9 +149,52 @@ def _build_doc(
     return doc, restrict
 
 
+def _write_abbreviations(view, ts, findings: list[AbbreviationFinding]) -> None:
+    """A ``GrammarAnomaly`` per abbreviation candidate, carrying **every** ranked
+    expansion as a ``SuggestedAction``.
+
+    This is the first writer to use the ``suggestions`` FSArray for genuine
+    ambiguity rather than a single rewrite: German short forms routinely have
+    several readings (``VP`` has 22 in Wiktionary alone), and collapsing them at
+    annotation time would throw away exactly what a later disambiguation step or
+    a human reader needs. ``certainty`` carries the harvest's confidence, so the
+    ranking survives too.
+
+    An occurrence that sits at its own gloss ("Konditionierter Reiz (CS)") is
+    still annotated — the phenomenon *is* there — but under the separate category
+    ``abbreviation_defined``, so a normalizer can see at a glance that it must be
+    left alone.
+    """
+    GA = ts.get_type(T_GRAMMAR_ANOMALY)
+    SA = ts.get_type(T_SUGGESTED_ACTION)
+    FSArray = ts.get_type("uima.cas.FSArray")
+    for f in findings:
+        actions = []
+        for exp in f.expansions:
+            action = SA(begin=f.begin, end=f.end, replacement=exp.form,
+                        certainty=float(exp.certainty))
+            view.add(action)
+            actions.append(action)
+        view.add(GA(
+            begin=f.begin, end=f.end,
+            description="Abbreviation",
+            category="abbreviation_defined" if f.defined_in_context
+                     else "abbreviation",
+            suggestions=FSArray(elements=actions),
+        ))
+
+
+
 # Named per-phenomenon entry points. These are thin back-compat delegations to
 # the generic :func:`find_and_annotate` (driven by :data:`DETECTOR_REGISTRY`,
 # defined at the bottom of this module). Several normalizers import them by name.
+def find_and_annotate_abbreviations(view, ts, *, lang=None, mixed=False) -> int:
+    """Named entry point for the abbreviation detector (py_lift wrapper, CLI)."""
+    return find_and_annotate(
+        view, ts, phenomenon="abbreviation", lang=lang, mixed=mixed
+    )
+
+
 def find_and_annotate_sluicing(view, ts, *, lang=None, mixed=False) -> int:
     """Detect sluicing on ``view`` and add CAS annotations for each finding."""
     return find_and_annotate(view, ts, phenomenon="sluicing", lang=lang, mixed=mixed)
@@ -187,6 +238,19 @@ def find_and_annotate_gapped_coordination(view, ts, *, lang=None, mixed=False) -
 def find_and_annotate_right_node_raising(view, ts, *, lang=None, mixed=False) -> int:
     """Detect (coordination-subset) right node raising and add CAS annotations."""
     return find_and_annotate(view, ts, phenomenon="right_node_raising", lang=lang, mixed=mixed)
+
+
+def find_and_annotate_suspended_composition(
+    view, ts, *, lang=None, mixed=False
+) -> int:
+    """Detect suspended composition (Ergänzungsstrich) and add CAS annotations.
+
+    Annotation-only: it records the sites and, where the resources are available,
+    the completion as a ``SuggestedAction``. Applying the rewrite is the
+    normalizer's job (``aslan_normalization.suspended_composition``).
+    """
+    return find_and_annotate(view, ts, phenomenon="suspended_composition",
+                             lang=lang, mixed=mixed)
 
 
 def _write_sluicing(view, ts, findings: list[SluicingFinding]) -> None:
@@ -342,6 +406,55 @@ def _write_contractions(view, ts, findings: list[ContractionFinding]) -> None:
             view.add(LP(begin=f.clitic.begin, end=f.clitic.end, text="Contraction_clitic"))
 
 
+def _write_suspended_composition(
+    view, ts, findings: list[SuspensionFinding]
+) -> None:
+    """A ``GrammarAnomaly`` over the truncated conjunct, plus the donor it borrows
+    from as a ``LexicalPhrase``.
+
+    The category distinguishes what a consumer may do with the site:
+    ``suspended_composition`` carries a completion in ``suggestions`` and can be
+    normalized; ``suspended_composition_unresolved`` marks a real site whose split
+    could not be settled (ambiguous, or the morphology/attestation resources were
+    absent). Recording the second kind rather than dropping it is the point — the
+    phenomenon is present either way, and a silently missing annotation is
+    indistinguishable from a clean sentence.
+
+    ``Suspension_donor`` is emitted only when a donor was identified. It is often
+    several tokens away — real examples put it six away — so it is genuinely
+    informative rather than derivable from adjacency. Which *side* it sits on
+    encodes the direction: before the stub for a shared modifier
+    ("Energieerzeugung und -verteilung"), after it for a shared head ("Sonn- und
+    Feiertagen").
+    """
+    GA = ts.get_type(T_GRAMMAR_ANOMALY)
+    LP = ts.get_type(T_LEXICAL_PHRASE)
+    SA = ts.get_type(T_SUGGESTED_ACTION)
+    FSArray = ts.get_type("uima.cas.FSArray")
+    for f in findings:
+        suggestions = []
+        if f.completed is not None:
+            action = SA(begin=f.begin, end=f.end, replacement=f.completed,
+                        certainty=1.0 if f.basis == "unique" else 0.7)
+            view.add(action)
+            suggestions.append(action)
+        view.add(GA(
+            begin=f.begin, end=f.end,
+            # Direction rides in the description rather than the category, so the
+            # registry's `ga_categories` (which drive re-run detection and
+            # --replace) stay stable while consumers can still tell the two apart.
+            # It is also derivable from geometry: the donor precedes the stub for a
+            # shared modifier and follows it for a shared head.
+            description=f"Suspended composition ({f.direction.replace('_', ' ')})",
+            category=("suspended_composition" if f.completed is not None
+                      else "suspended_composition_unresolved"),
+            suggestions=FSArray(elements=suggestions),
+        ))
+        if f.donor_begin is not None and f.donor_end is not None:
+            view.add(LP(begin=f.donor_begin, end=f.donor_end,
+                        text="Suspension_donor"))
+
+
 def _write_passive(view, ts, findings: list[PassiveFinding]) -> None:
     LP = ts.get_type(T_LEXICAL_PHRASE)
     for f in findings:
@@ -439,10 +552,22 @@ DETECTOR_REGISTRY: dict[str, DetectorSpec] = {
         ga_categories=frozenset({"gapped_coordination"}),
         lp_texts=frozenset({"GappedAntecedent"}),
     ),
+    "abbreviation": DetectorSpec(
+        "abbreviation", detect_abbreviations, _write_abbreviations, "abbreviation",
+        ga_categories=frozenset({"abbreviation", "abbreviation_defined"}),
+    ),
     "contraction": DetectorSpec(
         "contraction", detect_contractions, _write_contractions, "contraction",
         ga_categories=frozenset({"contraction"}),
         lp_texts=frozenset({"Contraction_host", "Contraction_clitic"}),
+    ),
+    "suspended_composition": DetectorSpec(
+        "suspended_composition", detect_suspended_composition,
+        _write_suspended_composition, "suspended composition",
+        ga_categories=frozenset({
+            "suspended_composition", "suspended_composition_unresolved",
+        }),
+        lp_texts=frozenset({"Suspension_donor"}),
     ),
     "right_node_raising": DetectorSpec(
         "right_node_raising", detect_right_node_raising,

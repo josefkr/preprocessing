@@ -1,0 +1,10 @@
+# sent_id = positive_kg_de
+# text = Die KG erhielt keine Aufgabe.
+# lang = de
+1	Die	der	DET	ART	Case=Nom|Definite=Def|Gender=Fem|Number=Sing|PronType=Art	2	det	_	t_start=0|t_end=3
+2	KG	KG	NOUN	NN	Case=Nom|Gender=Fem|Number=Sing	3	nsubj	_	t_start=4|t_end=6
+3	erhielt	erhalten	VERB	VVFIN	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	t_start=7|t_end=14
+4	keine	kein	DET	PIAT	Case=Acc|Gender=Fem|Number=Sing|PronType=Neg	5	det	_	t_start=15|t_end=20
+5	Aufgabe	Aufgabe	NOUN	NN	Case=Acc|Gender=Fem|Number=Sing	3	obj	_	SpaceAfter=No|t_start=21|t_end=28
+6	.	.	PUNCT	$.	_	3	punct	_	t_start=28|t_end=29
+

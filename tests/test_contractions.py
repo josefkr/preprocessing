@@ -29,13 +29,13 @@ def test_regular_negation():
 
 def test_irregular_host_is_expanded_too():
     # "She can't swim." — UD splits this as "ca" + "n't", so expanding only the
-    # clitic would yield "*ca not*"; the host must become "can".
+    # clitic would yield "*ca not*"; the host must become "can" — and English writes it solid: "cannot".
     findings = detect_contractions(_load("positive_irregular_host_en.conllu"))
     assert len(findings) == 1
     f = findings[0]
     assert f.text == "can't"
     assert f.host.text == "ca"
-    assert f.expansion == "can not"
+    assert f.expansion == "cannot"
 
 
 def test_copula_s_is_is():
@@ -122,7 +122,7 @@ def test_cas_adapter_writes_contraction_annotations():
     assert gas == [(4, 9, "contraction")]
     # `suggestions` is an FSArray of SuggestedAction, not a string.
     (anomaly,) = list(cas.select(T_GA))
-    assert [s.replacement for s in anomaly.suggestions.elements] == ["can not"]
+    assert [s.replacement for s in anomaly.suggestions.elements] == ["cannot"]
     lps = sorted((p.begin, p.end, p.text) for p in cas.select(T_LP))
     assert lps == [(4, 6, "Contraction_host"), (6, 9, "Contraction_clitic")]
     # the registry signature finds them again (skip/--replace on re-runs)
@@ -138,14 +138,14 @@ def test_annotated_cas_serialises_to_xmi():
     cas = _cas()
     find_and_annotate(cas, cas.typesystem, phenomenon="contraction", lang="en")
     xmi = cas.to_xmi()
-    assert "can not" in xmi
+    assert "cannot" in xmi
 
     from cassis import load_cas_from_xmi
     from py_lift.util import get_lift_typesystem
 
     reloaded = load_cas_from_xmi(xmi, typesystem=get_lift_typesystem())
     (anomaly,) = list(reloaded.select(T_GA))
-    assert [s.replacement for s in anomaly.suggestions.elements] == ["can not"]
+    assert [s.replacement for s in anomaly.suggestions.elements] == ["cannot"]
 
 
 # --- German clipped indefinite articles (nen / nem / ner) --------------------
@@ -327,3 +327,230 @@ def test_de_n_skipped_when_no_noun_follows():
     ])
     assert [x for x in detect_contractions(doc, restrict_to_lang="de")
             if x.kind == "clipped_article"] == []
+
+
+# --- clitic disambiguation by the following participle ----------------------
+# Stanza lemmatises the perfect auxiliaries "'s"/"'d" as *be*/*would*, which the
+# lemma table alone turns into the ungrammatical "is been"/"would been". Only
+# provably safe overrides are applied (the alternative isn't English).
+
+def _en_doc(lines: list[str]):
+    return _doc_from_conllu(["# sent_id = 1", "# lang = en"] + lines)
+
+
+def test_s_before_been_is_has():
+    # "He's been lucky." — Stanza gives lemma 'be' (-> "is"), but "is been" is
+    # never grammatical, so the following participle forces "has".
+    doc = _en_doc([
+        "# text = He's been lucky.",
+        "1\tHe\the\tPRON\tPRP\t_\t4\tnsubj\t_\tt_start=0|t_end=2",
+        "2\t's\tbe\tAUX\tVBZ\t_\t4\taux\t_\tt_start=2|t_end=4",
+        "3\tbeen\tbe\tAUX\tVBN\t_\t4\tcop\t_\tt_start=5|t_end=9",
+        "4\tlucky\tlucky\tADJ\tJJ\t_\t0\troot\t_\tSpaceAfter=No|t_start=10|t_end=15",
+        "5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t_\tt_start=15|t_end=16",
+    ])
+    findings = detect_contractions(doc)
+    assert len(findings) == 1
+    assert findings[0].expansion == "He has"
+
+
+def test_s_before_been_skips_intervening_negation():
+    # "He's not been well." — the negation must not hide the participle.
+    doc = _en_doc([
+        "# text = He's not been well.",
+        "1\tHe\the\tPRON\tPRP\t_\t5\tnsubj\t_\tt_start=0|t_end=2",
+        "2\t's\tbe\tAUX\tVBZ\t_\t5\taux\t_\tt_start=2|t_end=4",
+        "3\tnot\tnot\tPART\tRB\t_\t5\tadvmod\t_\tt_start=5|t_end=8",
+        "4\tbeen\tbe\tAUX\tVBN\t_\t5\tcop\t_\tt_start=9|t_end=13",
+        "5\twell\twell\tADJ\tJJ\t_\t0\troot\t_\tSpaceAfter=No|t_start=14|t_end=18",
+        "6\t.\t.\tPUNCT\t.\t_\t5\tpunct\t_\tt_start=18|t_end=19",
+    ])
+    findings = detect_contractions(doc)
+    assert len(findings) == 1
+    assert findings[0].expansion == "He has"
+
+
+def test_d_before_participle_is_had():
+    # "there'd been a process." — "would" never precedes a participle, so
+    # "'d" + VBN is the past perfect regardless of the 'would' lemma.
+    doc = _en_doc([
+        "# text = there'd been a process.",
+        "1\tthere\tthere\tPRON\tEX\t_\t3\texpl\t_\tt_start=0|t_end=5",
+        "2\t'd\twould\tAUX\tVBD\t_\t3\taux\t_\tt_start=5|t_end=7",
+        "3\tbeen\tbe\tVERB\tVBN\t_\t0\troot\t_\tt_start=8|t_end=12",
+        "4\ta\ta\tDET\tDT\t_\t5\tdet\t_\tt_start=13|t_end=14",
+        "5\tprocess\tprocess\tNOUN\tNN\t_\t3\tnsubj\t_\tSpaceAfter=No|t_start=15|t_end=22",
+        "6\t.\t.\tPUNCT\t.\t_\t3\tpunct\t_\tt_start=22|t_end=23",
+    ])
+    findings = detect_contractions(doc)
+    assert len(findings) == 1
+    assert findings[0].expansion == "there had"
+
+
+def test_copula_s_before_adjective_stays_is():
+    # "He's lucky." — no participle follows, so the lemma decision ("is") holds.
+    doc = _en_doc([
+        "# text = He's lucky.",
+        "1\tHe\the\tPRON\tPRP\t_\t3\tnsubj\t_\tt_start=0|t_end=2",
+        "2\t's\tbe\tAUX\tVBZ\t_\t3\tcop\t_\tt_start=2|t_end=4",
+        "3\tlucky\tlucky\tADJ\tJJ\t_\t0\troot\t_\tSpaceAfter=No|t_start=5|t_end=10",
+        "4\t.\t.\tPUNCT\t.\t_\t3\tpunct\t_\tt_start=10|t_end=11",
+    ])
+    findings = detect_contractions(doc)
+    assert len(findings) == 1
+    assert findings[0].expansion == "He is"
+
+
+def test_s_before_other_participle_left_to_lemma():
+    # "The job's finished." — genuinely ambiguous (perfect "he's eaten" vs
+    # passive "the job's finished"), so the lemma decision stands rather than
+    # guessing "has".
+    doc = _en_doc([
+        "# text = The job's finished.",
+        "1\tThe\tthe\tDET\tDT\t_\t2\tdet\t_\tt_start=0|t_end=3",
+        "2\tjob\tjob\tNOUN\tNN\t_\t4\tnsubj:pass\t_\tt_start=4|t_end=7",
+        "3\t's\tbe\tAUX\tVBZ\t_\t4\taux:pass\t_\tt_start=7|t_end=9",
+        "4\tfinished\tfinish\tVERB\tVBN\t_\t0\troot\t_\tSpaceAfter=No|t_start=10|t_end=18",
+        "5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t_\tt_start=18|t_end=19",
+    ])
+    findings = detect_contractions(doc)
+    assert len(findings) == 1
+    assert findings[0].expansion == "job is"
+
+
+# --- English clipped forms ("gonna", "lemme", "'em") ------------------------
+# Matched as whole written words, which the tokenizer may keep as one token or
+# split ("gonna" -> gon+na).
+
+def test_clipped_form_single_token():
+    # "He is kinda funny." — one token.
+    doc = _en_doc([
+        "# text = He is kinda funny.",
+        "1\tHe\the\tPRON\tPRP\t_\t4\tnsubj\t_\tt_start=0|t_end=2",
+        "2\tis\tbe\tAUX\tVBZ\t_\t4\tcop\t_\tt_start=3|t_end=5",
+        "3\tkinda\tkinda\tADV\tRB\t_\t4\tadvmod\t_\tt_start=6|t_end=11",
+        "4\tfunny\tfunny\tADJ\tJJ\t_\t0\troot\t_\tSpaceAfter=No|t_start=12|t_end=17",
+        "5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t_\tt_start=17|t_end=18",
+    ])
+    f = [x for x in detect_contractions(doc) if x.kind == "clipped_form"]
+    assert len(f) == 1
+    assert (f[0].text, f[0].expansion) == ("kinda", "kind of")
+
+
+def test_clipped_form_split_across_two_tokens():
+    # "I gonna go." — Stanza splits "gonna" into "gon" + "na"; the whole
+    # written word must still be matched.
+    doc = _en_doc([
+        "# text = I gonna go.",
+        "1\tI\tI\tPRON\tPRP\t_\t4\tnsubj\t_\tt_start=0|t_end=1",
+        "2\tgon\tgo\tVERB\tVBG\t_\t4\taux\t_\tt_start=2|t_end=5",
+        "3\tna\tto\tPART\tTO\t_\t4\tmark\t_\tt_start=5|t_end=7",
+        "4\tgo\tgo\tVERB\tVB\t_\t0\troot\t_\tSpaceAfter=No|t_start=8|t_end=10",
+        "5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t_\tt_start=10|t_end=11",
+    ])
+    f = [x for x in detect_contractions(doc) if x.kind == "clipped_form"]
+    assert len(f) == 1
+    assert (f[0].text, f[0].expansion) == ("gonna", "going to")
+    assert (f[0].begin, f[0].end) == (2, 7)
+
+
+def test_clipped_form_glued_to_previous_word_gets_a_space():
+    # "Take'em now." — written glued to the host, so the expansion must carry a
+    # separating space or the rewrite yields "Takethem".
+    doc = _en_doc([
+        "# text = Take'em now.",
+        "1\tTake\ttake\tVERB\tVB\t_\t0\troot\t_\tt_start=0|t_end=4",
+        "2\t'em\tthey\tPRON\tPRP\t_\t1\tobj\t_\tt_start=4|t_end=7",
+        "3\tnow\tnow\tADV\tRB\t_\t1\tadvmod\t_\tSpaceAfter=No|t_start=8|t_end=11",
+        "4\t.\t.\tPUNCT\t.\t_\t1\tpunct\t_\tt_start=11|t_end=12",
+    ])
+    f = [x for x in detect_contractions(doc) if x.kind == "clipped_form"]
+    assert len(f) == 1
+    assert f[0].expansion == " them"
+
+
+def test_clipped_form_sentence_initial_is_capitalised():
+    # "twas someone." — lower-case in the source, but it opens the sentence.
+    doc = _en_doc([
+        "# text = twas someone.",
+        "1\ttwas\ttwis\tAUX\tVBD\t_\t2\tcop\t_\tt_start=0|t_end=4",
+        "2\tsomeone\tsomeone\tPRON\tNN\t_\t0\troot\t_\tSpaceAfter=No|t_start=5|t_end=12",
+        "3\t.\t.\tPUNCT\t.\t_\t2\tpunct\t_\tt_start=12|t_end=13",
+    ])
+    f = [x for x in detect_contractions(doc) if x.kind == "clipped_form"]
+    assert len(f) == 1
+    assert f[0].expansion == "It was"
+
+
+def test_aint_host_agrees_with_subject():
+    # "ai" + "n't": the host is whichever form of *be* the subject needs, so the
+    # rewrite is never the ungrammatical "that ai not".
+    def _aint(subj, subj_lemma, subj_xpos):
+        n = len(subj)
+        return _en_doc([
+            f"# text = {subj} ain't funny.",
+            f"1\t{subj}\t{subj_lemma}\tPRON\t{subj_xpos}\t_\t4\tnsubj\t_\tt_start=0|t_end={n}",
+            f"2\tai\tbe\tAUX\tVBP\t_\t4\tcop\t_\tt_start={n+1}|t_end={n+3}",
+            f"3\tn't\tnot\tPART\tRB\t_\t4\tadvmod\t_\tt_start={n+3}|t_end={n+6}",
+            f"4\tfunny\tfunny\tADJ\tJJ\t_\t0\troot\t_\tSpaceAfter=No|t_start={n+7}|t_end={n+12}",
+            f"5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t_\tt_start={n+12}|t_end={n+13}",
+        ])
+    got = {}
+    for subj, lemma, xpos in [("That", "that", "DT"), ("I", "I", "PRP"),
+                              ("You", "you", "PRP")]:
+        f = [x for x in detect_contractions(_aint(subj, lemma, xpos))
+             if x.kind == "clitic"]
+        assert len(f) == 1, (subj, f)
+        got[subj] = f[0].expansion
+    # The finding spans "ain't" only (host "ai" + clitic "n't"), so the subject
+    # is not part of the expansion.
+    assert got == {"That": "is not", "I": "am not", "You": "are not"}
+
+
+# --- g-dropping ("talkin'" -> "talking") ------------------------------------
+# Only the apostrophe-marked spelling is handled here; the bare form
+# ("stickin") is left to the dictionary-backed spelling normalizer.
+
+def test_gdropping_single_token():
+    doc = _en_doc([
+        "# text = He was talkin' loudly.",
+        "1\tHe\the\tPRON\tPRP\t_\t3\tnsubj\t_\tt_start=0|t_end=2",
+        "2\twas\tbe\tAUX\tVBD\t_\t3\taux\t_\tt_start=3|t_end=6",
+        "3\ttalkin'\ttalkin'\tADJ\tJJ\t_\t0\troot\t_\tt_start=7|t_end=14",
+        "4\tloudly\tloudly\tADV\tRB\t_\t3\tadvmod\t_\tSpaceAfter=No|t_start=15|t_end=21",
+        "5\t.\t.\tPUNCT\t.\t_\t3\tpunct\t_\tt_start=21|t_end=22",
+    ])
+    f = [x for x in detect_contractions(doc) if x.kind == "clipped_form"]
+    assert len(f) == 1
+    assert (f[0].text, f[0].expansion) == ("talkin'", "talking")
+
+
+def test_gdropping_when_apostrophe_is_a_separate_token():
+    # Stanza sometimes splits "stayin'" into "stayin" + "'", so the joined span
+    # must be reachable too. The stem is a VERB, so the rule applies.
+    doc = _en_doc([
+        "# text = I am stayin' here.",
+        "1\tI\tI\tPRON\tPRP\t_\t3\tnsubj\t_\tt_start=0|t_end=1",
+        "2\tam\tbe\tAUX\tVBP\t_\t3\taux\t_\tt_start=2|t_end=4",
+        "3\tstayin\tstayin\tVERB\tVBG\t_\t0\troot\t_\tSpaceAfter=No|t_start=5|t_end=11",
+        "4\t'\t'\tPUNCT\t``\t_\t3\tpunct\t_\tt_start=11|t_end=12",
+        "5\there\there\tADV\tRB\t_\t3\tadvmod\t_\tSpaceAfter=No|t_start=13|t_end=17",
+        "6\t.\t.\tPUNCT\t.\t_\t3\tpunct\t_\tt_start=17|t_end=18",
+    ])
+    f = [x for x in detect_contractions(doc) if x.kind == "clipped_form"]
+    assert len(f) == 1
+    assert (f[0].text, f[0].expansion) == ("stayin'", "staying")
+    assert (f[0].begin, f[0].end) == (5, 12)   # spans the apostrophe too
+
+
+def test_gdropping_does_not_fire_on_a_closing_quote():
+    # "the cabin'" — a NOUN followed by a closing quote must not become
+    # "cabing". Only a verb stem is trusted for the joined form.
+    doc = _en_doc([
+        "# text = the cabin' here",
+        "1\tthe\tthe\tDET\tDT\t_\t2\tdet\t_\tt_start=0|t_end=3",
+        "2\tcabin\tcabin\tNOUN\tNN\t_\t0\troot\t_\tSpaceAfter=No|t_start=4|t_end=9",
+        "3\t'\t'\tPUNCT\t''\t_\t2\tpunct\t_\tt_start=9|t_end=10",
+        "4\there\there\tADV\tRB\t_\t2\tadvmod\t_\tt_start=11|t_end=15",
+    ])
+    assert [x for x in detect_contractions(doc) if x.kind == "clipped_form"] == []

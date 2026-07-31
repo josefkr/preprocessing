@@ -28,6 +28,7 @@ from py_lift.util import get_lift_typesystem
 
 from preprocessing.detection import lift_annotators as la
 from preprocessing.detection.cas_adapter import (
+    find_and_annotate_abbreviations,
     find_and_annotate_bare_questions,
     find_and_annotate_clefts,
     find_and_annotate_gapped_coordination,
@@ -36,6 +37,7 @@ from preprocessing.detection.cas_adapter import (
     find_and_annotate_right_node_raising,
     find_and_annotate_sluicing,
     find_and_annotate_subject_sharing,
+    find_and_annotate_suspended_composition,
     find_and_annotate_verbal_ellipsis,
 )
 
@@ -47,6 +49,11 @@ T_LEXICAL_PHRASE = "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.LexicalP
 # (phenomenon key, annotator class, adapter fn, fixture (relative), language).
 # One positive fixture per phenomenon; gapped-coordination is multi-sentence.
 CASES = [
+    ("abbreviation", la.SE_AbbreviationAnnotator, find_and_annotate_abbreviations,
+     "abbreviations/positive_kg_de.conllu", "de"),
+    ("suspended_composition", la.SE_SuspendedCompositionAnnotator,
+     find_and_annotate_suspended_composition,
+     "suspended_composition/positive_de.conllu", "de"),
     ("sluicing", la.SE_SluicingAnnotator, find_and_annotate_sluicing,
      "sluicing/positive_en_basic.conllu", "en"),
     ("bare_questions", la.SE_BareQuestionsAnnotator, find_and_annotate_bare_questions,

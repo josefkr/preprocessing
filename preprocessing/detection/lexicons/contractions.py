@@ -190,6 +190,181 @@ def clitic_expansion(lang: str, form: str, lemma: str) -> str | None:
     return table.get((form.lower(), (lemma or "").lower()))
 
 
+#: Colloquial **clipped forms**: single written words that stand for a
+#: multi-word sequence ("gonna" = going to, "lemme" = let me). A fourth
+#: mechanism, distinct from clitics and from the German clipped articles:
+#:
+#: * they are not apostrophe clitics, so the (form, lemma) clitic table can't
+#:   reach them, and Stanza's lemma is usually just the surface;
+#: * the tokenizer is **inconsistent** about them — some stay one token
+#:   ("kinda", "lemme", "'em"), others are split ("gonna" -> gon+na,
+#:   "sorta" -> sort+a, "lotsa" -> lot+sa). The detector therefore matches the
+#:   whole *written word*: one token, or an adjacent token sequence whose joined
+#:   surface is a key here. Keying on the full word is what makes this safe —
+#:   adding "a" or "na" as bare clitics would fire on ordinary words.
+#:
+#: Deliberately excluded because they are ambiguous with ordinary English or
+#: need context we don't model:
+#:   * "ain't" — needs subject agreement (I am not / that is not / you are not),
+#:     so it is left to the clitic path rather than guessed;
+#:   * "canny" — a real adjective ("a canny investor"), only *sometimes* Scots
+#:     "cannot";
+#:   * "betcha", and "wanna" before a noun ("I wanna cookie" = want *a*), where
+#:     the intended expansion isn't recoverable from the surface.
+CLIPPED_FORMS_BY_LANG: dict[str, dict[str, str]] = {
+    "en": {
+        # of-reductions
+        "kinda": "kind of", "sorta": "sort of", "typa": "type of",
+        "lotsa": "lots of", "outta": "out of", "hella": "hell of",
+        # to-reductions
+        "gonna": "going to", "wanna": "want to", "gotta": "have got to",
+        "hafta": "have to", "tryna": "trying to",
+        # have-reductions
+        "shoulda": "should have", "coulda": "could have",
+        "woulda": "would have", "musta": "must have",
+        # verb + pronoun
+        "lemme": "let me", "gimme": "give me",
+        # whole-clause reductions
+        "dunno": "do not know", "iunno": "I do not know",
+        "wassup": "what is up", "innit": "is it not", "init": "is it not",
+        "twas": "it was", "'twas": "it was", "ima": "I am",
+        # lexical clippings
+        "y'all": "you all", "ma'am": "madam", "'em": "them",
+        "ol'": "old", "a'ight": "alright", "cuz": "because",
+        "'cause": "because", "coz": "because",
+        # Scots negation
+        "shouldnay": "should not", "couldnay": "could not",
+        "cannae": "cannot", "dinnae": "do not",
+    },
+}
+
+#: Longest clipped form measured in tokens, so the detector knows how far to
+#: look when joining adjacent tokens ("gon"+"na").
+CLIPPED_FORM_MAX_TOKENS = 2
+
+
+def clipped_form_expansion(lang: str, surface: str) -> str | None:
+    """Expansion for a colloquial clipped form ("gonna" -> "going to"), or
+    ``None``. Case-insensitive; the caller restores the original casing."""
+    table = CLIPPED_FORMS_BY_LANG.get(lang)
+    if not table:
+        return None
+    return table.get(surface.lower())
+
+
+#: Whole-contraction expansions that are **not** simply
+#: ``host + " " + clitic``, keyed by ``(host form, clitic form)`` (lower-cased).
+#: English writes *can* + *not* solid, so "can't" expands to the single word
+#: "cannot"; the other negated modals stay two words ("won't" → "will not",
+#: "shan't" → "shall not", "couldn't" → "could not").
+CONTRACTION_OVERRIDES_BY_LANG: dict[str, dict[tuple[str, str], str]] = {
+    "en": {
+        ("ca", "n't"): "cannot",
+    },
+}
+
+
+def contraction_override(lang: str, host: str, clitic: str) -> str | None:
+    """Expansion for the whole host+clitic word when it isn't the default
+    ``host + " " + clitic`` composition ("can't" -> "cannot"), else ``None``."""
+    table = CONTRACTION_OVERRIDES_BY_LANG.get(lang)
+    if not table:
+        return None
+    return table.get(((host or "").lower(), (clitic or "").lower()))
+
+
+def gdropped_expansion(lang: str, surface: str) -> str | None:
+    """Restore a *g-dropped* participle written with an elision apostrophe
+    ("talkin'" → "talking", "nothin'" → "nothing"), else ``None``.
+
+    Only the apostrophe-marked spelling is handled here, and deliberately so:
+
+    * the trailing ``'`` explicitly marks the dropped *g*, and no standard
+      English word ends in ``in'``, so this is a safe productive rule — it does
+      not need a dictionary, and the tokenizer keeps a closing quote as its own
+      token ("the cabin'" never arises), so quotes can't trigger it;
+    * it can't rely on the parse: Stanza tags these inconsistently
+      ("stayin'" → VBG/*stay*, but "talkin'" → ADJ and "sayin" → SCONJ), and
+      the lemma is often just the surface;
+    * the **bare** spelling without an apostrophe ("stickin", "sayin") is left
+      to :class:`PySpellCheckerNormalizer`, which already resolves it correctly
+      via its dictionary while leaving real ``-in`` words (coin, cabin, within,
+      begin, ruin, thin, protein, robin) untouched. A blind ``-in`` → ``-ing``
+      rule here would corrupt those.
+    """
+    if lang != "en":
+        return None
+    s = surface or ""
+    if len(s) <= 3 or not s.lower().endswith("in'"):
+        return None
+    stem = s[:-3]
+    if not stem[-1:].isalpha():
+        return None
+    return stem + ("ING" if s[-3:-1].isupper() else "ing")
+
+
+def clitic_expansion_in_context(
+    lang: str,
+    form: str,
+    lemma: str,
+    next_xpos: str | None = None,
+    next_lemma: str | None = None,
+) -> str | None:
+    """Expansion for a clitic, using the following participle to settle cases
+    the lemma cannot.
+
+    Stanza lemmatises the perfect auxiliaries ``'s``/``'d`` as *be*/*would*, so
+    the lemma table alone yields the ungrammatical "he is been" / "there would
+    been". Only **provably safe** overrides are applied here — ones whose
+    alternative is not grammatical English:
+
+    * ``'d`` + past participle → *had*. ``would`` is always followed by a bare
+      infinitive, never a participle ("there'd been" → "there had been").
+    * ``'s`` + ``been`` → *has*. "is been" is never grammatical
+      ("he's been lucky" → "he has been lucky").
+
+    ``'s`` before any **other** participle is left to the lemma table, because
+    it is genuinely ambiguous between the perfect ("he's eaten") and the passive
+    ("the job's finished") and the parser's ``aux``/``aux:pass`` labels are not
+    reliable enough to separate them.
+
+    ``next_xpos``/``next_lemma`` describe the first following token that is not
+    an adverb or particle, so intervening negation ("he's not been well") and
+    adverbs ("he's already been") don't hide the participle.
+    """
+    f = (form or "").lower()
+    if lang == "en" and next_xpos == "VBN":
+        if f == "'d":
+            return "had"
+        if f == "'s" and (next_lemma or "").lower() == "be":
+            return "has"
+    return clitic_expansion(lang, form, lemma)
+
+
+def host_expansion_in_context(
+    lang: str,
+    form: str,
+    subject_lemma: str | None = None,
+    subject_number: str | None = None,
+) -> str | None:
+    """Replacement for an irregular clitic host, using the subject where the
+    host's own form doesn't determine it.
+
+    ``ain't`` is tokenised ``ai`` + ``n't``, and ``ai`` stands for whichever
+    form of *be* the subject requires — "I ain't" → *am*, "that ain't" → *is*,
+    "you/we/they ain't" → *are*. Without this the rewrite would emit the
+    ungrammatical "that ai not". Everything else falls back to the fixed table.
+    """
+    if lang == "en" and (form or "").lower() == "ai":
+        subj = (subject_lemma or "").lower()
+        if subj == "i":
+            return "am"
+        if subj in ("you", "we", "they") or subject_number == "Plur":
+            return "are"
+        return "is"
+    return host_expansion(lang, form)
+
+
 def host_expansion(lang: str, form: str) -> str | None:
     """Replacement for an irregular host form ("ca" -> "can"), else ``None``."""
     return HOST_EXPANSIONS_BY_LANG.get(lang, {}).get(form.lower())
